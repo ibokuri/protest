@@ -3,44 +3,52 @@ const std = @import("std");
 const print = std.debug.print;
 const test_ally = std.testing.allocator;
 
-/// Asserts that the specified value is false.
-///
-/// ```
-/// require.isFalse(my_bool);
-/// ```
-pub inline fn isFalse(value: bool) !void {
-    return try isFalsef(value, "", .{});
+/// Reports a failure.
+pub inline fn fail(fail_msg: []const u8) !void {
+    return try failf(fail_msg, "", .{});
 }
 
-/// Asserts that the specified value is false.
-///
-/// ```
-/// require.isFalsef(my_bool, "helpful {s}", .{"message"});
-/// ```
-pub inline fn isFalsef(value: bool, comptime msg: []const u8, args: anytype) !void {
-    if (value) {
-        return try failf("Should be false", msg, args);
-    }
-}
+/// Reports a failure.
+pub inline fn failf(fail_msg: []const u8, comptime msg: []const u8, args: anytype) !void {
+    var content = content: {
+        var cap: usize = if (msg.len == 0) 2 else 3;
+        break :content try std.ArrayList(LabelContent).initCapacity(test_ally, cap);
+    };
+    defer content.deinit();
 
-/// Asserts that the specified value is true.
-///
-/// ```
-/// require.isTrue(my_bool);
-/// ```
-pub inline fn isTrue(value: bool) !void {
-    return try isTrue(value, "", .{});
-}
+    content.appendAssumeCapacity(.{
+        .label = "Error",
+        .content = fail_msg,
+    });
 
-/// Asserts that the specified value is true.
-///
-/// ```
-/// require.isTrue(my_bool, "helpful {s}", .{"message"});
-/// ```
-pub inline fn isTruef(value: bool, comptime msg: []const u8, args: anytype) !void {
-    if (!value) {
-        return try failf("Should be true", msg, args);
-    }
+    var formatted_msg = formatted_msg: {
+        var formatted_msg = try std.ArrayList(u8).initCapacity(test_ally, msg.len);
+        errdefer formatted_msg.deinit();
+
+        if (msg.len > 0) {
+            try std.fmt.format(formatted_msg.writer(), msg, args);
+
+            content.appendAssumeCapacity(.{
+                .label = "Message",
+                .content = formatted_msg.items,
+            });
+        }
+        break :formatted_msg formatted_msg;
+    };
+    defer formatted_msg.deinit();
+
+    content.appendAssumeCapacity(.{
+        .label = "Error Trace",
+        .content = "",
+    });
+
+    const output = try labelOutput(content.items);
+    defer test_ally.free(output);
+
+    print("\r\n\n", .{});
+    print("{s}\n", .{output});
+
+    return error.AssertionError;
 }
 
 /// Asserts that the first element is greater than the second.
@@ -93,52 +101,94 @@ pub inline fn greaterOrEqualf(e1: anytype, e2: @TypeOf(e1), comptime msg: []cons
     }
 }
 
-/// Reports a failure.
-pub inline fn fail(fail_msg: []const u8) !void {
-    return try failf(fail_msg, "", .{});
+/// Asserts that the first element is less than the second.
+///
+/// ```
+/// require.less(1, 2);
+/// ```
+pub inline fn less(e1: anytype, e2: @TypeOf(e1)) !void {
+    return try lessf(e1, e2, "", .{});
 }
 
-/// Reports a failure.
-pub inline fn failf(fail_msg: []const u8, comptime msg: []const u8, args: anytype) !void {
-    var content = content: {
-        var cap: usize = if (msg.len == 0) 2 else 3;
-        break :content try std.ArrayList(LabelContent).initCapacity(test_ally, cap);
-    };
-    defer content.deinit();
+/// Asserts that the first element is less than the second.
+///
+/// ```
+/// require.lessf(2, 1, "helpful {s}", .{"message"});
+/// ```
+pub inline fn lessf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u8, args: anytype) !void {
+    if (e1 >= e2) {
+        var fail_msg = std.ArrayList(u8).init(test_ally);
+        defer fail_msg.deinit();
 
-    content.appendAssumeCapacity(.{
-        .label = "Error",
-        .content = fail_msg,
-    });
+        try std.fmt.format(fail_msg.writer(), "\"{}\" is not less than \"{}\"", .{ e1, e2 });
 
-    var formatted_msg = formatted_msg: {
-        var formatted_msg = try std.ArrayList(u8).initCapacity(test_ally, msg.len);
-        errdefer formatted_msg.deinit();
+        return try failf(fail_msg.items, msg, args);
+    }
+}
 
-        if (msg.len > 0) {
-            try std.fmt.format(formatted_msg.writer(), msg, args);
+/// Asserts that the first element is less than or equal to the second.
+///
+/// ```
+/// require.lessf(2, 1, "helpful {s}", .{"message"});
+/// ```
+pub inline fn lessOrEqual(e1: anytype, e2: @TypeOf(e1)) !void {
+    return try lessOrEqualf(e1, e2, "", .{});
+}
 
-            content.appendAssumeCapacity(.{
-                .label = "Message",
-                .content = formatted_msg.items,
-            });
-        }
-        break :formatted_msg formatted_msg;
-    };
-    defer formatted_msg.deinit();
+/// Asserts that the first element is less than or equal to the second.
+///
+/// ```
+/// require.lessf(2, 1, "helpful {s}", .{"message"});
+/// ```
+pub inline fn lessOrEqualf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u8, args: anytype) !void {
+    if (e1 > e2) {
+        var fail_msg = std.ArrayList(u8).init(test_ally);
+        defer fail_msg.deinit();
 
-    content.appendAssumeCapacity(.{
-        .label = "Error Trace",
-        .content = "",
-    });
+        try std.fmt.format(fail_msg.writer(), "\"{}\" is not less than \"{}\"", .{ e1, e2 });
 
-    const output = try labelOutput(content.items);
-    defer test_ally.free(output);
+        return try failf(fail_msg.items, msg, args);
+    }
+}
 
-    print("\r\n\n", .{});
-    print("{s}\n", .{output});
+/// Asserts that the specified value is false.
+///
+/// ```
+/// require.isFalse(my_bool);
+/// ```
+pub inline fn isFalse(value: bool) !void {
+    return try isFalsef(value, "", .{});
+}
 
-    return error.AssertionError;
+/// Asserts that the specified value is false.
+///
+/// ```
+/// require.isFalsef(my_bool, "helpful {s}", .{"message"});
+/// ```
+pub inline fn isFalsef(value: bool, comptime msg: []const u8, args: anytype) !void {
+    if (value) {
+        return try failf("Should be false", msg, args);
+    }
+}
+
+/// Asserts that the specified value is true.
+///
+/// ```
+/// require.isTrue(my_bool);
+/// ```
+pub inline fn isTrue(value: bool) !void {
+    return try isTrue(value, "", .{});
+}
+
+/// Asserts that the specified value is true.
+///
+/// ```
+/// require.isTrue(my_bool, "helpful {s}", .{"message"});
+/// ```
+pub inline fn isTruef(value: bool, comptime msg: []const u8, args: anytype) !void {
+    if (!value) {
+        return try failf("Should be true", msg, args);
+    }
 }
 
 const LabelContent = struct {
