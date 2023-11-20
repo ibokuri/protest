@@ -107,6 +107,50 @@ pub inline fn greaterOrEqualf(e1: anytype, e2: @TypeOf(e1), comptime msg: []cons
     }
 }
 
+/// Asserts that the specified value is false.
+///
+/// ```
+/// require.isFalse(true);
+/// ```
+pub inline fn isFalse(value: bool) !void {
+    return try isFalsef(value, "", .{});
+}
+
+/// Asserts that the specified value is false.
+///
+/// ```
+/// require.isFalsef(true, "helpful {s}", .{"message"});
+/// ```
+pub inline fn isFalsef(value: bool, comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
+    if (value) {
+        return try failf("Should be false", msg, args);
+    }
+}
+
+/// Asserts that the specified value is true.
+///
+/// ```
+/// require.isTrue(false);
+/// ```
+pub inline fn isTrue(value: bool) !void {
+    return try isTrue(value, "", .{});
+}
+
+/// Asserts that the specified value is true.
+///
+/// ```
+/// require.isTruef(false, "helpful {s}", .{"message"});
+/// ```
+pub inline fn isTruef(value: bool, comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
+    if (!value) {
+        return try failf("Should be true", msg, args);
+    }
+}
+
 /// Asserts that the first element is less than the second.
 ///
 /// ```
@@ -158,50 +202,6 @@ pub inline fn lessOrEqualf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u
         try std.fmt.format(fail_msg.writer(), "\"{}\" is not less than \"{}\"", .{ e1, e2 });
 
         return try failf(fail_msg.items, msg, args);
-    }
-}
-
-/// Asserts that the specified value is false.
-///
-/// ```
-/// require.isFalse(true);
-/// ```
-pub inline fn isFalse(value: bool) !void {
-    return try isFalsef(value, "", .{});
-}
-
-/// Asserts that the specified value is false.
-///
-/// ```
-/// require.isFalsef(true, "helpful {s}", .{"message"});
-/// ```
-pub inline fn isFalsef(value: bool, comptime msg: []const u8, args: anytype) !void {
-    comptime checkArgs(args);
-
-    if (value) {
-        return try failf("Should be false", msg, args);
-    }
-}
-
-/// Asserts that the specified value is true.
-///
-/// ```
-/// require.isTrue(false);
-/// ```
-pub inline fn isTrue(value: bool) !void {
-    return try isTrue(value, "", .{});
-}
-
-/// Asserts that the specified value is true.
-///
-/// ```
-/// require.isTruef(false, "helpful {s}", .{"message"});
-/// ```
-pub inline fn isTruef(value: bool, comptime msg: []const u8, args: anytype) !void {
-    comptime checkArgs(args);
-
-    if (!value) {
-        return try failf("Should be true", msg, args);
     }
 }
 
