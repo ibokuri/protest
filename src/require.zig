@@ -330,9 +330,7 @@ fn indentMessageLines(msg: []const u8, longest_label_len: usize) ![]const u8 {
 
             if (i != 0) {
                 try output.appendSlice(&.{ '\n', '\t' });
-                for (0..longest_label_len + 1) |_| {
-                    try output.append(' ');
-                }
+                try output.appendNTimes(' ', longest_label_len + 1);
                 try output.append('\t');
             }
 
