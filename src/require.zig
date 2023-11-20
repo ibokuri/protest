@@ -10,6 +10,8 @@ pub inline fn fail(fail_msg: []const u8) !void {
 
 /// Reports a failure.
 pub inline fn failf(fail_msg: []const u8, comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
     var content = content: {
         var cap: usize = if (msg.len == 0) 2 else 3;
         break :content try std.ArrayList(LabelContent).initCapacity(test_ally, cap);
@@ -66,6 +68,8 @@ pub inline fn greater(e1: anytype, e2: @TypeOf(e1)) !void {
 /// require.greaterf(1, 2, "helpful {s}", .{"message"});
 /// ```
 pub inline fn greaterf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
     if (e1 <= e2) {
         var fail_msg = std.ArrayList(u8).init(test_ally);
         defer fail_msg.deinit();
@@ -91,6 +95,8 @@ pub inline fn greaterOrEqual(e1: anytype, e2: @TypeOf(e1)) !void {
 /// require.greaterOrEqualf(1, 2, "helpful {s}", .{"message"});
 /// ```
 pub inline fn greaterOrEqualf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
     if (e1 < e2) {
         var fail_msg = std.ArrayList(u8).init(test_ally);
         defer fail_msg.deinit();
@@ -116,6 +122,8 @@ pub inline fn less(e1: anytype, e2: @TypeOf(e1)) !void {
 /// require.lessf(2, 1, "helpful {s}", .{"message"});
 /// ```
 pub inline fn lessf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
     if (e1 >= e2) {
         var fail_msg = std.ArrayList(u8).init(test_ally);
         defer fail_msg.deinit();
@@ -141,6 +149,8 @@ pub inline fn lessOrEqual(e1: anytype, e2: @TypeOf(e1)) !void {
 /// require.lessOrEqualf(2, 1, "helpful {s}", .{"message"});
 /// ```
 pub inline fn lessOrEqualf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
     if (e1 > e2) {
         var fail_msg = std.ArrayList(u8).init(test_ally);
         defer fail_msg.deinit();
@@ -166,6 +176,8 @@ pub inline fn isFalse(value: bool) !void {
 /// require.isFalsef(true, "helpful {s}", .{"message"});
 /// ```
 pub inline fn isFalsef(value: bool, comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
     if (value) {
         return try failf("Should be false", msg, args);
     }
@@ -186,6 +198,8 @@ pub inline fn isTrue(value: bool) !void {
 /// require.isTruef(false, "helpful {s}", .{"message"});
 /// ```
 pub inline fn isTruef(value: bool, comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
     if (!value) {
         return try failf("Should be true", msg, args);
     }
@@ -260,4 +274,23 @@ fn indentMessageLines(msg: []const u8, longest_label_len: usize) ![]const u8 {
     }
 
     return output.toOwnedSlice();
+}
+
+fn checkArgs(args: anytype) void {
+    comptime {
+        const T = @TypeOf(args);
+        const info = @typeInfo(T);
+
+        const err = std.fmt.comptimePrint("expected \"args\" to be a tuple, found {s}", .{@typeName(T)});
+
+        if (info != .Struct) {
+            @compileError(err);
+        }
+
+        const s_info = info.Struct;
+
+        if (!s_info.is_tuple) {
+            @compileError(err);
+        }
+    }
 }
