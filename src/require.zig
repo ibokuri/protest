@@ -92,10 +92,18 @@ pub inline fn isGreater(v1: anytype, v2: @TypeOf(v1)) !void {
 pub inline fn isGreaterf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
 
+    {
+        const v1_info = @typeInfo(@TypeOf(v1));
+
+        if (v1_info != .Int or v1_info != .Float) {
+            const err = std.fmt.comptimePrint("expected integers or floats, found '{s}'", .{@typeName(v1_info)});
+            @compileError(err);
+        }
+    }
+
     if (v1 <= v2) {
         var fail_msg = std.ArrayList(u8).init(test_ally);
         defer fail_msg.deinit();
-
         try std.fmt.format(fail_msg.writer(), "'{}' is not greater than '{}'", .{ v1, v2 });
 
         return try failf(fail_msg.items, msg, args);
@@ -119,10 +127,18 @@ pub inline fn isGreaterOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
 pub inline fn isGreaterOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
 
+    {
+        const v1_info = @typeInfo(@TypeOf(v1));
+
+        if (v1_info != .Int or v1_info != .Float) {
+            const err = std.fmt.comptimePrint("expected integers or floats, found '{s}'", .{@typeName(v1_info)});
+            @compileError(err);
+        }
+    }
+
     if (v1 < v2) {
         var fail_msg = std.ArrayList(u8).init(test_ally);
         defer fail_msg.deinit();
-
         try std.fmt.format(fail_msg.writer(), "'{}' is not greater than '{}'", .{ v1, v2 });
 
         return try failf(fail_msg.items, msg, args);
@@ -146,10 +162,18 @@ pub inline fn isLess(v1: anytype, v2: @TypeOf(v1)) !void {
 pub inline fn isLessf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
 
+    {
+        const v1_info = @typeInfo(@TypeOf(v1));
+
+        if (v1_info != .Int or v1_info != .Float) {
+            const err = std.fmt.comptimePrint("expected integers or floats, found '{s}'", .{@typeName(v1_info)});
+            @compileError(err);
+        }
+    }
+
     if (v1 >= v2) {
         var fail_msg = std.ArrayList(u8).init(test_ally);
         defer fail_msg.deinit();
-
         try std.fmt.format(fail_msg.writer(), "'{}' is not less than '{}'", .{ v1, v2 });
 
         return try failf(fail_msg.items, msg, args);
@@ -172,6 +196,15 @@ pub inline fn isLessOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
 /// ```
 pub inline fn isLessOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
+
+    {
+        const v1_info = @typeInfo(@TypeOf(v1));
+
+        if (v1_info != .Int or v1_info != .Float) {
+            const err = std.fmt.comptimePrint("expected integers or floats, found '{s}'", .{@typeName(v1_info)});
+            @compileError(err);
+        }
+    }
 
     if (v1 > v2) {
         var fail_msg = std.ArrayList(u8).init(test_ally);
@@ -315,15 +348,9 @@ fn checkArgs(args: anytype) void {
         const T = @TypeOf(args);
         const info = @typeInfo(T);
 
-        const err = std.fmt.comptimePrint("expected 'args' to be a tuple, found {s}", .{@typeName(T)});
+        const err = std.fmt.comptimePrint("expected 'args' to be a tuple, found '{s}'", .{@typeName(T)});
 
-        if (info != .Struct) {
-            @compileError(err);
-        }
-
-        const s_info = info.Struct;
-
-        if (!s_info.is_tuple) {
+        if (info != .Struct or !info.Struct.is_tuple) {
             @compileError(err);
         }
     }
