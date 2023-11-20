@@ -13,7 +13,7 @@ pub inline fn failf(fail_msg: []const u8, comptime msg: []const u8, args: anytyp
     comptime checkArgs(args);
 
     var content = content: {
-        var cap: usize = if (msg.len == 0) 2 else 3;
+        const cap: usize = if (msg.len == 0) 2 else 3;
         break :content try std.ArrayList(LabelContent).initCapacity(test_ally, cap);
     };
     defer content.deinit();
@@ -255,7 +255,7 @@ const LabelContent = struct {
 };
 
 fn labelOutput(contents: []const LabelContent) ![]const u8 {
-    var longest_label_len: usize = longest_label_len: {
+    const longest_label_len: usize = longest_label_len: {
         var len: usize = 0;
         for (contents) |v| {
             if (v.label.len > len) {
@@ -279,7 +279,7 @@ fn labelOutput(contents: []const LabelContent) ![]const u8 {
 
         // Content
         try output.append('\t');
-        var iml = try indentMessageLines(v.content, longest_label_len);
+        const iml = try indentMessageLines(v.content, longest_label_len);
         defer test_ally.free(iml);
         try output.appendSlice(iml);
 
