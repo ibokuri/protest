@@ -8,7 +8,7 @@ const test_ally = std.testing.allocator;
 /// ```
 /// require.isFalse(my_bool);
 /// ```
-pub fn isFalse(value: bool) !void {
+pub inline fn isFalse(value: bool) !void {
     if (value) {
         return fail("Should be false");
     }
@@ -19,7 +19,7 @@ pub fn isFalse(value: bool) !void {
 /// ```
 /// require.isFalsef(my_bool, "value is not {}", .{false});
 /// ```
-pub fn isFalsef(value: bool, comptime msg: []const u8, args: anytype) !void {
+pub inline fn isFalsef(value: bool, comptime msg: []const u8, args: anytype) !void {
     if (value) {
         return failf("Should be false", msg, args);
     }
@@ -30,7 +30,7 @@ pub fn isFalsef(value: bool, comptime msg: []const u8, args: anytype) !void {
 /// ```
 /// require.isTrue(my_bool);
 /// ```
-pub fn isTrue(value: bool) !void {
+pub inline fn isTrue(value: bool) !void {
     if (!value) {
         return fail("Should be true");
     }
@@ -41,19 +41,19 @@ pub fn isTrue(value: bool) !void {
 /// ```
 /// require.isTrue(my_bool, "value is not {}", .{true});
 /// ```
-pub fn isTruef(value: bool, comptime msg: []const u8, args: anytype) !void {
+pub inline fn isTruef(value: bool, comptime msg: []const u8, args: anytype) !void {
     if (!value) {
         return failf("Should be true", msg, args);
     }
 }
 
 /// Reports a failure.
-pub fn fail(fail_msg: []const u8) !void {
+pub inline fn fail(fail_msg: []const u8) !void {
     return try failf(fail_msg, "", .{});
 }
 
 /// Reports a failure.
-pub fn failf(fail_msg: []const u8, comptime msg: []const u8, args: anytype) !void {
+pub inline fn failf(fail_msg: []const u8, comptime msg: []const u8, args: anytype) !void {
     var content = content: {
         var cap: usize = if (msg.len == 0) 2 else 3;
         break :content try std.ArrayList(LabelContent).initCapacity(test_ally, cap);
