@@ -65,7 +65,7 @@ pub inline fn greater(e1: anytype, e2: @TypeOf(e1)) !void {
 /// Asserts that the first element is greater than the second.
 ///
 /// ```
-/// require.greaterf(1, 2, "helpful {s}", .{"message"});
+/// require.greaterf(1, 2, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn greaterf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
@@ -74,7 +74,7 @@ pub inline fn greaterf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u8, a
         var fail_msg = std.ArrayList(u8).init(test_ally);
         defer fail_msg.deinit();
 
-        try std.fmt.format(fail_msg.writer(), "\"{}\" is not greater than \"{}\"", .{ e1, e2 });
+        try std.fmt.format(fail_msg.writer(), "'{}' is not greater than '{}'", .{ e1, e2 });
 
         return try failf(fail_msg.items, msg, args);
     }
@@ -83,7 +83,7 @@ pub inline fn greaterf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u8, a
 /// Asserts that the first element is greater than or equal to the second.
 ///
 /// ```
-/// require.greaterOrEqual(1, 2, "helpful {s}", .{"message"});
+/// require.greaterOrEqual(1, 2);
 /// ```
 pub inline fn greaterOrEqual(e1: anytype, e2: @TypeOf(e1)) !void {
     return try greaterOrEqualf(e1, e2, "", .{});
@@ -92,7 +92,7 @@ pub inline fn greaterOrEqual(e1: anytype, e2: @TypeOf(e1)) !void {
 /// Asserts that the first element is greater than or equal to the second.
 ///
 /// ```
-/// require.greaterOrEqualf(1, 2, "helpful {s}", .{"message"});
+/// require.greaterOrEqualf(1, 2, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn greaterOrEqualf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
@@ -101,7 +101,7 @@ pub inline fn greaterOrEqualf(e1: anytype, e2: @TypeOf(e1), comptime msg: []cons
         var fail_msg = std.ArrayList(u8).init(test_ally);
         defer fail_msg.deinit();
 
-        try std.fmt.format(fail_msg.writer(), "\"{}\" is not greater than \"{}\"", .{ e1, e2 });
+        try std.fmt.format(fail_msg.writer(), "'{}' is not greater than '{}'", .{ e1, e2 });
 
         return try failf(fail_msg.items, msg, args);
     }
@@ -119,7 +119,7 @@ pub inline fn isFalse(value: bool) !void {
 /// Asserts that the specified value is false.
 ///
 /// ```
-/// require.isFalsef(true, "helpful {s}", .{"message"});
+/// require.isFalsef(true, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isFalsef(value: bool, comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
@@ -127,6 +127,41 @@ pub inline fn isFalsef(value: bool, comptime msg: []const u8, args: anytype) !vo
     if (value) {
         return try failf("Should be false", msg, args);
     }
+}
+
+/// Asserts that the specified value is null.
+///
+/// ```
+/// require.isNull(123);
+/// ```
+pub inline fn isNull(value: anytype) !void {
+    return try isNullf(value, "", .{});
+}
+
+/// Asserts that the specified value is null.
+///
+/// ```
+/// require.isNullf(123, "helpful error {s}", .{"message"});
+/// ```
+pub inline fn isNullf(value: anytype, comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
+    const info = @typeInfo(@TypeOf(value));
+
+    if (info == .Null or (info == .Optional and value == null)) {
+        return;
+    }
+
+    var fail_msg = std.ArrayList(u8).init(test_ally);
+    defer fail_msg.deinit();
+
+    switch (info) {
+        .Null => unreachable, // UNREACHABLE: null values always exit early.
+        .Optional => try std.fmt.format(fail_msg.writer(), "expected null, found '{any}'", .{value.?}),
+        else => try std.fmt.format(fail_msg.writer(), "expected null, found '{any}'", .{value}),
+    }
+
+    return try failf(fail_msg.items, msg, args);
 }
 
 /// Asserts that the specified value is true.
@@ -141,7 +176,7 @@ pub inline fn isTrue(value: bool) !void {
 /// Asserts that the specified value is true.
 ///
 /// ```
-/// require.isTruef(false, "helpful {s}", .{"message"});
+/// require.isTruef(false, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isTruef(value: bool, comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
@@ -163,7 +198,7 @@ pub inline fn less(e1: anytype, e2: @TypeOf(e1)) !void {
 /// Asserts that the first element is less than the second.
 ///
 /// ```
-/// require.lessf(2, 1, "helpful {s}", .{"message"});
+/// require.lessf(2, 1, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn lessf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
@@ -172,7 +207,7 @@ pub inline fn lessf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u8, args
         var fail_msg = std.ArrayList(u8).init(test_ally);
         defer fail_msg.deinit();
 
-        try std.fmt.format(fail_msg.writer(), "\"{}\" is not less than \"{}\"", .{ e1, e2 });
+        try std.fmt.format(fail_msg.writer(), "'{}' is not less than '{}'", .{ e1, e2 });
 
         return try failf(fail_msg.items, msg, args);
     }
@@ -181,7 +216,7 @@ pub inline fn lessf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u8, args
 /// Asserts that the first element is less than or equal to the second.
 ///
 /// ```
-/// require.lessOrEqual(2, 1, "helpful {s}", .{"message"});
+/// require.lessOrEqual(2, 1);
 /// ```
 pub inline fn lessOrEqual(e1: anytype, e2: @TypeOf(e1)) !void {
     return try lessOrEqualf(e1, e2, "", .{});
@@ -190,7 +225,7 @@ pub inline fn lessOrEqual(e1: anytype, e2: @TypeOf(e1)) !void {
 /// Asserts that the first element is less than or equal to the second.
 ///
 /// ```
-/// require.lessOrEqualf(2, 1, "helpful {s}", .{"message"});
+/// require.lessOrEqualf(2, 1, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn lessOrEqualf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
@@ -198,8 +233,7 @@ pub inline fn lessOrEqualf(e1: anytype, e2: @TypeOf(e1), comptime msg: []const u
     if (e1 > e2) {
         var fail_msg = std.ArrayList(u8).init(test_ally);
         defer fail_msg.deinit();
-
-        try std.fmt.format(fail_msg.writer(), "\"{}\" is not less than \"{}\"", .{ e1, e2 });
+        try std.fmt.format(fail_msg.writer(), "'{}' is not less than '{}'", .{ e1, e2 });
 
         return try failf(fail_msg.items, msg, args);
     }
@@ -281,7 +315,7 @@ fn checkArgs(args: anytype) void {
         const T = @TypeOf(args);
         const info = @typeInfo(T);
 
-        const err = std.fmt.comptimePrint("expected \"args\" to be a tuple, found {s}", .{@typeName(T)});
+        const err = std.fmt.comptimePrint("expected 'args' to be a tuple, found {s}", .{@typeName(T)});
 
         if (info != .Struct) {
             @compileError(err);
