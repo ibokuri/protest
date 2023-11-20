@@ -266,6 +266,35 @@ pub inline fn isNullf(value: anytype, comptime msg: []const u8, args: anytype) !
     return try failf(fail_msg.items, msg, args);
 }
 
+/// Asserts that the specified value is positive.
+///
+/// ```
+/// require.isPositive(1);
+/// require.isPositive(1.0);
+/// ```
+pub inline fn isPositive(value: anytype) !void {
+    return try isPositivef(value, "", .{});
+}
+
+/// Asserts that the specified value is positive.
+///
+/// ```
+/// require.isPositivef(1, "helpful error {s}", .{"message"});
+/// require.isPositivef(1.0, "helpful error {s}", .{"message"});
+/// ```
+pub inline fn isPositivef(value: anytype, comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+    comptime checkComparable(@TypeOf(value));
+
+    if (value >= 0) {
+        var fail_msg = std.ArrayList(u8).init(test_ally);
+        defer fail_msg.deinit();
+        try std.fmt.format(fail_msg.writer(), "'{}' is not positive", .{value});
+
+        return try failf(fail_msg.items, msg, args);
+    }
+}
+
 /// Asserts that the specified value is true.
 ///
 /// ```
