@@ -56,7 +56,7 @@ pub inline fn failf(fail_msg: []const u8, comptime msg: []const u8, args: anytyp
 /// Asserts that the specified value is false.
 ///
 /// ```
-/// require.isFalse(true);
+/// require.isFalse(false);
 /// ```
 pub inline fn isFalse(value: bool) !void {
     return try isFalsef(value, "", .{});
@@ -65,7 +65,7 @@ pub inline fn isFalse(value: bool) !void {
 /// Asserts that the specified value is false.
 ///
 /// ```
-/// require.isFalsef(true, "helpful error {s}", .{"message"});
+/// require.isFalsef(false, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isFalsef(value: bool, comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
@@ -78,7 +78,8 @@ pub inline fn isFalsef(value: bool, comptime msg: []const u8, args: anytype) !vo
 /// Asserts that the first value is greater than the second.
 ///
 /// ```
-/// require.isGreater(1, 2);
+/// require.isGreater(2, 1);
+/// require.isGreater(2.0, 1.0);
 /// ```
 pub inline fn isGreater(v1: anytype, v2: @TypeOf(v1)) !void {
     return try isGreaterf(v1, v2, "", .{});
@@ -87,7 +88,8 @@ pub inline fn isGreater(v1: anytype, v2: @TypeOf(v1)) !void {
 /// Asserts that the first value is greater than the second.
 ///
 /// ```
-/// require.isGreaterf(1, 2, "helpful error {s}", .{"message"});
+/// require.isGreaterf(2, 1, "helpful error {s}", .{"message"});
+/// require.isGreaterf(2.0, 1.0, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isGreaterf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
@@ -105,7 +107,8 @@ pub inline fn isGreaterf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8,
 /// Asserts that the first value is greater than or equal to the second.
 ///
 /// ```
-/// require.isGreaterOrEqual(1, 2);
+/// require.isGreaterOrEqual(1, 1);
+/// require.isGreaterOrEqual(1.0, 1.0);
 /// ```
 pub inline fn isGreaterOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
     return try isGreaterOrEqualf(v1, v2, "", .{});
@@ -114,7 +117,8 @@ pub inline fn isGreaterOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
 /// Asserts that the first value is greater than or equal to the second.
 ///
 /// ```
-/// require.isGreaterOrEqualf(1, 2, "helpful error {s}", .{"message"});
+/// require.isGreaterOrEqualf(1, 1, "helpful error {s}", .{"message"});
+/// require.isGreaterOrEqualf(1.0, 1.0, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isGreaterOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
@@ -142,6 +146,7 @@ pub inline fn isGreaterOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []co
 ///
 /// ```
 /// require.isLess(1, 2);
+/// require.isLess(1.0, 2.0);
 /// ```
 pub inline fn isLess(v1: anytype, v2: @TypeOf(v1)) !void {
     return try isLessf(v1, v2, "", .{});
@@ -150,7 +155,8 @@ pub inline fn isLess(v1: anytype, v2: @TypeOf(v1)) !void {
 /// Asserts that the first value is less than the second.
 ///
 /// ```
-/// require.isLessf(2, 1, "helpful error {s}", .{"message"});
+/// require.isLessf(1, 2, "helpful error {s}", .{"message"});
+/// require.isLessf(1.0, 2.0, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isLessf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
@@ -168,7 +174,8 @@ pub inline fn isLessf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, ar
 /// Asserts that the first value is less than or equal to the second.
 ///
 /// ```
-/// require.isLessOrEqual(2, 1);
+/// require.isLessOrEqual(1, 1);
+/// require.isLessOrEqual(1.0, 1.0);
 /// ```
 pub inline fn isLessOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
     return try isLessOrEqualf(v1, v2, "", .{});
@@ -177,7 +184,8 @@ pub inline fn isLessOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
 /// Asserts that the first value is less than or equal to the second.
 ///
 /// ```
-/// require.isLessOrEqualf(2, 1, "helpful error {s}", .{"message"});
+/// require.isLessOrEqualf(1, 1, "helpful error {s}", .{"message"});
+/// require.isLessOrEqualf(1.0, 1.0, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isLessOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
@@ -196,7 +204,7 @@ pub inline fn isLessOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const
 ///
 /// ```
 /// require.isNegative(-1);
-/// require.isNegative(-1.23);
+/// require.isNegative(-1.0);
 /// ```
 pub inline fn isNegative(value: anytype) !void {
     return try isNegativef(value, "", .{});
@@ -206,7 +214,7 @@ pub inline fn isNegative(value: anytype) !void {
 ///
 /// ```
 /// require.isNegativef(-1, "helpful error {s}", .{"message"});
-/// require.isNegativef(-1.23, "helpful error {s}", .{"message"});
+/// require.isNegativef(-1.0, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isNegativef(value: anytype, comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
@@ -224,7 +232,8 @@ pub inline fn isNegativef(value: anytype, comptime msg: []const u8, args: anytyp
 /// Asserts that the specified value is null.
 ///
 /// ```
-/// require.isNull(100);
+/// require.isNull(null);
+/// require.isNull(@as(?bool, null));
 /// ```
 pub inline fn isNull(value: anytype) !void {
     return try isNullf(value, "", .{});
@@ -233,7 +242,8 @@ pub inline fn isNull(value: anytype) !void {
 /// Asserts that the specified value is null.
 ///
 /// ```
-/// require.isNullf(100, "helpful error {s}", .{"message"});
+/// require.isNullf(null, "helpful error {s}", .{"message"});
+/// require.isNullf(@as(?bool, null), "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isNullf(value: anytype, comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
@@ -259,7 +269,7 @@ pub inline fn isNullf(value: anytype, comptime msg: []const u8, args: anytype) !
 /// Asserts that the specified value is true.
 ///
 /// ```
-/// require.isTrue(false);
+/// require.isTrue(true);
 /// ```
 pub inline fn isTrue(value: bool) !void {
     return try isTrue(value, "", .{});
@@ -268,7 +278,7 @@ pub inline fn isTrue(value: bool) !void {
 /// Asserts that the specified value is true.
 ///
 /// ```
-/// require.isTruef(false, "helpful error {s}", .{"message"});
+/// require.isTruef(true, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isTruef(value: bool, comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
