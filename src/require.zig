@@ -192,10 +192,39 @@ pub inline fn isLessOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const
     }
 }
 
+/// Asserts that the specified value is negative.
+///
+/// ```
+/// require.isNegative(-1);
+/// require.isNegative(-1.23);
+/// ```
+pub inline fn isNegative(value: anytype) !void {
+    return try isNegativef(value, "", .{});
+}
+
+/// Asserts that the specified value is negative.
+///
+/// ```
+/// require.isNegativef(-1, "helpful error {s}", .{"message"});
+/// require.isNegativef(-1.23, "helpful error {s}", .{"message"});
+/// ```
+pub inline fn isNegativef(value: anytype, comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+    comptime checkComparable(@TypeOf(value));
+
+    if (value < 0) {
+        var fail_msg = std.ArrayList(u8).init(test_ally);
+        defer fail_msg.deinit();
+        try std.fmt.format(fail_msg.writer(), "'{}' is not negative", .{value});
+
+        return try failf(fail_msg.items, msg, args);
+    }
+}
+
 /// Asserts that the specified value is null.
 ///
 /// ```
-/// require.isNull(123);
+/// require.isNull(100);
 /// ```
 pub inline fn isNull(value: anytype) !void {
     return try isNullf(value, "", .{});
@@ -204,7 +233,7 @@ pub inline fn isNull(value: anytype) !void {
 /// Asserts that the specified value is null.
 ///
 /// ```
-/// require.isNullf(123, "helpful error {s}", .{"message"});
+/// require.isNullf(100, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isNullf(value: anytype, comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
