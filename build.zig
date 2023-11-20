@@ -21,9 +21,6 @@ fn tests(
     target: std.zig.CrossTarget,
     mode: std.builtin.OptimizeMode,
 ) void {
-    _ = target;
-    _ = mode;
-
     const test_step = b.step("test", "Run tests");
 
     // Allow a test filter to be specified.
@@ -54,6 +51,33 @@ fn tests(
             else => |len| std.debug.panic("expected 1 argument, found {}", .{len}),
         }
     }
+
+    const test_assert_step = b.step("test-assert", "Run assert tests");
+    const test_require_step = b.step("test-require", "Run require tests");
+
+    // Configure tests.
+    const t_assert = b.addTest(.{
+        .name = "assert test",
+        .root_source_file = .{ .path = "src/assert.zig" },
+        .target = target,
+        .optimize = mode,
+        .main_pkg_path = .{ .path = "src/" },
+    });
+    const t_require = b.addTest(.{
+        .name = "require test",
+        .root_source_file = .{ .path = "src/require.zig" },
+        .target = target,
+        .optimize = mode,
+        .main_pkg_path = .{ .path = "src/" },
+    });
+
+    // Configure module-level test steps.
+    test_assert_step.dependOn(&b.addRunArtifact(t_assert).step);
+    test_require_step.dependOn(&b.addRunArtifact(t_require).step);
+
+    // Configure top-level test step.
+    test_step.dependOn(test_assert_step);
+    test_step.dependOn(test_require_step);
 }
 
 fn docs(
@@ -73,7 +97,7 @@ fn docs(
     const install_docs = b.addInstallDirectory(.{
         .source_dir = doc_obj.getEmittedDocs(),
         .install_dir = .prefix,
-        .install_subdir = "doc/protest",
+        .install_subdir = "docs/protest",
     });
     docs_step.dependOn(&install_docs.step);
 }
