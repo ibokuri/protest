@@ -362,7 +362,7 @@ pub inline fn notError(value: anytype) !void {
 pub inline fn notErrorf(value: anytype, comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
 
-    if (@typeInfo(@TypeOf(value)) != .Error) {
+    if (@typeInfo(@TypeOf(value)) == .Error) {
         return try failf("Received unexpected error", msg, args);
     }
 }
