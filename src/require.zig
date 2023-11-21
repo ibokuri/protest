@@ -70,7 +70,7 @@ pub inline fn isError(value: anytype) !void {
 pub inline fn isErrorf(value: anytype, comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
 
-    if (@typeInfo(@TypeOf(value)) != .Error) {
+    if (@typeInfo(@TypeOf(value)) != .ErrorSet) {
         const fail_msg = try failMsg("Expected error, found '{any}'", .{value});
         defer test_ally.free(fail_msg);
         return try failf(fail_msg, msg, args);
@@ -362,7 +362,7 @@ pub inline fn notError(value: anytype) !void {
 pub inline fn notErrorf(value: anytype, comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
 
-    if (@typeInfo(@TypeOf(value)) == .Error) {
+    if (@typeInfo(@TypeOf(value)) == .ErrorSet) {
         return try failf("Received unexpected error", msg, args);
     }
 }
