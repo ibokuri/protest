@@ -326,7 +326,7 @@ pub inline fn isTypef(comptime Expected: type, value: anytype, comptime msg: []c
 /// ```
 /// require.notError(true);
 /// ```
-pub inline fn notError(value: bool) !void {
+pub inline fn notError(value: anytype) !void {
     return try notErrorf(value, "", .{});
 }
 
@@ -335,7 +335,7 @@ pub inline fn notError(value: bool) !void {
 /// ```
 /// require.notErrorf(true, "helpful error {s}", .{"message"});
 /// ```
-pub inline fn notErrorf(value: bool, comptime msg: []const u8, args: anytype) !void {
+pub inline fn notErrorf(value: anytype, comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
 
     if (@typeInfo(@TypeOf(value)) != .Error) {
