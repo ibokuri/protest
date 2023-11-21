@@ -124,15 +124,6 @@ pub inline fn isGreaterOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []co
     comptime checkArgs(args);
     comptime checkComparable(@TypeOf(v1));
 
-    {
-        const v1_info = @typeInfo(@TypeOf(v1));
-
-        if (v1_info != .Int or v1_info != .Float) {
-            const err = std.fmt.comptimePrint("expected integers or floats, found '{s}'", .{@typeName(v1_info)});
-            @compileError(err);
-        }
-    }
-
     if (v1 < v2) {
         var fail_msg = std.ArrayList(u8).init(test_ally);
         defer fail_msg.deinit();
@@ -259,8 +250,8 @@ pub inline fn isNullf(value: anytype, comptime msg: []const u8, args: anytype) !
 
     switch (info) {
         .Null => unreachable, // UNREACHABLE: null values always exit early.
-        .Optional => try std.fmt.format(fail_msg.writer(), "expected null, found '{any}'", .{value.?}),
-        else => try std.fmt.format(fail_msg.writer(), "expected null, found '{any}'", .{value}),
+        .Optional => try std.fmt.format(fail_msg.writer(), "Expected null, found '{any}'", .{value.?}),
+        else => try std.fmt.format(fail_msg.writer(), "Expected null, found '{any}'", .{value}),
     }
 
     return try failf(fail_msg.items, msg, args);
@@ -301,7 +292,7 @@ pub inline fn isPositivef(value: anytype, comptime msg: []const u8, args: anytyp
 /// require.isTrue(true);
 /// ```
 pub inline fn isTrue(value: bool) !void {
-    return try isTrue(value, "", .{});
+    return try isTruef(value, "", .{});
 }
 
 /// Asserts that the specified value is true.
@@ -314,6 +305,39 @@ pub inline fn isTruef(value: bool, comptime msg: []const u8, args: anytype) !voi
 
     if (!value) {
         return try failf("Should be true", msg, args);
+    }
+}
+
+/// Asserts that the specified values are of the same type.
+///
+/// ```
+/// require.isType(bool, true);
+/// ```
+pub inline fn isType(comptime Expected: type, value: anytype) !void {
+    return try isTypef(Expected, value, "", .{});
+}
+
+/// Asserts that the specified values are of the same type.
+///
+/// ```
+/// require.isTypef(bool, true, "helpful error {s}", .{"message"});
+/// ```
+pub inline fn isTypef(comptime Expected: type, value: anytype, comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
+    const Value = @TypeOf(value);
+
+    if (Expected != Value) {
+        var fail_msg = std.ArrayList(u8).init(test_ally);
+        defer fail_msg.deinit();
+
+        try std.fmt.format(
+            fail_msg.writer(),
+            "Expected type '{s}', found '{s}'",
+            .{ @typeName(Expected), @typeName(Value) },
+        );
+
+        return try failf(fail_msg.items, msg, args);
     }
 }
 
@@ -406,7 +430,7 @@ fn checkComparable(comptime T: type) void {
 
         if (info != .Int or info != .Float) {
             const err = std.fmt.comptimePrint(
-                "expected integers or floats, found '{s}'",
+                "expected integer or float, found '{s}'",
                 .{@typeName(info)},
             );
 
