@@ -53,6 +53,30 @@ pub inline fn failf(fail_msg: []const u8, comptime msg: []const u8, args: anytyp
     return error.AssertionError;
 }
 
+/// Asserts that a value is an error.
+///
+/// ```
+/// require.isError(error.Foobar);
+/// ```
+pub inline fn isError(value: anytype) !void {
+    return try isErrorf(value, "", .{});
+}
+
+/// Asserts that a value is an error.
+///
+/// ```
+/// require.isErrorf(error.Foobar, "helpful error {s}", .{"message"});
+/// ```
+pub inline fn isErrorf(value: anytype, comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
+    if (@typeInfo(@TypeOf(value)) != .Error) {
+        const fail_msg = try failMsg("Expected error, found '{any}'", .{value});
+        defer test_ally.free(fail_msg);
+        return try failf(fail_msg, msg, args);
+    }
+}
+
 /// Asserts that the specified value is false.
 ///
 /// ```
