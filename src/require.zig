@@ -363,7 +363,7 @@ pub inline fn notErrorf(value: anytype, comptime msg: []const u8, args: anytype)
     comptime checkArgs(args);
 
     if (@typeInfo(@TypeOf(value)) == .ErrorSet) {
-        const fail_msg = try failMsg("Received unexpected error '{}'", .{value});
+        const fail_msg = try failMsg("Expected non-error, found '{}'", .{value});
         defer test_ally.free(fail_msg);
         return try failf(fail_msg, msg, args);
     }
