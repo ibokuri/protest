@@ -259,13 +259,12 @@ pub inline fn isNullf(value: anytype, comptime msg: []const u8, args: anytype) !
         return;
     }
 
-    const fmt = "Expected null, found '{any}'";
+    const fmt = "Expected null value, found '{any}'";
     const fail_msg = try switch (info) {
         .Optional => failMsg(fmt, .{value.?}),
-        else => failMsg(fmt, value),
+        else => failMsg(fmt, .{value}),
     };
     defer test_ally.free(fail_msg);
-
     return try failf(fail_msg, msg, args);
 }
 
@@ -366,6 +365,30 @@ pub inline fn notErrorf(value: anytype, comptime msg: []const u8, args: anytype)
         const fail_msg = try failMsg("Expected non-error, found '{}'", .{value});
         defer test_ally.free(fail_msg);
         return try failf(fail_msg, msg, args);
+    }
+}
+
+/// Asserts that the specified value is not null.
+///
+/// ```
+/// require.notNull(true);
+/// ```
+pub inline fn notNull(value: anytype) !void {
+    return try notNullf(value, "", .{});
+}
+
+/// Asserts that the specified value is not null.
+///
+/// ```
+/// require.notNullf(true, "helpful error {s}", .{"message"});
+/// ```
+pub inline fn notNullf(value: anytype, comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
+    const info = @typeInfo(@TypeOf(value));
+
+    if (info == .Null or (info == .Optional and value == null)) {
+        return try failf("Received unexpected null value", msg, args);
     }
 }
 
