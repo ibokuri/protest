@@ -96,11 +96,9 @@ pub inline fn isGreaterf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8,
     comptime checkComparable(@TypeOf(v1));
 
     if (v1 <= v2) {
-        var fail_msg = std.ArrayList(u8).init(test_ally);
-        defer fail_msg.deinit();
-        try std.fmt.format(fail_msg.writer(), "'{}' is not greater than '{}'", .{ v1, v2 });
-
-        return try failf(fail_msg.items, msg, args);
+        const fail_msg = try failMsg("'{}' is not greater than '{}'", .{ v1, v2 });
+        defer test_ally.free(fail_msg);
+        return try failf(fail_msg, msg, args);
     }
 }
 
@@ -125,10 +123,8 @@ pub inline fn isGreaterOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []co
     comptime checkComparable(@TypeOf(v1));
 
     if (v1 < v2) {
-        var fail_msg = std.ArrayList(u8).init(test_ally);
-        defer fail_msg.deinit();
-        try std.fmt.format(fail_msg.writer(), "'{}' is not greater than '{}'", .{ v1, v2 });
-
+        const fail_msg = try failMsg("'{}' is not greater than or equal to '{}'", .{ v1, v2 });
+        defer test_ally.free(fail_msg);
         return try failf(fail_msg.items, msg, args);
     }
 }
@@ -154,10 +150,8 @@ pub inline fn isLessf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, ar
     comptime checkComparable(@TypeOf(v1));
 
     if (v1 >= v2) {
-        var fail_msg = std.ArrayList(u8).init(test_ally);
-        defer fail_msg.deinit();
-        try std.fmt.format(fail_msg.writer(), "'{}' is not less than '{}'", .{ v1, v2 });
-
+        const fail_msg = try failMsg("'{}' is not less than '{}'", .{ v1, v2 });
+        defer test_ally.free(fail_msg);
         return try failf(fail_msg.items, msg, args);
     }
 }
@@ -183,10 +177,8 @@ pub inline fn isLessOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const
     comptime checkComparable(@TypeOf(v1));
 
     if (v1 > v2) {
-        var fail_msg = std.ArrayList(u8).init(test_ally);
-        defer fail_msg.deinit();
-        try std.fmt.format(fail_msg.writer(), "'{}' is not less than '{}'", .{ v1, v2 });
-
+        const fail_msg = try failMsg("'{}' is not less than or equal to '{}'", .{ v1, v2 });
+        defer test_ally.free(fail_msg);
         return try failf(fail_msg.items, msg, args);
     }
 }
@@ -212,10 +204,8 @@ pub inline fn isNegativef(value: anytype, comptime msg: []const u8, args: anytyp
     comptime checkComparable(@TypeOf(value));
 
     if (value < 0) {
-        var fail_msg = std.ArrayList(u8).init(test_ally);
-        defer fail_msg.deinit();
-        try std.fmt.format(fail_msg.writer(), "'{}' is not negative", .{value});
-
+        const fail_msg = try failMsg("'{}' is not negative", .{value});
+        defer test_ally.free(fail_msg);
         return try failf(fail_msg.items, msg, args);
     }
 }
@@ -245,16 +235,14 @@ pub inline fn isNullf(value: anytype, comptime msg: []const u8, args: anytype) !
         return;
     }
 
-    var fail_msg = std.ArrayList(u8).init(test_ally);
-    defer fail_msg.deinit();
+    const fmt = "Expected null, found '{any}'";
+    const fail_msg = try switch (info) {
+        .Optional => failMsg(fmt, .{value.?}),
+        else => failMsg(fmt, value),
+    };
+    defer test_ally.free(fail_msg);
 
-    switch (info) {
-        .Null => unreachable, // UNREACHABLE: null values always exit early.
-        .Optional => try std.fmt.format(fail_msg.writer(), "Expected null, found '{any}'", .{value.?}),
-        else => try std.fmt.format(fail_msg.writer(), "Expected null, found '{any}'", .{value}),
-    }
-
-    return try failf(fail_msg.items, msg, args);
+    return try failf(fail_msg, msg, args);
 }
 
 /// Asserts that the specified value is positive.
@@ -278,9 +266,8 @@ pub inline fn isPositivef(value: anytype, comptime msg: []const u8, args: anytyp
     comptime checkComparable(@TypeOf(value));
 
     if (value >= 0) {
-        var fail_msg = std.ArrayList(u8).init(test_ally);
-        defer fail_msg.deinit();
-        try std.fmt.format(fail_msg.writer(), "'{}' is not positive", .{value});
+        const fail_msg = try failMsg("'{}' is not positive", .{value});
+        defer test_ally.free(fail_msg);
 
         return try failf(fail_msg.items, msg, args);
     }
@@ -328,17 +315,41 @@ pub inline fn isTypef(comptime Expected: type, value: anytype, comptime msg: []c
     const Value = @TypeOf(value);
 
     if (Expected != Value) {
-        var fail_msg = std.ArrayList(u8).init(test_ally);
-        defer fail_msg.deinit();
-
-        try std.fmt.format(
-            fail_msg.writer(),
-            "Expected type '{s}', found '{s}'",
-            .{ @typeName(Expected), @typeName(Value) },
-        );
-
-        return try failf(fail_msg.items, msg, args);
+        const fail_msg = try failMsg("Expected type '{s}', found '{s}'", .{ @typeName(Expected), @typeName(Value) });
+        defer test_ally.free(fail_msg);
+        return try failf(fail_msg, msg, args);
     }
+}
+
+/// Asserts that a value is not an error.
+///
+/// ```
+/// require.noError(true);
+/// ```
+pub inline fn notError(value: bool) !void {
+    return try notErrorf(value, "", .{});
+}
+
+/// Asserts that a value is not an error.
+///
+/// ```
+/// require.notErrorf(true, "helpful error {s}", .{"message"});
+/// ```
+pub inline fn notErrorf(value: bool, comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
+    if (@typeInfo(@TypeOf(value)) != .Error) {
+        return try failf("Received unexpected error", msg, args);
+    }
+}
+
+fn failMsg(comptime fmt: []const u8, args: anytype) ![]const u8 {
+    var msg = std.ArrayList(u8).init(test_ally);
+    errdefer msg.deinit();
+
+    try std.fmt.format(msg.writer(), fmt, args);
+
+    return msg.toOwnedSlice();
 }
 
 const LabelContent = struct {
@@ -428,12 +439,10 @@ fn checkComparable(comptime T: type) void {
     comptime {
         const info = @typeInfo(T);
 
-        if (info != .Int or info != .Float) {
-            const err = std.fmt.comptimePrint(
-                "expected integer or float, found '{s}'",
-                .{@typeName(info)},
-            );
-
+        const is_int = info == .Int or info == .ComptimeInt;
+        const is_float = info == .Float or info == .ComptimeFloat;
+        if (!is_int and !is_float) {
+            const err = std.fmt.comptimePrint("expected integer or float, found '{s}'", .{@typeName(T)});
             @compileError(err);
         }
     }
