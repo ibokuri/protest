@@ -378,6 +378,33 @@ fn failMsg(comptime fmt: []const u8, args: anytype) ![]const u8 {
     return msg.toOwnedSlice();
 }
 
+fn checkArgs(args: anytype) void {
+    comptime {
+        const T = @TypeOf(args);
+        const info = @typeInfo(T);
+
+        if (info != .Struct or !info.Struct.is_tuple) {
+            @compileError(std.fmt.comptimePrint(
+                "expected 'args' to be a tuple, found '{s}'",
+                .{@typeName(T)},
+            ));
+        }
+    }
+}
+
+fn checkComparable(comptime T: type) void {
+    comptime {
+        const info = @typeInfo(T);
+
+        const is_int = info == .Int or info == .ComptimeInt;
+        const is_float = info == .Float or info == .ComptimeFloat;
+        if (!is_int and !is_float) {
+            const err = std.fmt.comptimePrint("expected integer or float, found '{s}'", .{@typeName(T)});
+            @compileError(err);
+        }
+    }
+}
+
 const LabelContent = struct {
     label: []const u8,
     content: []const u8,
@@ -445,31 +472,4 @@ fn indentMessageLines(msg: []const u8, longest_label_len: usize) ![]const u8 {
     }
 
     return output.toOwnedSlice();
-}
-
-fn checkArgs(args: anytype) void {
-    comptime {
-        const T = @TypeOf(args);
-        const info = @typeInfo(T);
-
-        if (info != .Struct or !info.Struct.is_tuple) {
-            @compileError(std.fmt.comptimePrint(
-                "expected 'args' to be a tuple, found '{s}'",
-                .{@typeName(T)},
-            ));
-        }
-    }
-}
-
-fn checkComparable(comptime T: type) void {
-    comptime {
-        const info = @typeInfo(T);
-
-        const is_int = info == .Int or info == .ComptimeInt;
-        const is_float = info == .Float or info == .ComptimeFloat;
-        if (!is_int and !is_float) {
-            const err = std.fmt.comptimePrint("expected integer or float, found '{s}'", .{@typeName(T)});
-            @compileError(err);
-        }
-    }
 }
