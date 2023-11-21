@@ -3,6 +3,44 @@ const std = @import("std");
 const print = std.debug.print;
 const test_ally = std.testing.allocator;
 
+/// Asserts that the provided value is an error and that it is equal to the
+/// provided error.
+///
+/// ```
+/// require.equalError(error.Foo, error.Foo);
+/// ```
+pub inline fn equalError(expected: anyerror, value: anytype) !void {
+    return try equalErrorf(expected, value, "", .{});
+}
+
+/// Asserts that the provided value is an error and that it is equal to the
+/// provided error.
+///
+/// ```
+/// require.equalErrorf(error.Foo, error.Foo, "helpful error {s}", .{"message"});
+/// ```
+pub inline fn equalErrorf(expected: anyerror, value: anytype, comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
+    const info = @typeInfo(@TypeOf(value));
+
+    if (info != .ErrorSet) {
+        const fail_msg = try failMsg("Expected error, found '{}'", .{value});
+        defer test_ally.free(fail_msg);
+        return try failf(fail_msg, msg, args);
+    }
+
+    if (value != expected) {
+        const fail_msg = try failMsg(
+            \\Error not equal:
+            \\expected: {}
+            \\actual:   {}
+        , .{ expected, value });
+        defer test_ally.free(fail_msg);
+        return try failf(fail_msg, msg, args);
+    }
+}
+
 /// Asserts that the specified value is of the specified type.
 ///
 /// ```
