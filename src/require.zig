@@ -324,7 +324,7 @@ pub inline fn isTypef(comptime Expected: type, value: anytype, comptime msg: []c
 /// Asserts that a value is not an error.
 ///
 /// ```
-/// require.noError(true);
+/// require.notError(true);
 /// ```
 pub inline fn notError(value: bool) !void {
     return try notErrorf(value, "", .{});
