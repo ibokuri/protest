@@ -3,6 +3,32 @@ const std = @import("std");
 const print = std.debug.print;
 const test_ally = std.testing.allocator;
 
+/// Asserts that the specified value is of the specified type.
+///
+/// ```
+/// require.equalType(bool, true);
+/// ```
+pub inline fn equalType(comptime Expected: type, value: anytype) !void {
+    return try equalTypef(Expected, value, "", .{});
+}
+
+/// Asserts that the specified value is of the specified type.
+///
+/// ```
+/// require.equalTypef(bool, true, "helpful error {s}", .{"message"});
+/// ```
+pub inline fn equalTypef(comptime Expected: type, value: anytype, comptime msg: []const u8, args: anytype) !void {
+    comptime checkArgs(args);
+
+    const Value = @TypeOf(value);
+
+    if (Expected != Value) {
+        const fail_msg = try failMsg("Expected type '{s}', found '{s}'", .{ @typeName(Expected), @typeName(Value) });
+        defer test_ally.free(fail_msg);
+        return try failf(fail_msg, msg, args);
+    }
+}
+
 /// Reports a failure.
 pub inline fn fail(fail_msg: []const u8) !void {
     return try failf(fail_msg, "", .{});
@@ -315,32 +341,6 @@ pub inline fn isTruef(value: bool, comptime msg: []const u8, args: anytype) !voi
 
     if (!value) {
         return try failf("Should be true", msg, args);
-    }
-}
-
-/// Asserts that the specified values are of the same type.
-///
-/// ```
-/// require.isType(bool, true);
-/// ```
-pub inline fn isType(comptime Expected: type, value: anytype) !void {
-    return try isTypef(Expected, value, "", .{});
-}
-
-/// Asserts that the specified values are of the same type.
-///
-/// ```
-/// require.isTypef(bool, true, "helpful error {s}", .{"message"});
-/// ```
-pub inline fn isTypef(comptime Expected: type, value: anytype, comptime msg: []const u8, args: anytype) !void {
-    comptime checkArgs(args);
-
-    const Value = @TypeOf(value);
-
-    if (Expected != Value) {
-        const fail_msg = try failMsg("Expected type '{s}', found '{s}'", .{ @typeName(Expected), @typeName(Value) });
-        defer test_ally.free(fail_msg);
-        return try failf(fail_msg, msg, args);
     }
 }
 
