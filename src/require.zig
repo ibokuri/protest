@@ -10,7 +10,7 @@ const test_ally = std.testing.allocator;
 /// require.equalError(error.Foo, error.Foo);
 /// ```
 pub inline fn equalError(expected: anyerror, value: anyerror) !void {
-    return try equalErrorf(expected, value, "", .{});
+    try equalErrorf(expected, value, "", .{});
 }
 
 /// Asserts that the provided value is an error and that it is equal to the
@@ -27,7 +27,8 @@ pub inline fn equalErrorf(expected: anyerror, value: anyerror, comptime msg: []c
     if (info != .ErrorSet) {
         const fail_msg = try failMsg("Expected error, found '{}'", .{value});
         defer test_ally.free(fail_msg);
-        return try failf(fail_msg, msg, args);
+
+        try failf(fail_msg, msg, args);
     }
 
     if (value != expected) {
@@ -37,7 +38,7 @@ pub inline fn equalErrorf(expected: anyerror, value: anyerror, comptime msg: []c
             \\actual:   {}
         , .{ expected, value });
         defer test_ally.free(fail_msg);
-        return try failf(fail_msg, msg, args);
+        try failf(fail_msg, msg, args);
     }
 }
 
@@ -47,7 +48,7 @@ pub inline fn equalErrorf(expected: anyerror, value: anyerror, comptime msg: []c
 /// require.equalType(bool, true);
 /// ```
 pub inline fn equalType(comptime Expected: type, value: anytype) !void {
-    return try equalTypef(Expected, value, "", .{});
+    try equalTypef(Expected, value, "", .{});
 }
 
 /// Asserts that the specified value is of the specified type.
@@ -63,13 +64,14 @@ pub inline fn equalTypef(comptime Expected: type, value: anytype, comptime msg: 
     if (Expected != Value) {
         const fail_msg = try failMsg("Expected type '{s}', found '{s}'", .{ @typeName(Expected), @typeName(Value) });
         defer test_ally.free(fail_msg);
-        return try failf(fail_msg, msg, args);
+
+        try failf(fail_msg, msg, args);
     }
 }
 
 /// Reports a failure.
 pub inline fn fail(fail_msg: []const u8) !void {
-    return try failf(fail_msg, "", .{});
+    try failf(fail_msg, "", .{});
 }
 
 /// Reports a failure.
@@ -123,7 +125,7 @@ pub inline fn failf(fail_msg: []const u8, comptime msg: []const u8, args: anytyp
 /// require.isError(error.Foobar);
 /// ```
 pub inline fn isError(value: anytype) !void {
-    return try isErrorf(value, "", .{});
+    try isErrorf(value, "", .{});
 }
 
 /// Asserts that a value is an error.
@@ -137,7 +139,8 @@ pub inline fn isErrorf(value: anytype, comptime msg: []const u8, args: anytype) 
     if (@typeInfo(@TypeOf(value)) != .ErrorSet) {
         const fail_msg = try failMsg("Expected error, found '{any}'", .{value});
         defer test_ally.free(fail_msg);
-        return try failf(fail_msg, msg, args);
+
+        try failf(fail_msg, msg, args);
     }
 }
 
@@ -147,7 +150,7 @@ pub inline fn isErrorf(value: anytype, comptime msg: []const u8, args: anytype) 
 /// require.isFalse(false);
 /// ```
 pub inline fn isFalse(value: bool) !void {
-    return try isFalsef(value, "", .{});
+    try isFalsef(value, "", .{});
 }
 
 /// Asserts that the specified value is false.
@@ -159,7 +162,7 @@ pub inline fn isFalsef(value: bool, comptime msg: []const u8, args: anytype) !vo
     comptime checkArgs(args);
 
     if (value) {
-        return try failf("Should be false", msg, args);
+        try failf("Should be false", msg, args);
     }
 }
 
@@ -170,7 +173,7 @@ pub inline fn isFalsef(value: bool, comptime msg: []const u8, args: anytype) !vo
 /// require.isGreater(2.0, 1.0);
 /// ```
 pub inline fn isGreater(v1: anytype, v2: @TypeOf(v1)) !void {
-    return try isGreaterf(v1, v2, "", .{});
+    try isGreaterf(v1, v2, "", .{});
 }
 
 /// Asserts that the first value is greater than the second.
@@ -186,7 +189,8 @@ pub inline fn isGreaterf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8,
     if (v1 <= v2) {
         const fail_msg = try failMsg("'{}' is not greater than '{}'", .{ v1, v2 });
         defer test_ally.free(fail_msg);
-        return try failf(fail_msg, msg, args);
+
+        try failf(fail_msg, msg, args);
     }
 }
 
@@ -197,7 +201,7 @@ pub inline fn isGreaterf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8,
 /// require.isGreaterOrEqual(1.0, 1.0);
 /// ```
 pub inline fn isGreaterOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
-    return try isGreaterOrEqualf(v1, v2, "", .{});
+    try isGreaterOrEqualf(v1, v2, "", .{});
 }
 
 /// Asserts that the first value is greater than or equal to the second.
@@ -213,7 +217,8 @@ pub inline fn isGreaterOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []co
     if (v1 < v2) {
         const fail_msg = try failMsg("'{}' is not greater than or equal to '{}'", .{ v1, v2 });
         defer test_ally.free(fail_msg);
-        return try failf(fail_msg.items, msg, args);
+
+        try failf(fail_msg.items, msg, args);
     }
 }
 
@@ -224,7 +229,7 @@ pub inline fn isGreaterOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []co
 /// require.isLess(1.0, 2.0);
 /// ```
 pub inline fn isLess(v1: anytype, v2: @TypeOf(v1)) !void {
-    return try isLessf(v1, v2, "", .{});
+    try isLessf(v1, v2, "", .{});
 }
 
 /// Asserts that the first value is less than the second.
@@ -240,7 +245,8 @@ pub inline fn isLessf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, ar
     if (v1 >= v2) {
         const fail_msg = try failMsg("'{}' is not less than '{}'", .{ v1, v2 });
         defer test_ally.free(fail_msg);
-        return try failf(fail_msg.items, msg, args);
+
+        try failf(fail_msg.items, msg, args);
     }
 }
 
@@ -251,7 +257,7 @@ pub inline fn isLessf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, ar
 /// require.isLessOrEqual(1.0, 1.0);
 /// ```
 pub inline fn isLessOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
-    return try isLessOrEqualf(v1, v2, "", .{});
+    try isLessOrEqualf(v1, v2, "", .{});
 }
 
 /// Asserts that the first value is less than or equal to the second.
@@ -267,7 +273,8 @@ pub inline fn isLessOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const
     if (v1 > v2) {
         const fail_msg = try failMsg("'{}' is not less than or equal to '{}'", .{ v1, v2 });
         defer test_ally.free(fail_msg);
-        return try failf(fail_msg.items, msg, args);
+
+        try failf(fail_msg.items, msg, args);
     }
 }
 
@@ -278,7 +285,7 @@ pub inline fn isLessOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const
 /// require.isNegative(-1.0);
 /// ```
 pub inline fn isNegative(value: anytype) !void {
-    return try isNegativef(value, "", .{});
+    try isNegativef(value, "", .{});
 }
 
 /// Asserts that the specified value is negative.
@@ -294,7 +301,8 @@ pub inline fn isNegativef(value: anytype, comptime msg: []const u8, args: anytyp
     if (value < 0) {
         const fail_msg = try failMsg("'{}' is not negative", .{value});
         defer test_ally.free(fail_msg);
-        return try failf(fail_msg.items, msg, args);
+
+        try failf(fail_msg.items, msg, args);
     }
 }
 
@@ -305,7 +313,7 @@ pub inline fn isNegativef(value: anytype, comptime msg: []const u8, args: anytyp
 /// require.isNull(@as(?bool, null));
 /// ```
 pub inline fn isNull(value: anytype) !void {
-    return try isNullf(value, "", .{});
+    try isNullf(value, "", .{});
 }
 
 /// Asserts that the specified value is null.
@@ -329,7 +337,8 @@ pub inline fn isNullf(value: anytype, comptime msg: []const u8, args: anytype) !
         else => failMsg(fmt, .{value}),
     };
     defer test_ally.free(fail_msg);
-    return try failf(fail_msg, msg, args);
+
+    try failf(fail_msg, msg, args);
 }
 
 /// Asserts that the specified value is positive.
@@ -339,7 +348,7 @@ pub inline fn isNullf(value: anytype, comptime msg: []const u8, args: anytype) !
 /// require.isPositive(1.0);
 /// ```
 pub inline fn isPositive(value: anytype) !void {
-    return try isPositivef(value, "", .{});
+    try isPositivef(value, "", .{});
 }
 
 /// Asserts that the specified value is positive.
@@ -356,7 +365,7 @@ pub inline fn isPositivef(value: anytype, comptime msg: []const u8, args: anytyp
         const fail_msg = try failMsg("'{}' is not positive", .{value});
         defer test_ally.free(fail_msg);
 
-        return try failf(fail_msg.items, msg, args);
+        try failf(fail_msg.items, msg, args);
     }
 }
 
@@ -366,7 +375,7 @@ pub inline fn isPositivef(value: anytype, comptime msg: []const u8, args: anytyp
 /// require.isTrue(true);
 /// ```
 pub inline fn isTrue(value: bool) !void {
-    return try isTruef(value, "", .{});
+    try isTruef(value, "", .{});
 }
 
 /// Asserts that the specified value is true.
@@ -378,7 +387,7 @@ pub inline fn isTruef(value: bool, comptime msg: []const u8, args: anytype) !voi
     comptime checkArgs(args);
 
     if (!value) {
-        return try failf("Should be true", msg, args);
+        try failf("Should be true", msg, args);
     }
 }
 
@@ -388,7 +397,7 @@ pub inline fn isTruef(value: bool, comptime msg: []const u8, args: anytype) !voi
 /// require.notError(true);
 /// ```
 pub inline fn notError(value: anytype) !void {
-    return try notErrorf(value, "", .{});
+    try notErrorf(value, "", .{});
 }
 
 /// Asserts that a value is not an error.
@@ -402,7 +411,8 @@ pub inline fn notErrorf(value: anytype, comptime msg: []const u8, args: anytype)
     if (@typeInfo(@TypeOf(value)) == .ErrorSet) {
         const fail_msg = try failMsg("Expected non-error, found '{}'", .{value});
         defer test_ally.free(fail_msg);
-        return try failf(fail_msg, msg, args);
+
+        try failf(fail_msg, msg, args);
     }
 }
 
@@ -412,7 +422,7 @@ pub inline fn notErrorf(value: anytype, comptime msg: []const u8, args: anytype)
 /// require.notNull(true);
 /// ```
 pub inline fn notNull(value: anytype) !void {
-    return try notNullf(value, "", .{});
+    try notNullf(value, "", .{});
 }
 
 /// Asserts that the specified value is not null.
@@ -426,7 +436,7 @@ pub inline fn notNullf(value: anytype, comptime msg: []const u8, args: anytype) 
     const info = @typeInfo(@TypeOf(value));
 
     if (info == .Null or (info == .Optional and value == null)) {
-        return try failf("Received unexpected null value", msg, args);
+        try failf("Received unexpected null value", msg, args);
     }
 }
 
