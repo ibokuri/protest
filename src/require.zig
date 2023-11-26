@@ -18,7 +18,10 @@ pub inline fn equalf(
 
     if (!deepEqual(expected, value)) {
         const fmt = comptime fmt: {
-            if (isZigString(Expected) and isZigString(Value)) {
+            const expected_str = isString(Expected);
+            const value_str = isString(Value);
+
+            if (expected_str and value_str) {
                 break :fmt 
                 \\Not equal:
                 \\expected: "{s}"
@@ -26,7 +29,7 @@ pub inline fn equalf(
                 ;
             }
 
-            if (!isZigString(Expected) and !isZigString(Value)) {
+            if (!expected_str and !value_str) {
                 break :fmt 
                 \\Not equal:
                 \\expected: {any}
@@ -34,7 +37,7 @@ pub inline fn equalf(
                 ;
             }
 
-            if (isZigString(Expected)) {
+            if (expected_str) {
                 break :fmt 
                 \\Not equal:
                 \\expected: "{s}"
@@ -42,7 +45,7 @@ pub inline fn equalf(
                 ;
             }
 
-            if (isZigString(Value)) {
+            if (value_str) {
                 break :fmt 
                 \\Not equal:
                 \\expected: "{any}"
@@ -815,7 +818,7 @@ fn deepEqual(expected: anytype, value: anytype) bool {
     return true;
 }
 
-fn isZigString(comptime T: type) bool {
+fn isString(comptime T: type) bool {
     comptime {
         // Only pointer types can be strings, no optionals
         const info = @typeInfo(T);
