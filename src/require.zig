@@ -9,7 +9,10 @@ const test_ally = std.testing.allocator;
 /// ```
 /// require.equalError(error.Foo, error.Foo);
 /// ```
-pub inline fn equalError(expected: anyerror, value: anyerror) !void {
+pub inline fn equalError(
+    expected: anyerror,
+    value: anyerror,
+) !void {
     try equalErrorf(expected, value, "", .{});
 }
 
@@ -19,7 +22,12 @@ pub inline fn equalError(expected: anyerror, value: anyerror) !void {
 /// ```
 /// require.equalErrorf(error.Foo, error.Foo, "helpful error {s}", .{"message"});
 /// ```
-pub inline fn equalErrorf(expected: anyerror, value: anyerror, comptime msg: []const u8, args: anytype) !void {
+pub inline fn equalErrorf(
+    expected: anyerror,
+    value: anyerror,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
     comptime checkArgs(args);
 
     const info = @typeInfo(@TypeOf(value));
@@ -47,7 +55,10 @@ pub inline fn equalErrorf(expected: anyerror, value: anyerror, comptime msg: []c
 /// ```
 /// require.equalType(bool, true);
 /// ```
-pub inline fn equalType(comptime Expected: type, value: anytype) !void {
+pub inline fn equalType(
+    comptime Expected: type,
+    value: anytype,
+) !void {
     try equalTypef(Expected, value, "", .{});
 }
 
@@ -56,13 +67,21 @@ pub inline fn equalType(comptime Expected: type, value: anytype) !void {
 /// ```
 /// require.equalTypef(bool, true, "helpful error {s}", .{"message"});
 /// ```
-pub inline fn equalTypef(comptime Expected: type, value: anytype, comptime msg: []const u8, args: anytype) !void {
+pub inline fn equalTypef(
+    comptime Expected: type,
+    value: anytype,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
     comptime checkArgs(args);
 
     const Value = @TypeOf(value);
 
     if (Expected != Value) {
-        const fail_msg = try failMsg("Expected type '{s}', found '{s}'", .{ @typeName(Expected), @typeName(Value) });
+        const fail_msg = try failMsg(
+            "Expected type '{s}', found '{s}'",
+            .{ @typeName(Expected), @typeName(Value) },
+        );
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg, msg, args);
@@ -75,12 +94,19 @@ pub inline fn fail(fail_msg: []const u8) !void {
 }
 
 /// Reports a failure.
-pub inline fn failf(fail_msg: []const u8, comptime msg: []const u8, args: anytype) !void {
+pub inline fn failf(
+    fail_msg: []const u8,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
     comptime checkArgs(args);
 
     var content = content: {
         const cap: usize = if (msg.len == 0) 2 else 3;
-        break :content try std.ArrayList(LabelContent).initCapacity(test_ally, cap);
+        break :content try std.ArrayList(LabelContent).initCapacity(
+            test_ally,
+            cap,
+        );
     };
     defer content.deinit();
 
@@ -90,7 +116,10 @@ pub inline fn failf(fail_msg: []const u8, comptime msg: []const u8, args: anytyp
     });
 
     var formatted_msg = formatted_msg: {
-        var formatted_msg = try std.ArrayList(u8).initCapacity(test_ally, msg.len);
+        var formatted_msg = try std.ArrayList(u8).initCapacity(
+            test_ally,
+            msg.len,
+        );
         errdefer formatted_msg.deinit();
 
         if (msg.len > 0) {
@@ -133,7 +162,11 @@ pub inline fn isError(value: anytype) !void {
 /// ```
 /// require.isErrorf(error.Foobar, "helpful error {s}", .{"message"});
 /// ```
-pub inline fn isErrorf(value: anytype, comptime msg: []const u8, args: anytype) !void {
+pub inline fn isErrorf(
+    value: anytype,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
     comptime checkArgs(args);
 
     if (@typeInfo(@TypeOf(value)) != .ErrorSet) {
@@ -158,7 +191,11 @@ pub inline fn isFalse(value: bool) !void {
 /// ```
 /// require.isFalsef(false, "helpful error {s}", .{"message"});
 /// ```
-pub inline fn isFalsef(value: bool, comptime msg: []const u8, args: anytype) !void {
+pub inline fn isFalsef(
+    value: bool,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
     comptime checkArgs(args);
 
     if (value) {
@@ -182,12 +219,20 @@ pub inline fn isGreater(v1: anytype, v2: @TypeOf(v1)) !void {
 /// require.isGreaterf(2, 1, "helpful error {s}", .{"message"});
 /// require.isGreaterf(2.0, 1.0, "helpful error {s}", .{"message"});
 /// ```
-pub inline fn isGreaterf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, args: anytype) !void {
+pub inline fn isGreaterf(
+    v1: anytype,
+    v2: @TypeOf(v1),
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
     comptime checkArgs(args);
     comptime checkComparable(@TypeOf(v1));
 
     if (v1 <= v2) {
-        const fail_msg = try failMsg("'{}' is not greater than '{}'", .{ v1, v2 });
+        const fail_msg = try failMsg(
+            "'{}' is not greater than '{}'",
+            .{ v1, v2 },
+        );
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg, msg, args);
@@ -210,12 +255,20 @@ pub inline fn isGreaterOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
 /// require.isGreaterOrEqualf(1, 1, "helpful error {s}", .{"message"});
 /// require.isGreaterOrEqualf(1.0, 1.0, "helpful error {s}", .{"message"});
 /// ```
-pub inline fn isGreaterOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, args: anytype) !void {
+pub inline fn isGreaterOrEqualf(
+    v1: anytype,
+    v2: @TypeOf(v1),
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
     comptime checkArgs(args);
     comptime checkComparable(@TypeOf(v1));
 
     if (v1 < v2) {
-        const fail_msg = try failMsg("'{}' is not greater than or equal to '{}'", .{ v1, v2 });
+        const fail_msg = try failMsg(
+            "'{}' is not greater than or equal to '{}'",
+            .{ v1, v2 },
+        );
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg.items, msg, args);
@@ -238,12 +291,20 @@ pub inline fn isLess(v1: anytype, v2: @TypeOf(v1)) !void {
 /// require.isLessf(1, 2, "helpful error {s}", .{"message"});
 /// require.isLessf(1.0, 2.0, "helpful error {s}", .{"message"});
 /// ```
-pub inline fn isLessf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, args: anytype) !void {
+pub inline fn isLessf(
+    v1: anytype,
+    v2: @TypeOf(v1),
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
     comptime checkArgs(args);
     comptime checkComparable(@TypeOf(v1));
 
     if (v1 >= v2) {
-        const fail_msg = try failMsg("'{}' is not less than '{}'", .{ v1, v2 });
+        const fail_msg = try failMsg(
+            "'{}' is not less than '{}'",
+            .{ v1, v2 },
+        );
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg.items, msg, args);
@@ -266,12 +327,20 @@ pub inline fn isLessOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
 /// require.isLessOrEqualf(1, 1, "helpful error {s}", .{"message"});
 /// require.isLessOrEqualf(1.0, 1.0, "helpful error {s}", .{"message"});
 /// ```
-pub inline fn isLessOrEqualf(v1: anytype, v2: @TypeOf(v1), comptime msg: []const u8, args: anytype) !void {
+pub inline fn isLessOrEqualf(
+    v1: anytype,
+    v2: @TypeOf(v1),
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
     comptime checkArgs(args);
     comptime checkComparable(@TypeOf(v1));
 
     if (v1 > v2) {
-        const fail_msg = try failMsg("'{}' is not less than or equal to '{}'", .{ v1, v2 });
+        const fail_msg = try failMsg(
+            "'{}' is not less than or equal to '{}'",
+            .{ v1, v2 },
+        );
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg.items, msg, args);
@@ -294,7 +363,11 @@ pub inline fn isNegative(value: anytype) !void {
 /// require.isNegativef(-1, "helpful error {s}", .{"message"});
 /// require.isNegativef(-1.0, "helpful error {s}", .{"message"});
 /// ```
-pub inline fn isNegativef(value: anytype, comptime msg: []const u8, args: anytype) !void {
+pub inline fn isNegativef(
+    value: anytype,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
     comptime checkArgs(args);
     comptime checkComparable(@TypeOf(value));
 
@@ -322,7 +395,11 @@ pub inline fn isNull(value: anytype) !void {
 /// require.isNullf(null, "helpful error {s}", .{"message"});
 /// require.isNullf(@as(?bool, null), "helpful error {s}", .{"message"});
 /// ```
-pub inline fn isNullf(value: anytype, comptime msg: []const u8, args: anytype) !void {
+pub inline fn isNullf(
+    value: anytype,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
     comptime checkArgs(args);
 
     const info = @typeInfo(@TypeOf(value));
@@ -357,7 +434,11 @@ pub inline fn isPositive(value: anytype) !void {
 /// require.isPositivef(1, "helpful error {s}", .{"message"});
 /// require.isPositivef(1.0, "helpful error {s}", .{"message"});
 /// ```
-pub inline fn isPositivef(value: anytype, comptime msg: []const u8, args: anytype) !void {
+pub inline fn isPositivef(
+    value: anytype,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
     comptime checkArgs(args);
     comptime checkComparable(@TypeOf(value));
 
@@ -383,7 +464,11 @@ pub inline fn isTrue(value: bool) !void {
 /// ```
 /// require.isTruef(true, "helpful error {s}", .{"message"});
 /// ```
-pub inline fn isTruef(value: bool, comptime msg: []const u8, args: anytype) !void {
+pub inline fn isTruef(
+    value: bool,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
     comptime checkArgs(args);
 
     if (!value) {
@@ -405,11 +490,18 @@ pub inline fn notError(value: anytype) !void {
 /// ```
 /// require.notErrorf(true, "helpful error {s}", .{"message"});
 /// ```
-pub inline fn notErrorf(value: anytype, comptime msg: []const u8, args: anytype) !void {
+pub inline fn notErrorf(
+    value: anytype,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
     comptime checkArgs(args);
 
     if (@typeInfo(@TypeOf(value)) == .ErrorSet) {
-        const fail_msg = try failMsg("Expected non-error, found '{}'", .{value});
+        const fail_msg = try failMsg(
+            "Expected non-error, found '{}'",
+            .{value},
+        );
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg, msg, args);
@@ -430,7 +522,11 @@ pub inline fn notNull(value: anytype) !void {
 /// ```
 /// require.notNullf(true, "helpful error {s}", .{"message"});
 /// ```
-pub inline fn notNullf(value: anytype, comptime msg: []const u8, args: anytype) !void {
+pub inline fn notNullf(
+    value: anytype,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
     comptime checkArgs(args);
 
     const info = @typeInfo(@TypeOf(value));
@@ -470,7 +566,10 @@ fn checkComparable(comptime T: type) void {
         const is_int = info == .Int or info == .ComptimeInt;
         const is_float = info == .Float or info == .ComptimeFloat;
         if (!is_int and !is_float) {
-            const err = std.fmt.comptimePrint("expected integer or float, found '{s}'", .{@typeName(T)});
+            const err = std.fmt.comptimePrint(
+                "expected integer or float, found '{s}'",
+                .{@typeName(T)},
+            );
             @compileError(err);
         }
     }
@@ -529,7 +628,11 @@ fn indentMessageLines(msg: []const u8, longest_label_len: usize) ![]const u8 {
     {
         var i: usize = 0;
 
-        while (try br_r.readUntilDelimiterOrEofAlloc(test_ally, '\n', 10_000)) |buf| : (i += 1) {
+        while (try br_r.readUntilDelimiterOrEofAlloc(
+            test_ally,
+            '\n',
+            10_000,
+        )) |buf| : (i += 1) {
             defer test_ally.free(buf);
 
             if (i != 0) {
