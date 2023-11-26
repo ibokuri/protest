@@ -3,6 +3,60 @@ const std = @import("std");
 const print = std.debug.print;
 const test_ally = std.testing.allocator;
 
+pub inline fn equal(expected: anytype, value: anytype) !void {
+    try equalf(expected, value, "", .{});
+}
+
+pub inline fn equalf(
+    expected: anytype,
+    value: anytype,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
+    const Expected = @TypeOf(expected);
+    const Value = @TypeOf(value);
+
+    if (!deepEqual(expected, value)) {
+        const fmt = comptime fmt: {
+            if (isZigString(Expected) and isZigString(Value)) {
+                break :fmt 
+                \\Not equal:
+                \\expected: "{s}"
+                \\actual:   "{s}"
+                ;
+            }
+
+            if (!isZigString(Expected) and !isZigString(Value)) {
+                break :fmt 
+                \\Not equal:
+                \\expected: {any}
+                \\actual:   {any}
+                ;
+            }
+
+            if (isZigString(Expected)) {
+                break :fmt 
+                \\Not equal:
+                \\expected: "{s}"
+                \\actual:   {any}
+                ;
+            }
+
+            if (isZigString(Value)) {
+                break :fmt 
+                \\Not equal:
+                \\expected: "{any}"
+                \\actual:   {s}
+                ;
+            }
+        };
+        const fail_msg = try failMsg(fmt, .{ expected, value });
+        defer test_ally.free(fail_msg);
+
+        try failf(fail_msg, msg, args);
+    }
+}
+
 /// Asserts that the provided value is an error and that it is equal to the
 /// provided error.
 ///
@@ -43,7 +97,7 @@ pub inline fn equalErrorf(
         const fail_msg = try failMsg(
             \\Error not equal:
             \\expected: {}
-            \\actual:   {}
+            \\value:   {}
         , .{ expected, value });
         defer test_ally.free(fail_msg);
         try failf(fail_msg, msg, args);
@@ -646,4 +700,145 @@ fn indentMessageLines(msg: []const u8, longest_label_len: usize) ![]const u8 {
     }
 
     return output.toOwnedSlice();
+}
+
+fn deepEqual(expected: anytype, value: anytype) bool {
+    const Expected = @TypeOf(expected);
+    const expected_info = @typeInfo(Expected);
+    const Value = @TypeOf(value);
+
+    if (Value != Expected) {
+        return false;
+    }
+
+    switch (expected_info) {
+        // Invalid values.
+        .AnyFrame,
+        .Frame,
+        .NoReturn,
+        .Opaque,
+        => {
+            const err = std.fmt.comptimePrint(
+                "type is not comparable: {s}",
+                .{@typeName(Expected)},
+            );
+            @compileError(err);
+        },
+
+        // Values that are always equal.
+        .Null,
+        .Undefined,
+        .Void,
+        => return true,
+
+        // Values comparable with == and !=.
+        .Bool,
+        .ComptimeFloat,
+        .ComptimeInt,
+        .Enum,
+        .EnumLiteral,
+        .ErrorSet,
+        .Float,
+        .Fn,
+        .Int,
+        .Type,
+        => if (value != expected) return false,
+
+        .Array,
+        .Vector,
+        => for (expected, value) |e, v| {
+            if (!deepEqual(e, v)) return false;
+        },
+
+        .ErrorUnion => {
+            if (expected) |e_payload| {
+                if (value) |v_payload| {
+                    return deepEqual(e_payload, v_payload);
+                }
+
+                return false;
+            } else |e_err| {
+                if (value) |_| {
+                    return false;
+                } else |v_err| {
+                    return deepEqual(e_err, v_err);
+                }
+            }
+        },
+        .Optional => {
+            if (expected) |e_payload| {
+                if (value) |v_payload| {
+                    return deepEqual(e_payload, v_payload);
+                }
+
+                return false;
+            }
+
+            if (value) |_| return false;
+        },
+        .Pointer => |info| switch (info.size) {
+            .Slice => {
+                if (expected.len != value.len) return false;
+                for (expected, value) |e, v| {
+                    if (!deepEqual(e, v)) return false;
+                }
+            },
+            .One => switch (@typeInfo(info.child)) {
+                .Fn, .Opaque => if (value != expected) return false,
+                else => return deepEqual(expected.*, value.*),
+            },
+            .C, .Many => if (value != expected) return false,
+        },
+        .Struct => |info| inline for (info.fields) |field| {
+            const e = @field(expected, field.name);
+            const v = @field(value, field.name);
+            return deepEqual(e, v);
+        },
+        .Union => |info| {
+            if (info.tag_type == null) {
+                const err = std.fmt.comptimePrint(
+                    "type is not comparable: {s}",
+                    .{@typeName(Expected)},
+                );
+                @compileError(err);
+            }
+
+            switch (expected) {
+                inline else => |e, tag| {
+                    const v = @field(value, @tagName(tag));
+                    return deepEqual(e, v);
+                },
+            }
+        },
+    }
+
+    return true;
+}
+
+fn isZigString(comptime T: type) bool {
+    comptime {
+        // Only pointer types can be strings, no optionals
+        const info = @typeInfo(T);
+        if (info != .Pointer) return false;
+        const ptr = &info.Pointer;
+
+        // Check for CV qualifiers that would prevent coerction to []const u8
+        if (ptr.is_volatile or ptr.is_allowzero) return false;
+
+        // If it's already a slice, simple check.
+        if (ptr.size == .Slice) {
+            return ptr.child == u8;
+        }
+
+        // Otherwise check if it's an array type that coerces to slice.
+        if (ptr.size == .One) {
+            const child = @typeInfo(ptr.child);
+            if (child == .Array) {
+                const arr = &child.Array;
+                return arr.child == u8;
+            }
+        }
+
+        return false;
+    }
 }
