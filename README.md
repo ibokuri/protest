@@ -28,3 +28,71 @@ test {
     try require.equal("Foobar", value.?);
 }
 ```
+
+## Installation
+
+1. Declare Protest as a dependency in `build.zig.zon`:
+
+    ```diff
+    .{
+        .name = "my-project",
+        .version = "1.0.0",
+        .paths = .{""},
+        .dependencies = .{
+    +       .protest = .{
+    +           .url = "https://github.com/ibokuri/protest/archive/<COMMIT>.tar.gz",
+    +       },
+        },
+    }
+    ```
+
+2. Add Protest as a module in `build.zig`:
+
+    ```diff
+    const std = @import("std");
+
+    pub fn build(b: *std.Build) void {
+        const target = b.standardTargetOptions(.{});
+        const optimize = b.standardOptimizeOption(.{});
+
+    +   const opts = .{ .target = target, .optimize = optimize };
+    +   const protest_mod = b.dependency("protest", opts).module("protest");
+
+        const tests = b.addTest(.{
+            .root_source_file = .{ .path = "src/main.zig" },
+            .target = target,
+            .optimize = optimize,
+        });
+
+    +   tests.addModule("protest", protest_mod);
+
+        ...
+    }
+    ```
+
+3. Obtain Protest's package hash:
+
+    ```
+    $ zig build --fetch
+    my-project/build.zig.zon:7:20: error: url field is missing corresponding hash field
+            .url = "https://github.com/ibokuri/protest/archive/<COMMIT>.tar.gz",
+                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    note: expected .hash = "<HASH>",
+    ```
+
+4. Update `build.zig.zon` with Protest's package hash:
+
+    ```diff
+    .{
+        .name = "my-project",
+        .version = "1.0.0",
+        .paths = .{""},
+        .dependencies = .{
+            .protest = .{
+                .url = "https://github.com/ibokuri/protest/archive/<COMMIT>.tar.gz",
+    +           .hash = "<HASH>",
+            },
+        },
+    }
+    ```
+
