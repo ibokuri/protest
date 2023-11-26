@@ -3,10 +3,20 @@ const std = @import("std");
 const print = std.debug.print;
 const test_ally = std.testing.allocator;
 
+/// Asserts that two values are equal.
+///
+/// ```
+/// require.equal(123, 123);
+/// ```
 pub inline fn equal(expected: anytype, value: anytype) !void {
     try equalf(expected, value, "", .{});
 }
 
+/// Asserts that two values are equal.
+///
+/// ```
+/// require.equalf(123, 123, "helpful error {s}", .{"message"});
+/// ```
 pub inline fn equalf(
     expected: anytype,
     value: anytype,
