@@ -9,7 +9,7 @@ const test_ally = std.testing.allocator;
 /// ```
 /// require.equalError(error.Foo, error.Foo);
 /// ```
-pub inline fn equalError(expected: anyerror, value: anytype) !void {
+pub inline fn equalError(expected: anyerror, value: anyerror) !void {
     return try equalErrorf(expected, value, "", .{});
 }
 
@@ -19,7 +19,7 @@ pub inline fn equalError(expected: anyerror, value: anytype) !void {
 /// ```
 /// require.equalErrorf(error.Foo, error.Foo, "helpful error {s}", .{"message"});
 /// ```
-pub inline fn equalErrorf(expected: anyerror, value: anytype, comptime msg: []const u8, args: anytype) !void {
+pub inline fn equalErrorf(expected: anyerror, value: anyerror, comptime msg: []const u8, args: anytype) !void {
     comptime checkArgs(args);
 
     const info = @typeInfo(@TypeOf(value));
