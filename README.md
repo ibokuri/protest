@@ -1,5 +1,10 @@
 # Protest
 
+<a href="https://github.com/ibokuri/protest/releases/latest"><img alt="Version" src="https://img.shields.io/github/v/release/ibokuri/protest?include_prereleases&label=version"></a>
+<a href="https://github.com/ibokuri/protest/actions/workflows/test.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/ibokuri/protest/test.yml?branch=main" /></a>
+<a href="https://ziglang.org/download"><img alt="Zig" src="https://img.shields.io/badge/zig-master-fd9930.svg"></a>
+<a href="https://github.com/ibokuri/protest/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue"></a>
+
 Protest is a set of modules for testing and validating Zig code.
 
 ## `require` Module
