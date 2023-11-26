@@ -575,6 +575,45 @@ pub inline fn notErrorf(
     }
 }
 
+/// Asserts that two values are not equal.
+///
+/// ```
+/// require.notEqual(123, 456);
+/// ```
+pub inline fn notEqual(expected: anytype, value: anytype) !void {
+    try notEqualf(expected, value, "", .{});
+}
+
+/// Asserts that two values are not equal.
+///
+/// ```
+/// require.notEqualf(123, 456, "helpful error {s}", .{"message"});
+/// ```
+pub inline fn notEqualf(
+    expected: anytype,
+    value: anytype,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
+    const Expected = @TypeOf(expected);
+    _ = Expected;
+    const Value = @TypeOf(value);
+
+    if (deepEqual(expected, value)) {
+        const fmt = comptime fmt: {
+            if (isString(Value)) {
+                break :fmt "Should not be: {s}";
+            }
+
+            break :fmt "Should not be: {any}";
+        };
+        const fail_msg = try failMsg(fmt, .{value});
+        defer test_ally.free(fail_msg);
+
+        try failf(fail_msg, msg, args);
+    }
+}
+
 /// Asserts that the specified value is not null.
 ///
 /// ```
