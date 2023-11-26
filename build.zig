@@ -52,17 +52,9 @@ fn tests(
         }
     }
 
-    const test_assert_step = b.step("test-assert", "Run assert tests");
     const test_require_step = b.step("test-require", "Run require tests");
 
     // Configure tests.
-    const t_assert = b.addTest(.{
-        .name = "assert test",
-        .root_source_file = .{ .path = "src/assert.zig" },
-        .target = target,
-        .optimize = mode,
-        .main_pkg_path = .{ .path = "src/" },
-    });
     const t_require = b.addTest(.{
         .name = "require test",
         .root_source_file = .{ .path = "src/require.zig" },
@@ -72,11 +64,9 @@ fn tests(
     });
 
     // Configure module-level test steps.
-    test_assert_step.dependOn(&b.addRunArtifact(t_assert).step);
     test_require_step.dependOn(&b.addRunArtifact(t_require).step);
 
     // Configure top-level test step.
-    test_step.dependOn(test_assert_step);
     test_step.dependOn(test_require_step);
 }
 
