@@ -28,10 +28,22 @@ test {
     // Require that `value` is not null.
     try require.notNull(value);
 
-    // Since `value` cannot be null, we can safely unwrap it
-    // and validate its payload.
+    // Since `value` cannot be null, safely unwrap it and check its payload.
     try require.equal("Foobar", value.?);
 }
+```
+
+```
+run test: error: 'test_0' failed:
+
+        Error:          Not equal:
+                        expected: "Foobar"
+                        actual:   "Barfoo"
+        Error Trace:
+
+/tmp/example/src/main.zig:14:5: 0x1048a5027 in test_0 (test)
+    try require.equal("Foobar", value.?);
+    ^
 ```
 
 ## Installation
