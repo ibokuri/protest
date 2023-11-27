@@ -7,7 +7,7 @@
 
 Protest is a set of modules for testing and validating Zig code.
 
-## `require` Module
+## [`require`](https://ibokuri.github.io/protest/#A;protest:require) Module
 
 The `require` module some provides helpful functions to help you write tests.
 
