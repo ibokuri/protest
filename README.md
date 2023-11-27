@@ -5,7 +5,8 @@
 <a href="https://ziglang.org/download"><img alt="Zig" src="https://img.shields.io/badge/zig-master-fd9930.svg"></a>
 <a href="https://github.com/ibokuri/protest/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue"></a>
 
-Protest is a set of modules for testing and validating Zig code.
+Protest is a set of modules for testing and validating Zig code. A
+[testify](https://github.com/stretchr/testify) for Zig, if you will, cause testify's awesome!
 
 ## [`require`](https://ibokuri.github.io/protest/#A;protest:require) Module
 
