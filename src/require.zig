@@ -58,8 +58,8 @@ pub inline fn equalf(
             if (value_str) {
                 break :fmt 
                 \\Not equal:
-                \\expected: "{any}"
-                \\actual:   {s}
+                \\expected: {any}
+                \\actual:   "{s}"
                 ;
             }
         };
