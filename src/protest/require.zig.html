@@ -117,8 +117,8 @@
 <span class="line" id="L3"><span class="tok-kw">const</span> print = std.debug.print;</span>
 <span class="line" id="L4"><span class="tok-kw">const</span> test_ally = std.testing.allocator;</span>
 <span class="line" id="L5"></span>
-<span class="line" id="L6"><span class="tok-comment">/// Asserts that the specified string or list (array, slice, tuple) contains</span></span>
-<span class="line" id="L7"><span class="tok-comment">/// the specified substring or element.</span></span>
+<span class="line" id="L6"><span class="tok-comment">/// Asserts that the specified string, array, slice, or tuple contains the</span></span>
+<span class="line" id="L7"><span class="tok-comment">/// specified substring or element.</span></span>
 <span class="line" id="L8"><span class="tok-comment">///</span></span>
 <span class="line" id="L9"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L10"><span class="tok-comment">/// try require.contains(&quot;Hello World&quot;, &quot;World&quot;);</span></span>
@@ -129,8 +129,8 @@
 <span class="line" id="L15">    <span class="tok-kw">try</span> containsf(haystack, needle, <span class="tok-str">&quot;&quot;</span>, .{});</span>
 <span class="line" id="L16">}</span>
 <span class="line" id="L17"></span>
-<span class="line" id="L18"><span class="tok-comment">/// Asserts that the specified string, list(array, slice...) or map</span></span>
-<span class="line" id="L19"><span class="tok-comment">/// contains the specified substring or element.</span></span>
+<span class="line" id="L18"><span class="tok-comment">/// Asserts that the specified string, array, slice, or tuple contains the</span></span>
+<span class="line" id="L19"><span class="tok-comment">/// specified substring or element.</span></span>
 <span class="line" id="L20"><span class="tok-comment">///</span></span>
 <span class="line" id="L21"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L22"><span class="tok-comment">/// try require.containsf(&quot;Hello World&quot;, &quot;World&quot;, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
