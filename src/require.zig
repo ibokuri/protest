@@ -3,8 +3,8 @@ const std = @import("std");
 const print = std.debug.print;
 const test_ally = std.testing.allocator;
 
-/// Asserts that the specified string or list (array, slice, tuple) contains
-/// the specified substring or element.
+/// Asserts that the specified string, array, slice, or tuple contains the
+/// specified substring or element.
 ///
 /// ```
 /// try require.contains("Hello World", "World");
@@ -15,8 +15,8 @@ pub inline fn contains(haystack: anytype, needle: anytype) !void {
     try containsf(haystack, needle, "", .{});
 }
 
-/// Asserts that the specified string, list(array, slice...) or map
-/// contains the specified substring or element.
+/// Asserts that the specified string, array, slice, or tuple contains the
+/// specified substring or element.
 ///
 /// ```
 /// try require.containsf("Hello World", "World", "helpful error {s}", .{"message"});
