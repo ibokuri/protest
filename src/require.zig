@@ -60,118 +60,6 @@ pub inline fn containsf(
     }
 }
 
-fn containsElement(haystack: anytype, needle: anytype) bool {
-    const Haystack = @TypeOf(haystack);
-    const Needle = @TypeOf(needle);
-    const haystack_info = @typeInfo(Haystack);
-    const haystack_is_str = comptime isString(Haystack);
-    const needle_is_str = comptime isString(Needle);
-
-    // Check the type of `haystack`.
-    //
-    // `haystack` must be an array, tuple, slice, or string.
-    const haystack_is_valid = comptime switch (haystack_info) {
-        .Pointer => |info| info.size == .Slice or haystack_is_str,
-        .Array => true,
-        .Struct => |info| info.is_tuple,
-        else => false,
-    };
-
-    if (!haystack_is_valid) {
-        const err = std.fmt.comptimePrint(
-            "type is not searchable: {s}",
-            .{@typeName(Haystack)},
-        );
-        @compileError(err);
-    }
-
-    // Check the type of `needle`.
-    //
-    // If `haystack` is a string, `needle` can be a string, comptime_int, or u8.
-    //
-    // If `haystack` is an array or a non-string slice, `needle` must be the
-    // child type of `haystack`.
-    //
-    // If `haystack` is a tuple, `needle` must be one of the child types of
-    // `haystack`.
-    const needle_is_valid = comptime switch (haystack_info) {
-        .Pointer => is_valid: {
-            if (haystack_is_str) {
-                if (needle_is_str or Needle == comptime_int or Needle == u8) {
-                    break :is_valid true;
-                }
-            } else if (Needle == std.meta.Child(Haystack)) {
-                break :is_valid true;
-            }
-
-            break :is_valid false;
-        },
-        .Array => Needle == std.meta.Child(Haystack),
-        .Struct => is_valid: {
-            for (std.meta.fields(Haystack)) |f| {
-                if (Needle == f.type) {
-                    break :is_valid true;
-                }
-            }
-
-            break :is_valid false;
-        },
-        // UNREACHABLE: We've already checked that `haystack` is either an
-        // array, pointer, or tuple.
-        else => unreachable,
-    };
-
-    if (!needle_is_valid) {
-        const err = std.fmt.comptimePrint(
-            "invalid 'needle' type: {s}",
-            .{@typeName(Needle)},
-        );
-        @compileError(err);
-    }
-
-    // Search for `needle` in `haystack`.
-    switch (haystack_info) {
-        .Pointer => |h_info| {
-            if (haystack_is_str) {
-                if (needle_is_str) {
-                    if (std.mem.indexOfPos(u8, haystack, 0, needle)) |_| {
-                        return true;
-                    }
-                } else if (std.mem.indexOfPos(u8, haystack, 0, &.{needle})) |_| {
-                    return true;
-                }
-
-                return false;
-            } else {
-                comptime std.debug.assert(h_info.size == .Slice);
-
-                for (haystack) |elem| {
-                    if (deepEqual(needle, elem)) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        },
-        .Array => inline for (haystack) |elem| {
-            if (deepEqual(needle, elem)) {
-                return true;
-            }
-        },
-        .Struct => inline for (haystack) |elem| {
-            if (deepEqual(needle, elem)) {
-                return true;
-            }
-        },
-        // UNREACHABLE: We've already checked that `haystack` is either an
-        // array, pointer, or tuple.
-        else => unreachable,
-    }
-
-    return false;
-}
-
 /// Asserts that two values are equal.
 ///
 /// ```
@@ -1062,4 +950,116 @@ fn isString(comptime T: type) bool {
 
         return false;
     }
+}
+
+fn containsElement(haystack: anytype, needle: anytype) bool {
+    const Haystack = @TypeOf(haystack);
+    const Needle = @TypeOf(needle);
+    const haystack_info = @typeInfo(Haystack);
+    const haystack_is_str = comptime isString(Haystack);
+    const needle_is_str = comptime isString(Needle);
+
+    // Check the type of `haystack`.
+    //
+    // `haystack` must be an array, tuple, slice, or string.
+    const haystack_is_valid = comptime switch (haystack_info) {
+        .Pointer => |info| info.size == .Slice or haystack_is_str,
+        .Array => true,
+        .Struct => |info| info.is_tuple,
+        else => false,
+    };
+
+    if (!haystack_is_valid) {
+        const err = std.fmt.comptimePrint(
+            "type is not searchable: {s}",
+            .{@typeName(Haystack)},
+        );
+        @compileError(err);
+    }
+
+    // Check the type of `needle`.
+    //
+    // If `haystack` is a string, `needle` can be a string, comptime_int, or u8.
+    //
+    // If `haystack` is an array or a non-string slice, `needle` must be the
+    // child type of `haystack`.
+    //
+    // If `haystack` is a tuple, `needle` must be one of the child types of
+    // `haystack`.
+    const needle_is_valid = comptime switch (haystack_info) {
+        .Pointer => is_valid: {
+            if (haystack_is_str) {
+                if (needle_is_str or Needle == comptime_int or Needle == u8) {
+                    break :is_valid true;
+                }
+            } else if (Needle == std.meta.Child(Haystack)) {
+                break :is_valid true;
+            }
+
+            break :is_valid false;
+        },
+        .Array => Needle == std.meta.Child(Haystack),
+        .Struct => is_valid: {
+            for (std.meta.fields(Haystack)) |f| {
+                if (Needle == f.type) {
+                    break :is_valid true;
+                }
+            }
+
+            break :is_valid false;
+        },
+        // UNREACHABLE: We've already checked that `haystack` is either an
+        // array, pointer, or tuple.
+        else => unreachable,
+    };
+
+    if (!needle_is_valid) {
+        const err = std.fmt.comptimePrint(
+            "invalid 'needle' type: {s}",
+            .{@typeName(Needle)},
+        );
+        @compileError(err);
+    }
+
+    // Search for `needle` in `haystack`.
+    switch (haystack_info) {
+        .Pointer => |h_info| {
+            if (haystack_is_str) {
+                if (needle_is_str) {
+                    if (std.mem.indexOfPos(u8, haystack, 0, needle)) |_| {
+                        return true;
+                    }
+                } else if (std.mem.indexOfPos(u8, haystack, 0, &.{needle})) |_| {
+                    return true;
+                }
+
+                return false;
+            } else {
+                comptime std.debug.assert(h_info.size == .Slice);
+
+                for (haystack) |elem| {
+                    if (deepEqual(needle, elem)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        },
+        .Array => inline for (haystack) |elem| {
+            if (deepEqual(needle, elem)) {
+                return true;
+            }
+        },
+        .Struct => inline for (haystack) |elem| {
+            if (deepEqual(needle, elem)) {
+                return true;
+            }
+        },
+        // UNREACHABLE: We've already checked that `haystack` is either an
+        // array, pointer, or tuple.
+        else => unreachable,
+    }
+
+    return false;
 }
