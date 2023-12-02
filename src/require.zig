@@ -3,10 +3,179 @@ const std = @import("std");
 const print = std.debug.print;
 const test_ally = std.testing.allocator;
 
+/// Asserts that the specified string or list (array, slice, tuple) contains
+/// the specified substring or element.
+///
+/// ```
+/// try require.contains("Hello World", "World");
+/// try require.contains("Hello World", 'W');
+/// try require.contains([_]bool{ true, false }, true);
+/// ```
+pub inline fn contains(haystack: anytype, needle: anytype) !void {
+    try containsf(haystack, needle, "", .{});
+}
+
+/// Asserts that the specified string, list(array, slice...) or map
+/// contains the specified substring or element.
+///
+/// ```
+/// try require.containsf("Hello World", "World", "helpful error {s}", .{"message"});
+/// try require.containsf("Hello World", 'W', "helpful error {s}", .{"message"});
+/// try require.containsf([_]bool{ true, false }, true, "helpful error {s}", .{"message"});
+/// ```
+pub inline fn containsf(
+    haystack: anytype,
+    needle: anytype,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
+    const Haystack = @TypeOf(haystack);
+    const Needle = @TypeOf(needle);
+
+    if (!containsElement(haystack, needle)) {
+        const fmt = comptime fmt: {
+            const haystack_is_str = isString(Haystack);
+            const needle_is_str = isString(Needle);
+
+            if (haystack_is_str and needle_is_str) break :fmt 
+            \\"{s}" does not contain "{s}"
+            ;
+
+            if (!haystack_is_str and !needle_is_str) break :fmt 
+            \\{any} does not contain {any}
+            ;
+
+            if (haystack_is_str) break :fmt 
+            \\"{s}" does not contain "{u}"
+            ;
+
+            if (needle_is_str) break :fmt 
+            \\{any} does not contain "{s}"
+            ;
+        };
+        const fail_msg = try failMsg(fmt, .{ haystack, needle });
+        defer test_ally.free(fail_msg);
+
+        try failf(fail_msg, msg, args);
+    }
+}
+
+fn containsElement(haystack: anytype, needle: anytype) bool {
+    const Haystack = @TypeOf(haystack);
+    const Needle = @TypeOf(needle);
+    const haystack_info = @typeInfo(Haystack);
+    const haystack_is_str = comptime isString(Haystack);
+    const needle_is_str = comptime isString(Needle);
+
+    // Check the type of `haystack`.
+    //
+    // `haystack` must be an array, tuple, slice, or string.
+    const haystack_is_valid = comptime switch (haystack_info) {
+        .Pointer => |info| info.size == .Slice or haystack_is_str,
+        .Array => true,
+        .Struct => |info| info.is_tuple,
+        else => false,
+    };
+
+    if (!haystack_is_valid) {
+        const err = std.fmt.comptimePrint(
+            "type is not searchable: {s}",
+            .{@typeName(Haystack)},
+        );
+        @compileError(err);
+    }
+
+    // Check the type of `needle`.
+    //
+    // If `haystack` is a string, `needle` can be a string, comptime_int, or u8.
+    //
+    // If `haystack` is an array or a non-string slice, `needle` must be the
+    // child type of `haystack`.
+    //
+    // If `haystack` is a tuple, `needle` must be one of the child types of
+    // `haystack`.
+    const needle_is_valid = comptime switch (haystack_info) {
+        .Pointer => is_valid: {
+            if (haystack_is_str) {
+                if (needle_is_str or Needle == comptime_int or Needle == u8) {
+                    break :is_valid true;
+                }
+            } else if (Needle == std.meta.Child(Haystack)) {
+                break :is_valid true;
+            }
+
+            break :is_valid false;
+        },
+        .Array => Needle == std.meta.Child(Haystack),
+        .Struct => is_valid: {
+            for (std.meta.fields(Haystack)) |f| {
+                if (Needle == f.type) {
+                    break :is_valid true;
+                }
+            }
+
+            break :is_valid false;
+        },
+        // UNREACHABLE: We've already checked that `haystack` is either an
+        // array, pointer, or tuple.
+        else => unreachable,
+    };
+
+    if (!needle_is_valid) {
+        const err = std.fmt.comptimePrint(
+            "invalid 'needle' type: {s}",
+            .{@typeName(Needle)},
+        );
+        @compileError(err);
+    }
+
+    // Search for `needle` in `haystack`.
+    switch (haystack_info) {
+        .Pointer => |h_info| {
+            if (haystack_is_str) {
+                if (needle_is_str) {
+                    if (std.mem.indexOfPos(u8, haystack, 0, needle)) |_| {
+                        return true;
+                    }
+                } else if (std.mem.indexOfPos(u8, haystack, 0, &.{needle})) |_| {
+                    return true;
+                }
+
+                return false;
+            } else {
+                comptime std.debug.assert(h_info.size == .Slice);
+
+                for (haystack) |elem| {
+                    if (deepEqual(needle, elem)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        },
+        .Array => inline for (haystack) |elem| {
+            if (deepEqual(needle, elem)) {
+                return true;
+            }
+        },
+        .Struct => inline for (haystack) |elem| {
+            if (deepEqual(needle, elem)) {
+                return true;
+            }
+        },
+        // UNREACHABLE: We've already checked that `haystack` is either an
+        // array, pointer, or tuple.
+        else => unreachable,
+    }
+
+    return false;
+}
+
 /// Asserts that two values are equal.
 ///
 /// ```
-/// require.equal(123, 123);
+/// try require.equal(123, 123);
 /// ```
 pub inline fn equal(expected: anytype, value: anytype) !void {
     try equalf(expected, value, "", .{});
@@ -15,7 +184,7 @@ pub inline fn equal(expected: anytype, value: anytype) !void {
 /// Asserts that two values are equal.
 ///
 /// ```
-/// require.equalf(123, 123, "helpful error {s}", .{"message"});
+/// try require.equalf(123, 123, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn equalf(
     expected: anytype,
@@ -74,7 +243,7 @@ pub inline fn equalf(
 /// provided error.
 ///
 /// ```
-/// require.equalError(error.Foo, error.Foo);
+/// try require.equalError(error.Foo, error.Foo);
 /// ```
 pub inline fn equalError(
     expected: anyerror,
@@ -87,7 +256,7 @@ pub inline fn equalError(
 /// provided error.
 ///
 /// ```
-/// require.equalErrorf(error.Foo, error.Foo, "helpful error {s}", .{"message"});
+/// try require.equalErrorf(error.Foo, error.Foo, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn equalErrorf(
     expected: anyerror,
@@ -120,7 +289,7 @@ pub inline fn equalErrorf(
 /// Asserts that the specified value is of the specified type.
 ///
 /// ```
-/// require.equalType(bool, true);
+/// try require.equalType(bool, true);
 /// ```
 pub inline fn equalType(
     comptime Expected: type,
@@ -132,7 +301,7 @@ pub inline fn equalType(
 /// Asserts that the specified value is of the specified type.
 ///
 /// ```
-/// require.equalTypef(bool, true, "helpful error {s}", .{"message"});
+/// try require.equalTypef(bool, true, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn equalTypef(
     comptime Expected: type,
@@ -218,7 +387,7 @@ pub inline fn failf(
 /// Asserts that a value is an error.
 ///
 /// ```
-/// require.isError(error.Foobar);
+/// try require.isError(error.Foobar);
 /// ```
 pub inline fn isError(value: anytype) !void {
     try isErrorf(value, "", .{});
@@ -227,7 +396,7 @@ pub inline fn isError(value: anytype) !void {
 /// Asserts that a value is an error.
 ///
 /// ```
-/// require.isErrorf(error.Foobar, "helpful error {s}", .{"message"});
+/// try require.isErrorf(error.Foobar, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isErrorf(
     value: anytype,
@@ -247,7 +416,7 @@ pub inline fn isErrorf(
 /// Asserts that the specified value is false.
 ///
 /// ```
-/// require.isFalse(false);
+/// try require.isFalse(false);
 /// ```
 pub inline fn isFalse(value: bool) !void {
     try isFalsef(value, "", .{});
@@ -256,7 +425,7 @@ pub inline fn isFalse(value: bool) !void {
 /// Asserts that the specified value is false.
 ///
 /// ```
-/// require.isFalsef(false, "helpful error {s}", .{"message"});
+/// try require.isFalsef(false, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isFalsef(
     value: bool,
@@ -273,8 +442,8 @@ pub inline fn isFalsef(
 /// Asserts that the first value is greater than the second.
 ///
 /// ```
-/// require.isGreater(2, 1);
-/// require.isGreater(2.0, 1.0);
+/// try require.isGreater(2, 1);
+/// try require.isGreater(2.0, 1.0);
 /// ```
 pub inline fn isGreater(v1: anytype, v2: @TypeOf(v1)) !void {
     try isGreaterf(v1, v2, "", .{});
@@ -283,8 +452,8 @@ pub inline fn isGreater(v1: anytype, v2: @TypeOf(v1)) !void {
 /// Asserts that the first value is greater than the second.
 ///
 /// ```
-/// require.isGreaterf(2, 1, "helpful error {s}", .{"message"});
-/// require.isGreaterf(2.0, 1.0, "helpful error {s}", .{"message"});
+/// try require.isGreaterf(2, 1, "helpful error {s}", .{"message"});
+/// try require.isGreaterf(2.0, 1.0, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isGreaterf(
     v1: anytype,
@@ -309,8 +478,8 @@ pub inline fn isGreaterf(
 /// Asserts that the first value is greater than or equal to the second.
 ///
 /// ```
-/// require.isGreaterOrEqual(1, 1);
-/// require.isGreaterOrEqual(1.0, 1.0);
+/// try require.isGreaterOrEqual(1, 1);
+/// try require.isGreaterOrEqual(1.0, 1.0);
 /// ```
 pub inline fn isGreaterOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
     try isGreaterOrEqualf(v1, v2, "", .{});
@@ -319,8 +488,8 @@ pub inline fn isGreaterOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
 /// Asserts that the first value is greater than or equal to the second.
 ///
 /// ```
-/// require.isGreaterOrEqualf(1, 1, "helpful error {s}", .{"message"});
-/// require.isGreaterOrEqualf(1.0, 1.0, "helpful error {s}", .{"message"});
+/// try require.isGreaterOrEqualf(1, 1, "helpful error {s}", .{"message"});
+/// try require.isGreaterOrEqualf(1.0, 1.0, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isGreaterOrEqualf(
     v1: anytype,
@@ -345,8 +514,8 @@ pub inline fn isGreaterOrEqualf(
 /// Asserts that the first value is less than the second.
 ///
 /// ```
-/// require.isLess(1, 2);
-/// require.isLess(1.0, 2.0);
+/// try require.isLess(1, 2);
+/// try require.isLess(1.0, 2.0);
 /// ```
 pub inline fn isLess(v1: anytype, v2: @TypeOf(v1)) !void {
     try isLessf(v1, v2, "", .{});
@@ -355,8 +524,8 @@ pub inline fn isLess(v1: anytype, v2: @TypeOf(v1)) !void {
 /// Asserts that the first value is less than the second.
 ///
 /// ```
-/// require.isLessf(1, 2, "helpful error {s}", .{"message"});
-/// require.isLessf(1.0, 2.0, "helpful error {s}", .{"message"});
+/// try require.isLessf(1, 2, "helpful error {s}", .{"message"});
+/// try require.isLessf(1.0, 2.0, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isLessf(
     v1: anytype,
@@ -381,8 +550,8 @@ pub inline fn isLessf(
 /// Asserts that the first value is less than or equal to the second.
 ///
 /// ```
-/// require.isLessOrEqual(1, 1);
-/// require.isLessOrEqual(1.0, 1.0);
+/// try require.isLessOrEqual(1, 1);
+/// try require.isLessOrEqual(1.0, 1.0);
 /// ```
 pub inline fn isLessOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
     try isLessOrEqualf(v1, v2, "", .{});
@@ -391,8 +560,8 @@ pub inline fn isLessOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
 /// Asserts that the first value is less than or equal to the second.
 ///
 /// ```
-/// require.isLessOrEqualf(1, 1, "helpful error {s}", .{"message"});
-/// require.isLessOrEqualf(1.0, 1.0, "helpful error {s}", .{"message"});
+/// try require.isLessOrEqualf(1, 1, "helpful error {s}", .{"message"});
+/// try require.isLessOrEqualf(1.0, 1.0, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isLessOrEqualf(
     v1: anytype,
@@ -417,8 +586,8 @@ pub inline fn isLessOrEqualf(
 /// Asserts that the specified value is negative.
 ///
 /// ```
-/// require.isNegative(-1);
-/// require.isNegative(-1.0);
+/// try require.isNegative(-1);
+/// try require.isNegative(-1.0);
 /// ```
 pub inline fn isNegative(value: anytype) !void {
     try isNegativef(value, "", .{});
@@ -427,8 +596,8 @@ pub inline fn isNegative(value: anytype) !void {
 /// Asserts that the specified value is negative.
 ///
 /// ```
-/// require.isNegativef(-1, "helpful error {s}", .{"message"});
-/// require.isNegativef(-1.0, "helpful error {s}", .{"message"});
+/// try require.isNegativef(-1, "helpful error {s}", .{"message"});
+/// try require.isNegativef(-1.0, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isNegativef(
     value: anytype,
@@ -449,8 +618,8 @@ pub inline fn isNegativef(
 /// Asserts that the specified value is null.
 ///
 /// ```
-/// require.isNull(null);
-/// require.isNull(@as(?bool, null));
+/// try require.isNull(null);
+/// try require.isNull(@as(?bool, null));
 /// ```
 pub inline fn isNull(value: anytype) !void {
     try isNullf(value, "", .{});
@@ -459,8 +628,8 @@ pub inline fn isNull(value: anytype) !void {
 /// Asserts that the specified value is null.
 ///
 /// ```
-/// require.isNullf(null, "helpful error {s}", .{"message"});
-/// require.isNullf(@as(?bool, null), "helpful error {s}", .{"message"});
+/// try require.isNullf(null, "helpful error {s}", .{"message"});
+/// try require.isNullf(@as(?bool, null), "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isNullf(
     value: anytype,
@@ -488,8 +657,8 @@ pub inline fn isNullf(
 /// Asserts that the specified value is positive.
 ///
 /// ```
-/// require.isPositive(1);
-/// require.isPositive(1.0);
+/// try require.isPositive(1);
+/// try require.isPositive(1.0);
 /// ```
 pub inline fn isPositive(value: anytype) !void {
     try isPositivef(value, "", .{});
@@ -498,8 +667,8 @@ pub inline fn isPositive(value: anytype) !void {
 /// Asserts that the specified value is positive.
 ///
 /// ```
-/// require.isPositivef(1, "helpful error {s}", .{"message"});
-/// require.isPositivef(1.0, "helpful error {s}", .{"message"});
+/// try require.isPositivef(1, "helpful error {s}", .{"message"});
+/// try require.isPositivef(1.0, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isPositivef(
     value: anytype,
@@ -520,7 +689,7 @@ pub inline fn isPositivef(
 /// Asserts that the specified value is true.
 ///
 /// ```
-/// require.isTrue(true);
+/// try require.isTrue(true);
 /// ```
 pub inline fn isTrue(value: bool) !void {
     try isTruef(value, "", .{});
@@ -529,7 +698,7 @@ pub inline fn isTrue(value: bool) !void {
 /// Asserts that the specified value is true.
 ///
 /// ```
-/// require.isTruef(true, "helpful error {s}", .{"message"});
+/// try require.isTruef(true, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn isTruef(
     value: bool,
@@ -546,7 +715,7 @@ pub inline fn isTruef(
 /// Asserts that a value is not an error.
 ///
 /// ```
-/// require.notError(true);
+/// try require.notError(true);
 /// ```
 pub inline fn notError(value: anytype) !void {
     try notErrorf(value, "", .{});
@@ -555,7 +724,7 @@ pub inline fn notError(value: anytype) !void {
 /// Asserts that a value is not an error.
 ///
 /// ```
-/// require.notErrorf(true, "helpful error {s}", .{"message"});
+/// try require.notErrorf(true, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn notErrorf(
     value: anytype,
@@ -578,7 +747,7 @@ pub inline fn notErrorf(
 /// Asserts that two values are not equal.
 ///
 /// ```
-/// require.notEqual(123, 456);
+/// try require.notEqual(123, 456);
 /// ```
 pub inline fn notEqual(expected: anytype, value: anytype) !void {
     try notEqualf(expected, value, "", .{});
@@ -587,7 +756,7 @@ pub inline fn notEqual(expected: anytype, value: anytype) !void {
 /// Asserts that two values are not equal.
 ///
 /// ```
-/// require.notEqualf(123, 456, "helpful error {s}", .{"message"});
+/// try require.notEqualf(123, 456, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn notEqualf(
     expected: anytype,
@@ -617,7 +786,7 @@ pub inline fn notEqualf(
 /// Asserts that the specified value is not null.
 ///
 /// ```
-/// require.notNull(true);
+/// try require.notNull(true);
 /// ```
 pub inline fn notNull(value: anytype) !void {
     try notNullf(value, "", .{});
@@ -626,7 +795,7 @@ pub inline fn notNull(value: anytype) !void {
 /// Asserts that the specified value is not null.
 ///
 /// ```
-/// require.notNullf(true, "helpful error {s}", .{"message"});
+/// try require.notNullf(true, "helpful error {s}", .{"message"});
 /// ```
 pub inline fn notNullf(
     value: anytype,
