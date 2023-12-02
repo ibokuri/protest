@@ -133,9 +133,9 @@
 <span class="line" id="L19"><span class="tok-comment">/// specified substring or element.</span></span>
 <span class="line" id="L20"><span class="tok-comment">///</span></span>
 <span class="line" id="L21"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L22"><span class="tok-comment">/// try require.containsf(&quot;Hello World&quot;, &quot;World&quot;, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
-<span class="line" id="L23"><span class="tok-comment">/// try require.containsf(&quot;Hello World&quot;, 'W', &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
-<span class="line" id="L24"><span class="tok-comment">/// try require.containsf([_]bool{ true, false }, true, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L22"><span class="tok-comment">/// try require.containsf(&quot;Hello World&quot;, &quot;World&quot;, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
+<span class="line" id="L23"><span class="tok-comment">/// try require.containsf(&quot;Hello World&quot;, 'W', &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
+<span class="line" id="L24"><span class="tok-comment">/// try require.containsf([_]bool{ true, false }, true, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L25"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L26"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">containsf</span>(</span>
 <span class="line" id="L27">    haystack: <span class="tok-kw">anytype</span>,</span>
@@ -190,7 +190,7 @@
 <span class="line" id="L72"><span class="tok-comment">/// Asserts that two values are equal.</span></span>
 <span class="line" id="L73"><span class="tok-comment">///</span></span>
 <span class="line" id="L74"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L75"><span class="tok-comment">/// try require.equalf(123, 123, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L75"><span class="tok-comment">/// try require.equalf(123, 123, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L76"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L77"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">equalf</span>(</span>
 <span class="line" id="L78">    expected: <span class="tok-kw">anytype</span>,</span>
@@ -274,7 +274,7 @@
 <span class="line" id="L144"><span class="tok-comment">/// provided error.</span></span>
 <span class="line" id="L145"><span class="tok-comment">///</span></span>
 <span class="line" id="L146"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L147"><span class="tok-comment">/// try require.equalErrorf(error.Foo, error.Foo, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L147"><span class="tok-comment">/// try require.equalErrorf(error.Foo, error.Foo, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L148"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L149"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">equalErrorf</span>(</span>
 <span class="line" id="L150">    expected: <span class="tok-type">anyerror</span>,</span>
@@ -322,7 +322,7 @@
 <span class="line" id="L189"><span class="tok-comment">/// Asserts that the specified value is of the specified type.</span></span>
 <span class="line" id="L190"><span class="tok-comment">///</span></span>
 <span class="line" id="L191"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L192"><span class="tok-comment">/// try require.equalTypef(bool, true, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L192"><span class="tok-comment">/// try require.equalTypef(bool, true, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L193"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L194"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">equalTypef</span>(</span>
 <span class="line" id="L195">    <span class="tok-kw">comptime</span> Expected: <span class="tok-type">type</span>,</span>
@@ -417,7 +417,7 @@
 <span class="line" id="L284"><span class="tok-comment">/// Asserts that a value is an error.</span></span>
 <span class="line" id="L285"><span class="tok-comment">///</span></span>
 <span class="line" id="L286"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L287"><span class="tok-comment">/// try require.isErrorf(error.Foobar, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L287"><span class="tok-comment">/// try require.isErrorf(error.Foobar, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L288"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L289"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">isErrorf</span>(</span>
 <span class="line" id="L290">    value: <span class="tok-kw">anytype</span>,</span>
@@ -446,7 +446,7 @@
 <span class="line" id="L313"><span class="tok-comment">/// Asserts that the specified value is false.</span></span>
 <span class="line" id="L314"><span class="tok-comment">///</span></span>
 <span class="line" id="L315"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L316"><span class="tok-comment">/// try require.isFalsef(false, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L316"><span class="tok-comment">/// try require.isFalsef(false, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L317"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L318"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">isFalsef</span>(</span>
 <span class="line" id="L319">    value: <span class="tok-type">bool</span>,</span>
@@ -473,8 +473,8 @@
 <span class="line" id="L340"><span class="tok-comment">/// Asserts that the first value is greater than the second.</span></span>
 <span class="line" id="L341"><span class="tok-comment">///</span></span>
 <span class="line" id="L342"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L343"><span class="tok-comment">/// try require.isGreaterf(2, 1, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
-<span class="line" id="L344"><span class="tok-comment">/// try require.isGreaterf(2.0, 1.0, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L343"><span class="tok-comment">/// try require.isGreaterf(2, 1, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
+<span class="line" id="L344"><span class="tok-comment">/// try require.isGreaterf(2.0, 1.0, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L345"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L346"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">isGreaterf</span>(</span>
 <span class="line" id="L347">    v1: <span class="tok-kw">anytype</span>,</span>
@@ -509,8 +509,8 @@
 <span class="line" id="L376"><span class="tok-comment">/// Asserts that the first value is greater than or equal to the second.</span></span>
 <span class="line" id="L377"><span class="tok-comment">///</span></span>
 <span class="line" id="L378"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L379"><span class="tok-comment">/// try require.isGreaterOrEqualf(1, 1, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
-<span class="line" id="L380"><span class="tok-comment">/// try require.isGreaterOrEqualf(1.0, 1.0, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L379"><span class="tok-comment">/// try require.isGreaterOrEqualf(1, 1, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
+<span class="line" id="L380"><span class="tok-comment">/// try require.isGreaterOrEqualf(1.0, 1.0, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L381"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L382"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">isGreaterOrEqualf</span>(</span>
 <span class="line" id="L383">    v1: <span class="tok-kw">anytype</span>,</span>
@@ -545,8 +545,8 @@
 <span class="line" id="L412"><span class="tok-comment">/// Asserts that the first value is less than the second.</span></span>
 <span class="line" id="L413"><span class="tok-comment">///</span></span>
 <span class="line" id="L414"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L415"><span class="tok-comment">/// try require.isLessf(1, 2, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
-<span class="line" id="L416"><span class="tok-comment">/// try require.isLessf(1.0, 2.0, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L415"><span class="tok-comment">/// try require.isLessf(1, 2, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
+<span class="line" id="L416"><span class="tok-comment">/// try require.isLessf(1.0, 2.0, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L417"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L418"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">isLessf</span>(</span>
 <span class="line" id="L419">    v1: <span class="tok-kw">anytype</span>,</span>
@@ -581,8 +581,8 @@
 <span class="line" id="L448"><span class="tok-comment">/// Asserts that the first value is less than or equal to the second.</span></span>
 <span class="line" id="L449"><span class="tok-comment">///</span></span>
 <span class="line" id="L450"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L451"><span class="tok-comment">/// try require.isLessOrEqualf(1, 1, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
-<span class="line" id="L452"><span class="tok-comment">/// try require.isLessOrEqualf(1.0, 1.0, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L451"><span class="tok-comment">/// try require.isLessOrEqualf(1, 1, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
+<span class="line" id="L452"><span class="tok-comment">/// try require.isLessOrEqualf(1.0, 1.0, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L453"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L454"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">isLessOrEqualf</span>(</span>
 <span class="line" id="L455">    v1: <span class="tok-kw">anytype</span>,</span>
@@ -617,8 +617,8 @@
 <span class="line" id="L484"><span class="tok-comment">/// Asserts that the specified value is negative.</span></span>
 <span class="line" id="L485"><span class="tok-comment">///</span></span>
 <span class="line" id="L486"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L487"><span class="tok-comment">/// try require.isNegativef(-1, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
-<span class="line" id="L488"><span class="tok-comment">/// try require.isNegativef(-1.0, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L487"><span class="tok-comment">/// try require.isNegativef(-1, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
+<span class="line" id="L488"><span class="tok-comment">/// try require.isNegativef(-1.0, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L489"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L490"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">isNegativef</span>(</span>
 <span class="line" id="L491">    value: <span class="tok-kw">anytype</span>,</span>
@@ -649,8 +649,8 @@
 <span class="line" id="L516"><span class="tok-comment">/// Asserts that the specified value is null.</span></span>
 <span class="line" id="L517"><span class="tok-comment">///</span></span>
 <span class="line" id="L518"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L519"><span class="tok-comment">/// try require.isNullf(null, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
-<span class="line" id="L520"><span class="tok-comment">/// try require.isNullf(@as(?bool, null), &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L519"><span class="tok-comment">/// try require.isNullf(null, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
+<span class="line" id="L520"><span class="tok-comment">/// try require.isNullf(@as(?bool, null), &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L521"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L522"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">isNullf</span>(</span>
 <span class="line" id="L523">    value: <span class="tok-kw">anytype</span>,</span>
@@ -688,8 +688,8 @@
 <span class="line" id="L555"><span class="tok-comment">/// Asserts that the specified value is positive.</span></span>
 <span class="line" id="L556"><span class="tok-comment">///</span></span>
 <span class="line" id="L557"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L558"><span class="tok-comment">/// try require.isPositivef(1, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
-<span class="line" id="L559"><span class="tok-comment">/// try require.isPositivef(1.0, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L558"><span class="tok-comment">/// try require.isPositivef(1, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
+<span class="line" id="L559"><span class="tok-comment">/// try require.isPositivef(1.0, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L560"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L561"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">isPositivef</span>(</span>
 <span class="line" id="L562">    value: <span class="tok-kw">anytype</span>,</span>
@@ -719,7 +719,7 @@
 <span class="line" id="L586"><span class="tok-comment">/// Asserts that the specified value is true.</span></span>
 <span class="line" id="L587"><span class="tok-comment">///</span></span>
 <span class="line" id="L588"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L589"><span class="tok-comment">/// try require.isTruef(true, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L589"><span class="tok-comment">/// try require.isTruef(true, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L590"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L591"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">isTruef</span>(</span>
 <span class="line" id="L592">    value: <span class="tok-type">bool</span>,</span>
@@ -745,7 +745,7 @@
 <span class="line" id="L612"><span class="tok-comment">/// Asserts that a value is not an error.</span></span>
 <span class="line" id="L613"><span class="tok-comment">///</span></span>
 <span class="line" id="L614"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L615"><span class="tok-comment">/// try require.notErrorf(true, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L615"><span class="tok-comment">/// try require.notErrorf(true, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L616"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L617"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">notErrorf</span>(</span>
 <span class="line" id="L618">    value: <span class="tok-kw">anytype</span>,</span>
@@ -777,7 +777,7 @@
 <span class="line" id="L644"><span class="tok-comment">/// Asserts that two values are not equal.</span></span>
 <span class="line" id="L645"><span class="tok-comment">///</span></span>
 <span class="line" id="L646"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L647"><span class="tok-comment">/// try require.notEqualf(123, 456, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L647"><span class="tok-comment">/// try require.notEqualf(123, 456, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L648"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L649"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">notEqualf</span>(</span>
 <span class="line" id="L650">    expected: <span class="tok-kw">anytype</span>,</span>
@@ -816,7 +816,7 @@
 <span class="line" id="L683"><span class="tok-comment">/// Asserts that the specified value is not null.</span></span>
 <span class="line" id="L684"><span class="tok-comment">///</span></span>
 <span class="line" id="L685"><span class="tok-comment">/// ```</span></span>
-<span class="line" id="L686"><span class="tok-comment">/// try require.notNullf(true, &quot;helpful error {s}&quot;, .{&quot;message&quot;});</span></span>
+<span class="line" id="L686"><span class="tok-comment">/// try require.notNullf(true, &quot;error message {s}&quot;, .{&quot;formatted&quot;});</span></span>
 <span class="line" id="L687"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L688"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">notNullf</span>(</span>
 <span class="line" id="L689">    value: <span class="tok-kw">anytype</span>,</span>
