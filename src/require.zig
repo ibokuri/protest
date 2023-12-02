@@ -19,9 +19,9 @@ pub inline fn contains(haystack: anytype, needle: anytype) !void {
 /// specified substring or element.
 ///
 /// ```
-/// try require.containsf("Hello World", "World", "helpful error {s}", .{"message"});
-/// try require.containsf("Hello World", 'W', "helpful error {s}", .{"message"});
-/// try require.containsf([_]bool{ true, false }, true, "helpful error {s}", .{"message"});
+/// try require.containsf("Hello World", "World", "error message {s}", .{"formatted"});
+/// try require.containsf("Hello World", 'W', "error message {s}", .{"formatted"});
+/// try require.containsf([_]bool{ true, false }, true, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn containsf(
     haystack: anytype,
@@ -72,7 +72,7 @@ pub inline fn equal(expected: anytype, value: anytype) !void {
 /// Asserts that two values are equal.
 ///
 /// ```
-/// try require.equalf(123, 123, "helpful error {s}", .{"message"});
+/// try require.equalf(123, 123, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn equalf(
     expected: anytype,
@@ -144,7 +144,7 @@ pub inline fn equalError(
 /// provided error.
 ///
 /// ```
-/// try require.equalErrorf(error.Foo, error.Foo, "helpful error {s}", .{"message"});
+/// try require.equalErrorf(error.Foo, error.Foo, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn equalErrorf(
     expected: anyerror,
@@ -189,7 +189,7 @@ pub inline fn equalType(
 /// Asserts that the specified value is of the specified type.
 ///
 /// ```
-/// try require.equalTypef(bool, true, "helpful error {s}", .{"message"});
+/// try require.equalTypef(bool, true, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn equalTypef(
     comptime Expected: type,
@@ -284,7 +284,7 @@ pub inline fn isError(value: anytype) !void {
 /// Asserts that a value is an error.
 ///
 /// ```
-/// try require.isErrorf(error.Foobar, "helpful error {s}", .{"message"});
+/// try require.isErrorf(error.Foobar, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn isErrorf(
     value: anytype,
@@ -313,7 +313,7 @@ pub inline fn isFalse(value: bool) !void {
 /// Asserts that the specified value is false.
 ///
 /// ```
-/// try require.isFalsef(false, "helpful error {s}", .{"message"});
+/// try require.isFalsef(false, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn isFalsef(
     value: bool,
@@ -340,8 +340,8 @@ pub inline fn isGreater(v1: anytype, v2: @TypeOf(v1)) !void {
 /// Asserts that the first value is greater than the second.
 ///
 /// ```
-/// try require.isGreaterf(2, 1, "helpful error {s}", .{"message"});
-/// try require.isGreaterf(2.0, 1.0, "helpful error {s}", .{"message"});
+/// try require.isGreaterf(2, 1, "error message {s}", .{"formatted"});
+/// try require.isGreaterf(2.0, 1.0, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn isGreaterf(
     v1: anytype,
@@ -376,8 +376,8 @@ pub inline fn isGreaterOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
 /// Asserts that the first value is greater than or equal to the second.
 ///
 /// ```
-/// try require.isGreaterOrEqualf(1, 1, "helpful error {s}", .{"message"});
-/// try require.isGreaterOrEqualf(1.0, 1.0, "helpful error {s}", .{"message"});
+/// try require.isGreaterOrEqualf(1, 1, "error message {s}", .{"formatted"});
+/// try require.isGreaterOrEqualf(1.0, 1.0, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn isGreaterOrEqualf(
     v1: anytype,
@@ -412,8 +412,8 @@ pub inline fn isLess(v1: anytype, v2: @TypeOf(v1)) !void {
 /// Asserts that the first value is less than the second.
 ///
 /// ```
-/// try require.isLessf(1, 2, "helpful error {s}", .{"message"});
-/// try require.isLessf(1.0, 2.0, "helpful error {s}", .{"message"});
+/// try require.isLessf(1, 2, "error message {s}", .{"formatted"});
+/// try require.isLessf(1.0, 2.0, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn isLessf(
     v1: anytype,
@@ -448,8 +448,8 @@ pub inline fn isLessOrEqual(v1: anytype, v2: @TypeOf(v1)) !void {
 /// Asserts that the first value is less than or equal to the second.
 ///
 /// ```
-/// try require.isLessOrEqualf(1, 1, "helpful error {s}", .{"message"});
-/// try require.isLessOrEqualf(1.0, 1.0, "helpful error {s}", .{"message"});
+/// try require.isLessOrEqualf(1, 1, "error message {s}", .{"formatted"});
+/// try require.isLessOrEqualf(1.0, 1.0, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn isLessOrEqualf(
     v1: anytype,
@@ -484,8 +484,8 @@ pub inline fn isNegative(value: anytype) !void {
 /// Asserts that the specified value is negative.
 ///
 /// ```
-/// try require.isNegativef(-1, "helpful error {s}", .{"message"});
-/// try require.isNegativef(-1.0, "helpful error {s}", .{"message"});
+/// try require.isNegativef(-1, "error message {s}", .{"formatted"});
+/// try require.isNegativef(-1.0, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn isNegativef(
     value: anytype,
@@ -516,8 +516,8 @@ pub inline fn isNull(value: anytype) !void {
 /// Asserts that the specified value is null.
 ///
 /// ```
-/// try require.isNullf(null, "helpful error {s}", .{"message"});
-/// try require.isNullf(@as(?bool, null), "helpful error {s}", .{"message"});
+/// try require.isNullf(null, "error message {s}", .{"formatted"});
+/// try require.isNullf(@as(?bool, null), "error message {s}", .{"formatted"});
 /// ```
 pub inline fn isNullf(
     value: anytype,
@@ -555,8 +555,8 @@ pub inline fn isPositive(value: anytype) !void {
 /// Asserts that the specified value is positive.
 ///
 /// ```
-/// try require.isPositivef(1, "helpful error {s}", .{"message"});
-/// try require.isPositivef(1.0, "helpful error {s}", .{"message"});
+/// try require.isPositivef(1, "error message {s}", .{"formatted"});
+/// try require.isPositivef(1.0, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn isPositivef(
     value: anytype,
@@ -586,7 +586,7 @@ pub inline fn isTrue(value: bool) !void {
 /// Asserts that the specified value is true.
 ///
 /// ```
-/// try require.isTruef(true, "helpful error {s}", .{"message"});
+/// try require.isTruef(true, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn isTruef(
     value: bool,
@@ -612,7 +612,7 @@ pub inline fn notError(value: anytype) !void {
 /// Asserts that a value is not an error.
 ///
 /// ```
-/// try require.notErrorf(true, "helpful error {s}", .{"message"});
+/// try require.notErrorf(true, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn notErrorf(
     value: anytype,
@@ -644,7 +644,7 @@ pub inline fn notEqual(expected: anytype, value: anytype) !void {
 /// Asserts that two values are not equal.
 ///
 /// ```
-/// try require.notEqualf(123, 456, "helpful error {s}", .{"message"});
+/// try require.notEqualf(123, 456, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn notEqualf(
     expected: anytype,
@@ -683,7 +683,7 @@ pub inline fn notNull(value: anytype) !void {
 /// Asserts that the specified value is not null.
 ///
 /// ```
-/// try require.notNullf(true, "helpful error {s}", .{"message"});
+/// try require.notNullf(true, "error message {s}", .{"formatted"});
 /// ```
 pub inline fn notNullf(
     value: anytype,
