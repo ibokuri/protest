@@ -64,67 +64,6 @@ pub inline fn containsf(
     }
 }
 
-/// Asserts that the specified string, array, slice, or tuple does not contain
-/// the specified substring or element.
-///
-/// ## Examples
-///
-/// ```
-/// try require.notContainsf("Hello World", 'E');
-/// try require.notContainsf("Hello World", "Earth");
-/// try require.notContainsf(.{ "Hello", "World" }, "Earth");
-/// ```
-pub inline fn notContains(haystack: anytype, needle: anytype) !void {
-    try notContainsf(haystack, needle, "", .{});
-}
-
-/// Asserts that the specified string, array, slice, or tuple does not contain
-/// the specified substring or element.
-///
-/// ## Examples
-///
-/// ```
-/// try require.notContainsf("Hello World", 'E', "error message {s}", .{"formatted"});
-/// try require.notContainsf("Hello World", "Earth", "error message {s}", .{"formatted"});
-/// try require.notContainsf(.{ "Hello", "World" }, "Earth", "error message {s}", .{"formatted"});
-/// ```
-pub inline fn notContainsf(
-    haystack: anytype,
-    needle: anytype,
-    comptime msg: []const u8,
-    args: anytype,
-) !void {
-    const Haystack = @TypeOf(haystack);
-    const Needle = @TypeOf(needle);
-
-    if (containsElement(haystack, needle)) {
-        const fmt = comptime fmt: {
-            const haystack_is_str = isString(Haystack);
-            const needle_is_str = isString(Needle);
-
-            if (haystack_is_str and needle_is_str) break :fmt 
-            \\"{s}" should not contain "{s}"
-            ;
-
-            if (!haystack_is_str and !needle_is_str) break :fmt 
-            \\{any} should not contain {any}
-            ;
-
-            if (haystack_is_str) break :fmt 
-            \\"{s}" should not contain "{u}"
-            ;
-
-            if (needle_is_str) break :fmt 
-            \\{any} should not contain "{s}"
-            ;
-        };
-        const fail_msg = try failMsg(fmt, .{ haystack, needle });
-        defer test_ally.free(fail_msg);
-
-        try failf(fail_msg, msg, args);
-    }
-}
-
 /// Asserts that two values are equal.
 ///
 /// ## Examples
@@ -714,6 +653,67 @@ pub inline fn isTruef(
 
     if (!value) {
         try failf("Should be true", msg, args);
+    }
+}
+
+/// Asserts that the specified string, array, slice, or tuple does not contain
+/// the specified substring or element.
+///
+/// ## Examples
+///
+/// ```
+/// try require.notContainsf("Hello World", 'E');
+/// try require.notContainsf("Hello World", "Earth");
+/// try require.notContainsf(.{ "Hello", "World" }, "Earth");
+/// ```
+pub inline fn notContains(haystack: anytype, needle: anytype) !void {
+    try notContainsf(haystack, needle, "", .{});
+}
+
+/// Asserts that the specified string, array, slice, or tuple does not contain
+/// the specified substring or element.
+///
+/// ## Examples
+///
+/// ```
+/// try require.notContainsf("Hello World", 'E', "error message {s}", .{"formatted"});
+/// try require.notContainsf("Hello World", "Earth", "error message {s}", .{"formatted"});
+/// try require.notContainsf(.{ "Hello", "World" }, "Earth", "error message {s}", .{"formatted"});
+/// ```
+pub inline fn notContainsf(
+    haystack: anytype,
+    needle: anytype,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
+    const Haystack = @TypeOf(haystack);
+    const Needle = @TypeOf(needle);
+
+    if (containsElement(haystack, needle)) {
+        const fmt = comptime fmt: {
+            const haystack_is_str = isString(Haystack);
+            const needle_is_str = isString(Needle);
+
+            if (haystack_is_str and needle_is_str) break :fmt 
+            \\"{s}" should not contain "{s}"
+            ;
+
+            if (!haystack_is_str and !needle_is_str) break :fmt 
+            \\{any} should not contain {any}
+            ;
+
+            if (haystack_is_str) break :fmt 
+            \\"{s}" should not contain "{u}"
+            ;
+
+            if (needle_is_str) break :fmt 
+            \\{any} should not contain "{s}"
+            ;
+        };
+        const fail_msg = try failMsg(fmt, .{ haystack, needle });
+        defer test_ally.free(fail_msg);
+
+        try failf(fail_msg, msg, args);
     }
 }
 
