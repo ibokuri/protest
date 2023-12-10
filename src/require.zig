@@ -64,6 +64,250 @@ pub inline fn containsf(
     }
 }
 
+/// Asserts that the specified listA is equal to specified listB ignoring the
+/// order of the elements. If there are duplicate elements, the number of
+/// appearances of each of them in both lists should match.
+///
+/// ## Examples
+///
+/// ```
+/// try require.elementsMatch(.{ 1, 2, 3 }, .{ 1, 2, 3 });
+/// ```
+pub inline fn elementsMatch(listA: anytype, listB: anytype) !void {
+    try elementsMatchf(listA, listB, "", .{});
+}
+
+/// Asserts that the specified listA is equal to specified listB ignoring the
+/// order of the elements. If there are duplicate elements, the number of
+/// appearances of each of them in both lists should match.
+///
+/// ## Examples
+///
+/// ```
+/// try require.elementsMatchf(.{ 1, 2, 3 }, .{ 1, 3, 2 }, "error message {s}", .{"formatted"});
+/// ```
+pub inline fn elementsMatchf(
+    listA: anytype,
+    listB: anytype,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
+    const a_is_list = comptime isList(listA);
+    const b_is_list = comptime isList(listA);
+    if (!a_is_list or !b_is_list) {
+        const fail_msg = try failMsg(
+            "'{}' has an unsupported type: {}, expecting array, slice, or tuple",
+            if (!a_is_list) .{ listA, @typeName(@TypeOf(listA)) } else .{ listB, @typeName(@TypeOf(listB)) },
+        );
+        defer test_ally.free(fail_msg);
+        try failf(fail_msg, msg, args);
+    }
+
+    if (isEmpty(listA) and isEmpty(listB)) {
+        return;
+    }
+
+    const extra = try diffLists(listA, listB);
+    defer {
+        test_ally.free(extra[0]);
+        test_ally.free(extra[1]);
+    }
+    const extraA = extra[0];
+    const extraB = extra[1];
+
+    if (extraA.len == 0 and extraB.len == 0) {
+        return;
+    }
+
+    const fail_msg = try formatDiffList(listA, listB, extraA, extraB);
+    defer test_ally.free(fail_msg);
+    try failf(fail_msg, msg, args);
+}
+
+fn isList(list: anytype) bool {
+    const List = @TypeOf(list);
+
+    return switch (@typeInfo(List)) {
+        .Array => true,
+        .Pointer => |info| ret: {
+            const is_slice = info.size == .Slice;
+            const is_ptr_to_array = info.size == .One and @typeInfo(std.meta.Child(List)) == .Array;
+            break :ret is_slice or is_ptr_to_array;
+        },
+        .Struct => |info| info.is_tuple,
+        else => false,
+    };
+}
+
+fn isEmpty(list: anytype) bool {
+    std.debug.assert(isList(list));
+    return list.len == 0;
+}
+
+fn diffLists(listA: anytype, listB: anytype) ![2][]usize {
+    std.debug.assert(isList(listA) and isList(listB));
+
+    const a_is_tuple = @typeInfo(@TypeOf(listA)) == .Struct;
+    const b_is_tuple = @typeInfo(@TypeOf(listB)) == .Struct;
+
+    var visited = [_]bool{false} ** listB.len;
+
+    var extraA = std.ArrayList(usize).init(test_ally);
+    var extraB = std.ArrayList(usize).init(test_ally);
+    defer extraA.deinit();
+    defer extraB.deinit();
+
+    if (a_is_tuple) {
+        inline for (listA, 0..) |elemA, i| {
+            var found = false;
+
+            if (b_is_tuple) {
+                inline for (listB, 0..) |elemB, j| {
+                    if (!visited[j] and deepEqual(elemB, elemA)) {
+                        visited[j] = true;
+                        found = true;
+                    }
+                }
+            } else {
+                for (listB, 0..) |elemB, j| {
+                    if (visited[j]) {
+                        continue;
+                    }
+                    if (deepEqual(elemB, elemA)) {
+                        visited[j] = true;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!found) {
+                try extraA.append(i);
+            }
+        }
+    } else {
+        for (listA, 0..) |elemA, i| {
+            var found = false;
+
+            if (b_is_tuple) {
+                inline for (listB, 0..) |elemB, j| {
+                    if (!visited[j] and deepEqual(elemB, elemA)) {
+                        visited[j] = true;
+                        found = true;
+                    }
+                }
+            } else {
+                for (listB, 0..) |elemB, j| {
+                    if (visited[j]) {
+                        continue;
+                    }
+                    if (deepEqual(elemB, elemA)) {
+                        visited[j] = true;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!found) {
+                try extraA.append(i);
+            }
+        }
+    }
+
+    if (b_is_tuple) {
+        inline for (visited, 0..) |seen, i| {
+            if (!seen) {
+                try extraB.append(i);
+            }
+        }
+    } else {
+        for (visited, 0..) |seen, i| {
+            if (seen) {
+                continue;
+            }
+
+            try extraB.append(i);
+        }
+    }
+
+    return [_][]usize{
+        try extraA.toOwnedSlice(),
+        try extraB.toOwnedSlice(),
+    };
+}
+
+fn formatDiffList(listA: anytype, listB: anytype, extraA: []usize, extraB: []usize) ![]const u8 {
+    const ListA = @TypeOf(listA);
+    const ListB = @TypeOf(listB);
+
+    var fail_msg = std.ArrayList(u8).init(test_ally);
+    const fail_msg_writer = fail_msg.writer();
+    errdefer fail_msg.deinit();
+
+    try std.fmt.format(fail_msg_writer, "elements differ", .{});
+    if (extraA.len > 0) {
+        try std.fmt.format(fail_msg_writer, "\n\nextra elements in list A:\n", .{});
+        try std.fmt.format(fail_msg_writer, "{{ ", .{});
+        for (extraA, 0..) |idx, i| {
+            if (!(@typeInfo(ListA) == .Struct)) {
+                if (i != extraA.len - 1) {
+                    try std.fmt.format(fail_msg_writer, "{any}, ", .{listA[idx]});
+                } else {
+                    try std.fmt.format(fail_msg_writer, "{any}", .{listA[idx]});
+                }
+            } else {
+                if (i != extraA.len - 1) {
+                    inline for (listA, 0..) |elemA, j| {
+                        if (j == idx) {
+                            try std.fmt.format(fail_msg_writer, "{any}, ", .{elemA});
+                        }
+                    }
+                } else {
+                    inline for (listA, 0..) |elemA, j| {
+                        if (j == idx) {
+                            try std.fmt.format(fail_msg_writer, "{any}", .{elemA});
+                        }
+                    }
+                }
+            }
+        }
+        try std.fmt.format(fail_msg_writer, " }}", .{});
+    }
+    if (extraB.len > 0) {
+        try std.fmt.format(fail_msg_writer, "\n\nextra elements in list B:\n", .{});
+        try std.fmt.format(fail_msg_writer, "{{ ", .{});
+        for (extraB, 0..) |idx, i| {
+            if (!(@typeInfo(ListB) == .Struct)) {
+                if (i != extraB.len - 1) {
+                    try std.fmt.format(fail_msg_writer, "{any}, ", .{listB[idx]});
+                } else {
+                    try std.fmt.format(fail_msg_writer, "{any}", .{listB[idx]});
+                }
+            } else {
+                if (i != extraB.len - 1) {
+                    inline for (listB, 0..) |elemB, j| {
+                        if (j == idx) {
+                            try std.fmt.format(fail_msg_writer, "{any}, ", .{elemB});
+                        }
+                    }
+                } else {
+                    inline for (listB, 0..) |elemB, j| {
+                        if (j == idx) {
+                            try std.fmt.format(fail_msg_writer, "{any}", .{elemB});
+                        }
+                    }
+                }
+            }
+        }
+        try std.fmt.format(fail_msg_writer, " }}", .{});
+    }
+    try std.fmt.format(fail_msg_writer, "\n\nlistA:\n{any}", .{listA});
+    try std.fmt.format(fail_msg_writer, "\n\nlistB:\n{any}\n", .{listB});
+
+    return try fail_msg.toOwnedSlice();
+}
+
 /// Asserts that two values are equal.
 ///
 /// ## Examples
