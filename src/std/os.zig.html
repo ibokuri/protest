@@ -7751,7 +7751,7 @@
 <span class="line" id="L7271">    group_fd: fd_t,</span>
 <span class="line" id="L7272">    flags: <span class="tok-type">usize</span>,</span>
 <span class="line" id="L7273">) PerfEventOpenError!fd_t {</span>
-<span class="line" id="L7274">    <span class="tok-kw">const</span> rc = system.perf_event_open(attr, pid, cpu, group_fd, flags);</span>
+<span class="line" id="L7274">    <span class="tok-kw">const</span> rc = linux.perf_event_open(attr, pid, cpu, group_fd, flags);</span>
 <span class="line" id="L7275">    <span class="tok-kw">switch</span> (errno(rc)) {</span>
 <span class="line" id="L7276">        .SUCCESS =&gt; <span class="tok-kw">return</span> <span class="tok-builtin">@as</span>(fd_t, <span class="tok-builtin">@intCast</span>(rc)),</span>
 <span class="line" id="L7277">        .@&quot;2BIG&quot; =&gt; <span class="tok-kw">return</span> <span class="tok-kw">error</span>.TooBig,</span>
