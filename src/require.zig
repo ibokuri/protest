@@ -1123,24 +1123,17 @@ fn indentMessageLines(msg: []const u8, longest_label_len: usize) ![]const u8 {
     var br = io.bufferedReader(fbs_r);
     const br_r = br.reader();
 
-    {
-        var i: usize = 0;
+    var i: usize = 0;
+    while (try br_r.readUntilDelimiterOrEofAlloc(test_ally, '\n', 10_000)) |buf| : (i += 1) {
+        defer test_ally.free(buf);
 
-        while (try br_r.readUntilDelimiterOrEofAlloc(
-            test_ally,
-            '\n',
-            10_000,
-        )) |buf| : (i += 1) {
-            defer test_ally.free(buf);
-
-            if (i != 0) {
-                try output.appendSlice(&.{ '\n', '\t' });
-                try output.appendNTimes(' ', longest_label_len + 1);
-                try output.append('\t');
-            }
-
-            try output.appendSlice(buf);
+        if (i != 0) {
+            try output.appendSlice(&.{ '\n', '\t' });
+            try output.appendNTimes(' ', longest_label_len + 1);
+            try output.append('\t');
         }
+
+        try output.appendSlice(buf);
     }
 
     return output.toOwnedSlice();
