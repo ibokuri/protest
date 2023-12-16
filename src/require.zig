@@ -1,5 +1,12 @@
 const std = @import("std");
 
+const fmt = std.fmt;
+const io = std.io;
+const mem = std.mem;
+const meta = std.meta;
+
+const ArrayList = std.ArrayList;
+const assert = std.debug.assert;
 const print = std.debug.print;
 const test_ally = std.testing.allocator;
 
@@ -37,27 +44,24 @@ pub inline fn containsf(
     const Needle = @TypeOf(needle);
 
     if (!containsElement(haystack, needle)) {
-        const fmt = comptime fmt: {
+        const f = comptime f: {
             const haystack_is_str = isString(Haystack);
             const needle_is_str = isString(Needle);
 
-            if (haystack_is_str and needle_is_str) break :fmt 
+            if (haystack_is_str and needle_is_str) break :f 
             \\"{s}" does not contain "{s}"
             ;
-
-            if (!haystack_is_str and !needle_is_str) break :fmt 
+            if (!haystack_is_str and !needle_is_str) break :f 
             \\{any} does not contain {any}
             ;
-
-            if (haystack_is_str) break :fmt 
+            if (haystack_is_str) break :f 
             \\"{s}" does not contain "{u}"
             ;
-
-            if (needle_is_str) break :fmt 
+            if (needle_is_str) break :f 
             \\{any} does not contain "{s}"
             ;
         };
-        const fail_msg = try sprintf(fmt, .{ haystack, needle });
+        const fail_msg = try sprintf(f, .{ haystack, needle });
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg, msg, args);
@@ -152,43 +156,40 @@ pub inline fn equalf(
     const Value = @TypeOf(value);
 
     if (!deepEqual(expected, value)) {
-        const fmt = comptime fmt: {
+        const f = comptime f: {
             const expected_str = isString(Expected);
             const value_str = isString(Value);
 
             if (expected_str and value_str) {
-                break :fmt 
+                break :f 
                 \\Not equal:
                 \\expected: "{s}"
                 \\actual:   "{s}"
                 ;
             }
-
             if (!expected_str and !value_str) {
-                break :fmt 
+                break :f 
                 \\Not equal:
                 \\expected: {any}
                 \\actual:   {any}
                 ;
             }
-
             if (expected_str) {
-                break :fmt 
+                break :f 
                 \\Not equal:
                 \\expected: "{s}"
                 \\actual:   {any}
                 ;
             }
-
             if (value_str) {
-                break :fmt 
+                break :f 
                 \\Not equal:
                 \\expected: {any}
                 \\actual:   "{s}"
                 ;
             }
         };
-        const fail_msg = try sprintf(fmt, .{ expected, value });
+        const fail_msg = try sprintf(f, .{ expected, value });
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg, msg, args);
@@ -303,7 +304,7 @@ pub inline fn failf(
 
     var content = content: {
         const cap: usize = if (msg.len == 0) 2 else 3;
-        break :content try std.ArrayList(LabelContent).initCapacity(
+        break :content try ArrayList(LabelContent).initCapacity(
             test_ally,
             cap,
         );
@@ -316,14 +317,14 @@ pub inline fn failf(
     });
 
     var formatted_msg = formatted_msg: {
-        var formatted_msg = try std.ArrayList(u8).initCapacity(
+        var formatted_msg = try ArrayList(u8).initCapacity(
             test_ally,
             msg.len,
         );
         errdefer formatted_msg.deinit();
 
         if (msg.len > 0) {
-            try std.fmt.format(formatted_msg.writer(), msg, args);
+            try fmt.format(formatted_msg.writer(), msg, args);
 
             content.appendAssumeCapacity(.{
                 .label = "Message",
@@ -640,10 +641,10 @@ pub inline fn isNullf(
         return;
     }
 
-    const fmt = "Expected null value, found '{any}'";
+    const f = "Expected null value, found '{any}'";
     const fail_msg = try switch (info) {
-        .Optional => sprintf(fmt, .{value.?}),
-        else => sprintf(fmt, .{value}),
+        .Optional => sprintf(f, .{value.?}),
+        else => sprintf(f, .{value}),
     };
     defer test_ally.free(fail_msg);
 
@@ -750,27 +751,24 @@ pub inline fn notContainsf(
     const Needle = @TypeOf(needle);
 
     if (containsElement(haystack, needle)) {
-        const fmt = comptime fmt: {
+        const f = comptime f: {
             const haystack_is_str = isString(Haystack);
             const needle_is_str = isString(Needle);
 
-            if (haystack_is_str and needle_is_str) break :fmt 
+            if (haystack_is_str and needle_is_str) break :f 
             \\"{s}" should not contain "{s}"
             ;
-
-            if (!haystack_is_str and !needle_is_str) break :fmt 
+            if (!haystack_is_str and !needle_is_str) break :f 
             \\{any} should not contain {any}
             ;
-
-            if (haystack_is_str) break :fmt 
+            if (haystack_is_str) break :f 
             \\"{s}" should not contain "{u}"
             ;
-
-            if (needle_is_str) break :fmt 
+            if (needle_is_str) break :f 
             \\{any} should not contain "{s}"
             ;
         };
-        const fail_msg = try sprintf(fmt, .{ haystack, needle });
+        const fail_msg = try sprintf(f, .{ haystack, needle });
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg, msg, args);
@@ -842,14 +840,14 @@ pub inline fn notEqualf(
     const Value = @TypeOf(value);
 
     if (deepEqual(expected, value)) {
-        const fmt = comptime fmt: {
+        const f = comptime f: {
             if (isString(Value)) {
-                break :fmt "Should not be: {s}";
+                break :f "Should not be: {s}";
             }
 
-            break :fmt "Should not be: {any}";
+            break :f "Should not be: {any}";
         };
-        const fail_msg = try sprintf(fmt, .{value});
+        const fail_msg = try sprintf(f, .{value});
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg, msg, args);
@@ -898,7 +896,7 @@ fn checkArgs(args: anytype) void {
         const info = @typeInfo(T);
 
         if (info != .Struct or !info.Struct.is_tuple) {
-            @compileError(std.fmt.comptimePrint(
+            @compileError(fmt.comptimePrint(
                 "expected 'args' to be a tuple, found '{s}'",
                 .{@typeName(T)},
             ));
@@ -913,7 +911,7 @@ fn checkComparable(comptime T: type) void {
         const is_int = info == .Int or info == .ComptimeInt;
         const is_float = info == .Float or info == .ComptimeFloat;
         if (!is_int and !is_float) {
-            const err = std.fmt.comptimePrint(
+            const err = fmt.comptimePrint(
                 "expected integer or float, found '{s}'",
                 .{@typeName(T)},
             );
@@ -923,7 +921,7 @@ fn checkComparable(comptime T: type) void {
 }
 
 fn isEmpty(list: anytype) bool {
-    std.debug.assert(isList(list));
+    assert(isList(list));
     return list.len == 0;
 }
 
@@ -934,7 +932,7 @@ fn isList(list: anytype) bool {
         .Array => true,
         .Pointer => |info| ret: {
             const is_slice = info.size == .Slice;
-            const is_ptr_to_array = info.size == .One and @typeInfo(std.meta.Child(List)) == .Array;
+            const is_ptr_to_array = info.size == .One and @typeInfo(meta.Child(List)) == .Array;
             break :ret is_slice or is_ptr_to_array;
         },
         .Struct => |info| info.is_tuple,
@@ -974,11 +972,11 @@ fn isString(comptime T: type) bool {
 // Formatting
 ////////////////////////////////////////////////////////////////////////////////
 
-fn sprintf(comptime fmt: []const u8, args: anytype) ![]const u8 {
-    var msg = std.ArrayList(u8).init(test_ally);
+fn sprintf(comptime f: []const u8, args: anytype) ![]const u8 {
+    var msg = ArrayList(u8).init(test_ally);
     errdefer msg.deinit();
 
-    try std.fmt.format(msg.writer(), fmt, args);
+    try fmt.format(msg.writer(), f, args);
 
     return msg.toOwnedSlice();
 }
@@ -989,20 +987,20 @@ fn formatDiffList(
     extraA: []usize,
     extraB: []usize,
 ) ![]const u8 {
-    var fail_msg = std.ArrayList(u8).init(test_ally);
+    var fail_msg = ArrayList(u8).init(test_ally);
     const fail_msg_writer = fail_msg.writer();
     errdefer fail_msg.deinit();
 
-    try std.fmt.format(fail_msg_writer, "elements differ", .{});
+    try fmt.format(fail_msg_writer, "elements differ", .{});
 
     try formatExtra(fail_msg_writer, extraA, 'A', listA);
     try formatExtra(fail_msg_writer, extraB, 'B', listB);
 
-    try std.fmt.format(fail_msg_writer, "\n\nlistA:\n", .{});
+    try fmt.format(fail_msg_writer, "\n\nlistA:\n", .{});
     try formatList(fail_msg_writer, listA);
-    try std.fmt.format(fail_msg_writer, "\n\nlistB:\n", .{});
+    try fmt.format(fail_msg_writer, "\n\nlistB:\n", .{});
     try formatList(fail_msg_writer, listB);
-    try std.fmt.format(fail_msg_writer, "\n", .{});
+    try fmt.format(fail_msg_writer, "\n", .{});
 
     return try fail_msg.toOwnedSlice();
 }
@@ -1013,66 +1011,66 @@ fn formatExtra(
     comptime letter: comptime_int,
     list: anytype,
 ) !void {
-    std.debug.assert(isList(list));
+    assert(isList(list));
 
     if (extra.len == 0) {
         return;
     }
 
-    try std.fmt.format(writer, "\n\nextra elements in list {u}:\n", .{letter});
-    try std.fmt.format(writer, "{{ ", .{});
+    try fmt.format(writer, "\n\nextra elements in list {u}:\n", .{letter});
+    try fmt.format(writer, "{{ ", .{});
 
     switch (@typeInfo(@TypeOf(list))) {
         .Struct => for (extra, 0..) |idx, i| {
             if (i != extra.len - 1) {
                 inline for (list, 0..) |elemA, j| {
                     if (j == idx) {
-                        try std.fmt.format(writer, "{any}, ", .{elemA});
+                        try fmt.format(writer, "{any}, ", .{elemA});
                     }
                 }
             } else {
                 inline for (list, 0..) |elemA, j| {
                     if (j == idx) {
-                        try std.fmt.format(writer, "{any}", .{elemA});
+                        try fmt.format(writer, "{any}", .{elemA});
                     }
                 }
             }
         },
         else => for (extra, 0..) |idx, i| {
             if (i != extra.len - 1) {
-                try std.fmt.format(writer, "{any}, ", .{list[idx]});
+                try fmt.format(writer, "{any}, ", .{list[idx]});
             } else {
-                try std.fmt.format(writer, "{any}", .{list[idx]});
+                try fmt.format(writer, "{any}", .{list[idx]});
             }
         },
     }
 
-    try std.fmt.format(writer, " }}", .{});
+    try fmt.format(writer, " }}", .{});
 }
 
 fn formatList(writer: anytype, list: anytype) !void {
-    std.debug.assert(isList(list));
+    assert(isList(list));
 
-    try std.fmt.format(writer, "{{ ", .{});
+    try fmt.format(writer, "{{ ", .{});
 
     switch (@typeInfo(@TypeOf(list))) {
         .Struct => inline for (list, 0..) |elem, i| {
             if (i != list.len - 1) {
-                try std.fmt.format(writer, "{any}, ", .{elem});
+                try fmt.format(writer, "{any}, ", .{elem});
             } else {
-                try std.fmt.format(writer, "{any}", .{elem});
+                try fmt.format(writer, "{any}", .{elem});
             }
         },
         else => for (list, 0..) |elem, i| {
             if (i != list.len - 1) {
-                try std.fmt.format(writer, "{any}, ", .{elem});
+                try fmt.format(writer, "{any}, ", .{elem});
             } else {
-                try std.fmt.format(writer, "{any}", .{elem});
+                try fmt.format(writer, "{any}", .{elem});
             }
         },
     }
 
-    try std.fmt.format(writer, " }}", .{});
+    try fmt.format(writer, " }}", .{});
 }
 
 const LabelContent = struct {
@@ -1091,7 +1089,7 @@ fn labelOutput(contents: []const LabelContent) ![]const u8 {
         break :longest_label_len len;
     };
 
-    var output = std.ArrayList(u8).init(test_ally);
+    var output = ArrayList(u8).init(test_ally);
     errdefer output.deinit();
 
     for (contents) |v| {
@@ -1117,12 +1115,12 @@ fn labelOutput(contents: []const LabelContent) ![]const u8 {
 }
 
 fn indentMessageLines(msg: []const u8, longest_label_len: usize) ![]const u8 {
-    var output = std.ArrayList(u8).init(test_ally);
+    var output = ArrayList(u8).init(test_ally);
     errdefer output.deinit();
 
-    var fbs = std.io.fixedBufferStream(msg);
+    var fbs = io.fixedBufferStream(msg);
     const fbs_r = fbs.reader();
-    var br = std.io.bufferedReader(fbs_r);
+    var br = io.bufferedReader(fbs_r);
     const br_r = br.reader();
 
     {
@@ -1170,7 +1168,7 @@ fn containsElement(haystack: anytype, needle: anytype) bool {
     };
 
     if (!haystack_is_valid) {
-        const err = std.fmt.comptimePrint(
+        const err = fmt.comptimePrint(
             "type is not searchable: {s}",
             .{@typeName(Haystack)},
         );
@@ -1192,15 +1190,15 @@ fn containsElement(haystack: anytype, needle: anytype) bool {
                 if (needle_is_str or Needle == comptime_int or Needle == u8) {
                     break :is_valid true;
                 }
-            } else if (Needle == std.meta.Child(Haystack)) {
+            } else if (Needle == meta.Child(Haystack)) {
                 break :is_valid true;
             }
 
             break :is_valid false;
         },
-        .Array => Needle == std.meta.Child(Haystack),
+        .Array => Needle == meta.Child(Haystack),
         .Struct => is_valid: {
-            for (std.meta.fields(Haystack)) |f| {
+            for (meta.fields(Haystack)) |f| {
                 if (Needle == f.type) {
                     break :is_valid true;
                 }
@@ -1214,7 +1212,7 @@ fn containsElement(haystack: anytype, needle: anytype) bool {
     };
 
     if (!needle_is_valid) {
-        const err = std.fmt.comptimePrint(
+        const err = fmt.comptimePrint(
             "invalid 'needle' type: {s}",
             .{@typeName(Needle)},
         );
@@ -1226,16 +1224,16 @@ fn containsElement(haystack: anytype, needle: anytype) bool {
         .Pointer => |h_info| {
             if (haystack_is_str) {
                 if (needle_is_str) {
-                    if (std.mem.indexOfPos(u8, haystack, 0, needle)) |_| {
+                    if (mem.indexOfPos(u8, haystack, 0, needle)) |_| {
                         return true;
                     }
-                } else if (std.mem.indexOfPos(u8, haystack, 0, &.{needle})) |_| {
+                } else if (mem.indexOfPos(u8, haystack, 0, &.{needle})) |_| {
                     return true;
                 }
 
                 return false;
             } else {
-                comptime std.debug.assert(h_info.size == .Slice);
+                comptime assert(h_info.size == .Slice);
 
                 for (haystack) |elem| {
                     if (deepEqual(needle, elem)) {
@@ -1280,7 +1278,7 @@ fn deepEqual(expected: anytype, value: anytype) bool {
         .NoReturn,
         .Opaque,
         => {
-            const err = std.fmt.comptimePrint(
+            const err = fmt.comptimePrint(
                 "type is not comparable: {s}",
                 .{@typeName(Expected)},
             );
@@ -1358,7 +1356,7 @@ fn deepEqual(expected: anytype, value: anytype) bool {
         },
         .Union => |info| {
             if (info.tag_type == null) {
-                const err = std.fmt.comptimePrint(
+                const err = fmt.comptimePrint(
                     "type is not comparable: {s}",
                     .{@typeName(Expected)},
                 );
@@ -1378,15 +1376,15 @@ fn deepEqual(expected: anytype, value: anytype) bool {
 }
 
 fn diffLists(listA: anytype, listB: anytype) ![2][]usize {
-    std.debug.assert(isList(listA) and isList(listB));
+    assert(isList(listA) and isList(listB));
 
     const a_is_tuple = @typeInfo(@TypeOf(listA)) == .Struct;
     const b_is_tuple = @typeInfo(@TypeOf(listB)) == .Struct;
 
     var visited = [_]bool{false} ** listB.len;
 
-    var extraA = std.ArrayList(usize).init(test_ally);
-    var extraB = std.ArrayList(usize).init(test_ally);
+    var extraA = ArrayList(usize).init(test_ally);
+    var extraB = ArrayList(usize).init(test_ally);
     defer extraA.deinit();
     defer extraB.deinit();
 
