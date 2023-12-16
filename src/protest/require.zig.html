@@ -1274,373 +1274,366 @@
 <span class="line" id="L1123">    <span class="tok-kw">var</span> br = io.bufferedReader(fbs_r);</span>
 <span class="line" id="L1124">    <span class="tok-kw">const</span> br_r = br.reader();</span>
 <span class="line" id="L1125"></span>
-<span class="line" id="L1126">    {</span>
-<span class="line" id="L1127">        <span class="tok-kw">var</span> i: <span class="tok-type">usize</span> = <span class="tok-number">0</span>;</span>
-<span class="line" id="L1128"></span>
-<span class="line" id="L1129">        <span class="tok-kw">while</span> (<span class="tok-kw">try</span> br_r.readUntilDelimiterOrEofAlloc(</span>
-<span class="line" id="L1130">            test_ally,</span>
-<span class="line" id="L1131">            <span class="tok-str">'\n'</span>,</span>
-<span class="line" id="L1132">            <span class="tok-number">10_000</span>,</span>
-<span class="line" id="L1133">        )) |buf| : (i += <span class="tok-number">1</span>) {</span>
-<span class="line" id="L1134">            <span class="tok-kw">defer</span> test_ally.free(buf);</span>
+<span class="line" id="L1126">    <span class="tok-kw">var</span> i: <span class="tok-type">usize</span> = <span class="tok-number">0</span>;</span>
+<span class="line" id="L1127">    <span class="tok-kw">while</span> (<span class="tok-kw">try</span> br_r.readUntilDelimiterOrEofAlloc(test_ally, <span class="tok-str">'\n'</span>, <span class="tok-number">10_000</span>)) |buf| : (i += <span class="tok-number">1</span>) {</span>
+<span class="line" id="L1128">        <span class="tok-kw">defer</span> test_ally.free(buf);</span>
+<span class="line" id="L1129"></span>
+<span class="line" id="L1130">        <span class="tok-kw">if</span> (i != <span class="tok-number">0</span>) {</span>
+<span class="line" id="L1131">            <span class="tok-kw">try</span> output.appendSlice(&amp;.{ <span class="tok-str">'\n'</span>, <span class="tok-str">'\t'</span> });</span>
+<span class="line" id="L1132">            <span class="tok-kw">try</span> output.appendNTimes(<span class="tok-str">' '</span>, longest_label_len + <span class="tok-number">1</span>);</span>
+<span class="line" id="L1133">            <span class="tok-kw">try</span> output.append(<span class="tok-str">'\t'</span>);</span>
+<span class="line" id="L1134">        }</span>
 <span class="line" id="L1135"></span>
-<span class="line" id="L1136">            <span class="tok-kw">if</span> (i != <span class="tok-number">0</span>) {</span>
-<span class="line" id="L1137">                <span class="tok-kw">try</span> output.appendSlice(&amp;.{ <span class="tok-str">'\n'</span>, <span class="tok-str">'\t'</span> });</span>
-<span class="line" id="L1138">                <span class="tok-kw">try</span> output.appendNTimes(<span class="tok-str">' '</span>, longest_label_len + <span class="tok-number">1</span>);</span>
-<span class="line" id="L1139">                <span class="tok-kw">try</span> output.append(<span class="tok-str">'\t'</span>);</span>
-<span class="line" id="L1140">            }</span>
+<span class="line" id="L1136">        <span class="tok-kw">try</span> output.appendSlice(buf);</span>
+<span class="line" id="L1137">    }</span>
+<span class="line" id="L1138"></span>
+<span class="line" id="L1139">    <span class="tok-kw">return</span> output.toOwnedSlice();</span>
+<span class="line" id="L1140">}</span>
 <span class="line" id="L1141"></span>
-<span class="line" id="L1142">            <span class="tok-kw">try</span> output.appendSlice(buf);</span>
-<span class="line" id="L1143">        }</span>
-<span class="line" id="L1144">    }</span>
+<span class="line" id="L1142"><span class="tok-comment">////////////////////////////////////////////////////////////////////////////////</span>
+</span>
+<span class="line" id="L1143"><span class="tok-comment">// Comparison</span>
+</span>
+<span class="line" id="L1144"><span class="tok-comment">////////////////////////////////////////////////////////////////////////////////</span>
+</span>
 <span class="line" id="L1145"></span>
-<span class="line" id="L1146">    <span class="tok-kw">return</span> output.toOwnedSlice();</span>
-<span class="line" id="L1147">}</span>
-<span class="line" id="L1148"></span>
-<span class="line" id="L1149"><span class="tok-comment">////////////////////////////////////////////////////////////////////////////////</span>
-</span>
-<span class="line" id="L1150"><span class="tok-comment">// Comparison</span>
-</span>
-<span class="line" id="L1151"><span class="tok-comment">////////////////////////////////////////////////////////////////////////////////</span>
-</span>
+<span class="line" id="L1146"><span class="tok-kw">fn</span> <span class="tok-fn">containsElement</span>(haystack: <span class="tok-kw">anytype</span>, needle: <span class="tok-kw">anytype</span>) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L1147">    <span class="tok-kw">const</span> Haystack = <span class="tok-builtin">@TypeOf</span>(haystack);</span>
+<span class="line" id="L1148">    <span class="tok-kw">const</span> Needle = <span class="tok-builtin">@TypeOf</span>(needle);</span>
+<span class="line" id="L1149">    <span class="tok-kw">const</span> haystack_info = <span class="tok-builtin">@typeInfo</span>(Haystack);</span>
+<span class="line" id="L1150">    <span class="tok-kw">const</span> haystack_is_str = <span class="tok-kw">comptime</span> isString(Haystack);</span>
+<span class="line" id="L1151">    <span class="tok-kw">const</span> needle_is_str = <span class="tok-kw">comptime</span> isString(Needle);</span>
 <span class="line" id="L1152"></span>
-<span class="line" id="L1153"><span class="tok-kw">fn</span> <span class="tok-fn">containsElement</span>(haystack: <span class="tok-kw">anytype</span>, needle: <span class="tok-kw">anytype</span>) <span class="tok-type">bool</span> {</span>
-<span class="line" id="L1154">    <span class="tok-kw">const</span> Haystack = <span class="tok-builtin">@TypeOf</span>(haystack);</span>
-<span class="line" id="L1155">    <span class="tok-kw">const</span> Needle = <span class="tok-builtin">@TypeOf</span>(needle);</span>
-<span class="line" id="L1156">    <span class="tok-kw">const</span> haystack_info = <span class="tok-builtin">@typeInfo</span>(Haystack);</span>
-<span class="line" id="L1157">    <span class="tok-kw">const</span> haystack_is_str = <span class="tok-kw">comptime</span> isString(Haystack);</span>
-<span class="line" id="L1158">    <span class="tok-kw">const</span> needle_is_str = <span class="tok-kw">comptime</span> isString(Needle);</span>
-<span class="line" id="L1159"></span>
-<span class="line" id="L1160">    <span class="tok-comment">// Check the type of `haystack`.</span>
+<span class="line" id="L1153">    <span class="tok-comment">// Check the type of `haystack`.</span>
 </span>
-<span class="line" id="L1161">    <span class="tok-comment">//</span>
+<span class="line" id="L1154">    <span class="tok-comment">//</span>
 </span>
-<span class="line" id="L1162">    <span class="tok-comment">// `haystack` must be an array, tuple, slice, or string.</span>
+<span class="line" id="L1155">    <span class="tok-comment">// `haystack` must be an array, tuple, slice, or string.</span>
 </span>
-<span class="line" id="L1163">    <span class="tok-kw">const</span> haystack_is_valid = <span class="tok-kw">comptime</span> <span class="tok-kw">switch</span> (haystack_info) {</span>
-<span class="line" id="L1164">        .Pointer =&gt; |info| info.size == .Slice <span class="tok-kw">or</span> haystack_is_str,</span>
-<span class="line" id="L1165">        .Array =&gt; <span class="tok-null">true</span>,</span>
-<span class="line" id="L1166">        .Struct =&gt; |info| info.is_tuple,</span>
-<span class="line" id="L1167">        <span class="tok-kw">else</span> =&gt; <span class="tok-null">false</span>,</span>
-<span class="line" id="L1168">    };</span>
-<span class="line" id="L1169"></span>
-<span class="line" id="L1170">    <span class="tok-kw">if</span> (!haystack_is_valid) {</span>
-<span class="line" id="L1171">        <span class="tok-kw">const</span> err = fmt.comptimePrint(</span>
-<span class="line" id="L1172">            <span class="tok-str">&quot;type is not searchable: {s}&quot;</span>,</span>
-<span class="line" id="L1173">            .{<span class="tok-builtin">@typeName</span>(Haystack)},</span>
-<span class="line" id="L1174">        );</span>
-<span class="line" id="L1175">        <span class="tok-builtin">@compileError</span>(err);</span>
-<span class="line" id="L1176">    }</span>
-<span class="line" id="L1177"></span>
-<span class="line" id="L1178">    <span class="tok-comment">// Check the type of `needle`.</span>
+<span class="line" id="L1156">    <span class="tok-kw">const</span> haystack_is_valid = <span class="tok-kw">comptime</span> <span class="tok-kw">switch</span> (haystack_info) {</span>
+<span class="line" id="L1157">        .Pointer =&gt; |info| info.size == .Slice <span class="tok-kw">or</span> haystack_is_str,</span>
+<span class="line" id="L1158">        .Array =&gt; <span class="tok-null">true</span>,</span>
+<span class="line" id="L1159">        .Struct =&gt; |info| info.is_tuple,</span>
+<span class="line" id="L1160">        <span class="tok-kw">else</span> =&gt; <span class="tok-null">false</span>,</span>
+<span class="line" id="L1161">    };</span>
+<span class="line" id="L1162"></span>
+<span class="line" id="L1163">    <span class="tok-kw">if</span> (!haystack_is_valid) {</span>
+<span class="line" id="L1164">        <span class="tok-kw">const</span> err = fmt.comptimePrint(</span>
+<span class="line" id="L1165">            <span class="tok-str">&quot;type is not searchable: {s}&quot;</span>,</span>
+<span class="line" id="L1166">            .{<span class="tok-builtin">@typeName</span>(Haystack)},</span>
+<span class="line" id="L1167">        );</span>
+<span class="line" id="L1168">        <span class="tok-builtin">@compileError</span>(err);</span>
+<span class="line" id="L1169">    }</span>
+<span class="line" id="L1170"></span>
+<span class="line" id="L1171">    <span class="tok-comment">// Check the type of `needle`.</span>
 </span>
-<span class="line" id="L1179">    <span class="tok-comment">//</span>
+<span class="line" id="L1172">    <span class="tok-comment">//</span>
 </span>
-<span class="line" id="L1180">    <span class="tok-comment">// If `haystack` is a string, `needle` can be a string, comptime_int, or u8.</span>
+<span class="line" id="L1173">    <span class="tok-comment">// If `haystack` is a string, `needle` can be a string, comptime_int, or u8.</span>
 </span>
-<span class="line" id="L1181">    <span class="tok-comment">//</span>
+<span class="line" id="L1174">    <span class="tok-comment">//</span>
 </span>
-<span class="line" id="L1182">    <span class="tok-comment">// If `haystack` is an array or a non-string slice, `needle` must be the</span>
+<span class="line" id="L1175">    <span class="tok-comment">// If `haystack` is an array or a non-string slice, `needle` must be the</span>
 </span>
-<span class="line" id="L1183">    <span class="tok-comment">// child type of `haystack`.</span>
+<span class="line" id="L1176">    <span class="tok-comment">// child type of `haystack`.</span>
 </span>
-<span class="line" id="L1184">    <span class="tok-comment">//</span>
+<span class="line" id="L1177">    <span class="tok-comment">//</span>
 </span>
-<span class="line" id="L1185">    <span class="tok-comment">// If `haystack` is a tuple, `needle` must be one of the child types of</span>
+<span class="line" id="L1178">    <span class="tok-comment">// If `haystack` is a tuple, `needle` must be one of the child types of</span>
 </span>
-<span class="line" id="L1186">    <span class="tok-comment">// `haystack`.</span>
+<span class="line" id="L1179">    <span class="tok-comment">// `haystack`.</span>
 </span>
-<span class="line" id="L1187">    <span class="tok-kw">const</span> needle_is_valid = <span class="tok-kw">comptime</span> <span class="tok-kw">switch</span> (haystack_info) {</span>
-<span class="line" id="L1188">        .Pointer =&gt; is_valid: {</span>
-<span class="line" id="L1189">            <span class="tok-kw">if</span> (haystack_is_str) {</span>
-<span class="line" id="L1190">                <span class="tok-kw">if</span> (needle_is_str <span class="tok-kw">or</span> Needle == <span class="tok-type">comptime_int</span> <span class="tok-kw">or</span> Needle == <span class="tok-type">u8</span>) {</span>
-<span class="line" id="L1191">                    <span class="tok-kw">break</span> :is_valid <span class="tok-null">true</span>;</span>
-<span class="line" id="L1192">                }</span>
-<span class="line" id="L1193">            } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (Needle == meta.Child(Haystack)) {</span>
-<span class="line" id="L1194">                <span class="tok-kw">break</span> :is_valid <span class="tok-null">true</span>;</span>
-<span class="line" id="L1195">            }</span>
-<span class="line" id="L1196"></span>
-<span class="line" id="L1197">            <span class="tok-kw">break</span> :is_valid <span class="tok-null">false</span>;</span>
-<span class="line" id="L1198">        },</span>
-<span class="line" id="L1199">        .Array =&gt; Needle == meta.Child(Haystack),</span>
-<span class="line" id="L1200">        .Struct =&gt; is_valid: {</span>
-<span class="line" id="L1201">            <span class="tok-kw">for</span> (meta.fields(Haystack)) |f| {</span>
-<span class="line" id="L1202">                <span class="tok-kw">if</span> (Needle == f.<span class="tok-type">type</span>) {</span>
-<span class="line" id="L1203">                    <span class="tok-kw">break</span> :is_valid <span class="tok-null">true</span>;</span>
-<span class="line" id="L1204">                }</span>
-<span class="line" id="L1205">            }</span>
+<span class="line" id="L1180">    <span class="tok-kw">const</span> needle_is_valid = <span class="tok-kw">comptime</span> <span class="tok-kw">switch</span> (haystack_info) {</span>
+<span class="line" id="L1181">        .Pointer =&gt; is_valid: {</span>
+<span class="line" id="L1182">            <span class="tok-kw">if</span> (haystack_is_str) {</span>
+<span class="line" id="L1183">                <span class="tok-kw">if</span> (needle_is_str <span class="tok-kw">or</span> Needle == <span class="tok-type">comptime_int</span> <span class="tok-kw">or</span> Needle == <span class="tok-type">u8</span>) {</span>
+<span class="line" id="L1184">                    <span class="tok-kw">break</span> :is_valid <span class="tok-null">true</span>;</span>
+<span class="line" id="L1185">                }</span>
+<span class="line" id="L1186">            } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (Needle == meta.Child(Haystack)) {</span>
+<span class="line" id="L1187">                <span class="tok-kw">break</span> :is_valid <span class="tok-null">true</span>;</span>
+<span class="line" id="L1188">            }</span>
+<span class="line" id="L1189"></span>
+<span class="line" id="L1190">            <span class="tok-kw">break</span> :is_valid <span class="tok-null">false</span>;</span>
+<span class="line" id="L1191">        },</span>
+<span class="line" id="L1192">        .Array =&gt; Needle == meta.Child(Haystack),</span>
+<span class="line" id="L1193">        .Struct =&gt; is_valid: {</span>
+<span class="line" id="L1194">            <span class="tok-kw">for</span> (meta.fields(Haystack)) |f| {</span>
+<span class="line" id="L1195">                <span class="tok-kw">if</span> (Needle == f.<span class="tok-type">type</span>) {</span>
+<span class="line" id="L1196">                    <span class="tok-kw">break</span> :is_valid <span class="tok-null">true</span>;</span>
+<span class="line" id="L1197">                }</span>
+<span class="line" id="L1198">            }</span>
+<span class="line" id="L1199"></span>
+<span class="line" id="L1200">            <span class="tok-kw">break</span> :is_valid <span class="tok-null">false</span>;</span>
+<span class="line" id="L1201">        },</span>
+<span class="line" id="L1202">        <span class="tok-comment">// UNREACHABLE: We've already checked that `haystack` is either an</span>
+</span>
+<span class="line" id="L1203">        <span class="tok-comment">// array, pointer, or tuple.</span>
+</span>
+<span class="line" id="L1204">        <span class="tok-kw">else</span> =&gt; <span class="tok-kw">unreachable</span>,</span>
+<span class="line" id="L1205">    };</span>
 <span class="line" id="L1206"></span>
-<span class="line" id="L1207">            <span class="tok-kw">break</span> :is_valid <span class="tok-null">false</span>;</span>
-<span class="line" id="L1208">        },</span>
-<span class="line" id="L1209">        <span class="tok-comment">// UNREACHABLE: We've already checked that `haystack` is either an</span>
+<span class="line" id="L1207">    <span class="tok-kw">if</span> (!needle_is_valid) {</span>
+<span class="line" id="L1208">        <span class="tok-kw">const</span> err = fmt.comptimePrint(</span>
+<span class="line" id="L1209">            <span class="tok-str">&quot;invalid 'needle' type: {s}&quot;</span>,</span>
+<span class="line" id="L1210">            .{<span class="tok-builtin">@typeName</span>(Needle)},</span>
+<span class="line" id="L1211">        );</span>
+<span class="line" id="L1212">        <span class="tok-builtin">@compileError</span>(err);</span>
+<span class="line" id="L1213">    }</span>
+<span class="line" id="L1214"></span>
+<span class="line" id="L1215">    <span class="tok-comment">// Search for `needle` in `haystack`.</span>
 </span>
-<span class="line" id="L1210">        <span class="tok-comment">// array, pointer, or tuple.</span>
+<span class="line" id="L1216">    <span class="tok-kw">switch</span> (haystack_info) {</span>
+<span class="line" id="L1217">        .Pointer =&gt; |h_info| {</span>
+<span class="line" id="L1218">            <span class="tok-kw">if</span> (haystack_is_str) {</span>
+<span class="line" id="L1219">                <span class="tok-kw">if</span> (needle_is_str) {</span>
+<span class="line" id="L1220">                    <span class="tok-kw">if</span> (mem.indexOfPos(<span class="tok-type">u8</span>, haystack, <span class="tok-number">0</span>, needle)) |_| {</span>
+<span class="line" id="L1221">                        <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
+<span class="line" id="L1222">                    }</span>
+<span class="line" id="L1223">                } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (mem.indexOfPos(<span class="tok-type">u8</span>, haystack, <span class="tok-number">0</span>, &amp;.{needle})) |_| {</span>
+<span class="line" id="L1224">                    <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
+<span class="line" id="L1225">                }</span>
+<span class="line" id="L1226"></span>
+<span class="line" id="L1227">                <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L1228">            } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L1229">                <span class="tok-kw">comptime</span> assert(h_info.size == .Slice);</span>
+<span class="line" id="L1230"></span>
+<span class="line" id="L1231">                <span class="tok-kw">for</span> (haystack) |elem| {</span>
+<span class="line" id="L1232">                    <span class="tok-kw">if</span> (deepEqual(needle, elem)) {</span>
+<span class="line" id="L1233">                        <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
+<span class="line" id="L1234">                    }</span>
+<span class="line" id="L1235">                }</span>
+<span class="line" id="L1236"></span>
+<span class="line" id="L1237">                <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L1238">            }</span>
+<span class="line" id="L1239">        },</span>
+<span class="line" id="L1240">        .Array =&gt; <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (haystack) |elem| {</span>
+<span class="line" id="L1241">            <span class="tok-kw">if</span> (deepEqual(needle, elem)) {</span>
+<span class="line" id="L1242">                <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
+<span class="line" id="L1243">            }</span>
+<span class="line" id="L1244">        },</span>
+<span class="line" id="L1245">        .Struct =&gt; <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (haystack) |elem| {</span>
+<span class="line" id="L1246">            <span class="tok-kw">if</span> (deepEqual(needle, elem)) {</span>
+<span class="line" id="L1247">                <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
+<span class="line" id="L1248">            }</span>
+<span class="line" id="L1249">        },</span>
+<span class="line" id="L1250">        <span class="tok-comment">// UNREACHABLE: We've already checked that `haystack` is either an</span>
 </span>
-<span class="line" id="L1211">        <span class="tok-kw">else</span> =&gt; <span class="tok-kw">unreachable</span>,</span>
-<span class="line" id="L1212">    };</span>
-<span class="line" id="L1213"></span>
-<span class="line" id="L1214">    <span class="tok-kw">if</span> (!needle_is_valid) {</span>
-<span class="line" id="L1215">        <span class="tok-kw">const</span> err = fmt.comptimePrint(</span>
-<span class="line" id="L1216">            <span class="tok-str">&quot;invalid 'needle' type: {s}&quot;</span>,</span>
-<span class="line" id="L1217">            .{<span class="tok-builtin">@typeName</span>(Needle)},</span>
-<span class="line" id="L1218">        );</span>
-<span class="line" id="L1219">        <span class="tok-builtin">@compileError</span>(err);</span>
-<span class="line" id="L1220">    }</span>
-<span class="line" id="L1221"></span>
-<span class="line" id="L1222">    <span class="tok-comment">// Search for `needle` in `haystack`.</span>
+<span class="line" id="L1251">        <span class="tok-comment">// array, pointer, or tuple.</span>
 </span>
-<span class="line" id="L1223">    <span class="tok-kw">switch</span> (haystack_info) {</span>
-<span class="line" id="L1224">        .Pointer =&gt; |h_info| {</span>
-<span class="line" id="L1225">            <span class="tok-kw">if</span> (haystack_is_str) {</span>
-<span class="line" id="L1226">                <span class="tok-kw">if</span> (needle_is_str) {</span>
-<span class="line" id="L1227">                    <span class="tok-kw">if</span> (mem.indexOfPos(<span class="tok-type">u8</span>, haystack, <span class="tok-number">0</span>, needle)) |_| {</span>
-<span class="line" id="L1228">                        <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
-<span class="line" id="L1229">                    }</span>
-<span class="line" id="L1230">                } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (mem.indexOfPos(<span class="tok-type">u8</span>, haystack, <span class="tok-number">0</span>, &amp;.{needle})) |_| {</span>
-<span class="line" id="L1231">                    <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
-<span class="line" id="L1232">                }</span>
-<span class="line" id="L1233"></span>
-<span class="line" id="L1234">                <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
-<span class="line" id="L1235">            } <span class="tok-kw">else</span> {</span>
-<span class="line" id="L1236">                <span class="tok-kw">comptime</span> assert(h_info.size == .Slice);</span>
-<span class="line" id="L1237"></span>
-<span class="line" id="L1238">                <span class="tok-kw">for</span> (haystack) |elem| {</span>
-<span class="line" id="L1239">                    <span class="tok-kw">if</span> (deepEqual(needle, elem)) {</span>
-<span class="line" id="L1240">                        <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
-<span class="line" id="L1241">                    }</span>
-<span class="line" id="L1242">                }</span>
-<span class="line" id="L1243"></span>
-<span class="line" id="L1244">                <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
-<span class="line" id="L1245">            }</span>
-<span class="line" id="L1246">        },</span>
-<span class="line" id="L1247">        .Array =&gt; <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (haystack) |elem| {</span>
-<span class="line" id="L1248">            <span class="tok-kw">if</span> (deepEqual(needle, elem)) {</span>
-<span class="line" id="L1249">                <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
-<span class="line" id="L1250">            }</span>
-<span class="line" id="L1251">        },</span>
-<span class="line" id="L1252">        .Struct =&gt; <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (haystack) |elem| {</span>
-<span class="line" id="L1253">            <span class="tok-kw">if</span> (deepEqual(needle, elem)) {</span>
-<span class="line" id="L1254">                <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
-<span class="line" id="L1255">            }</span>
-<span class="line" id="L1256">        },</span>
-<span class="line" id="L1257">        <span class="tok-comment">// UNREACHABLE: We've already checked that `haystack` is either an</span>
+<span class="line" id="L1252">        <span class="tok-kw">else</span> =&gt; <span class="tok-kw">unreachable</span>,</span>
+<span class="line" id="L1253">    }</span>
+<span class="line" id="L1254"></span>
+<span class="line" id="L1255">    <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L1256">}</span>
+<span class="line" id="L1257"></span>
+<span class="line" id="L1258"><span class="tok-kw">fn</span> <span class="tok-fn">deepEqual</span>(expected: <span class="tok-kw">anytype</span>, value: <span class="tok-kw">anytype</span>) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L1259">    <span class="tok-kw">const</span> Expected = <span class="tok-builtin">@TypeOf</span>(expected);</span>
+<span class="line" id="L1260">    <span class="tok-kw">const</span> expected_info = <span class="tok-builtin">@typeInfo</span>(Expected);</span>
+<span class="line" id="L1261">    <span class="tok-kw">const</span> Value = <span class="tok-builtin">@TypeOf</span>(value);</span>
+<span class="line" id="L1262"></span>
+<span class="line" id="L1263">    <span class="tok-kw">if</span> (Value != Expected) {</span>
+<span class="line" id="L1264">        <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L1265">    }</span>
+<span class="line" id="L1266"></span>
+<span class="line" id="L1267">    <span class="tok-kw">switch</span> (expected_info) {</span>
+<span class="line" id="L1268">        <span class="tok-comment">// Invalid values.</span>
 </span>
-<span class="line" id="L1258">        <span class="tok-comment">// array, pointer, or tuple.</span>
+<span class="line" id="L1269">        .AnyFrame,</span>
+<span class="line" id="L1270">        .Frame,</span>
+<span class="line" id="L1271">        .NoReturn,</span>
+<span class="line" id="L1272">        .Opaque,</span>
+<span class="line" id="L1273">        =&gt; {</span>
+<span class="line" id="L1274">            <span class="tok-kw">const</span> err = fmt.comptimePrint(</span>
+<span class="line" id="L1275">                <span class="tok-str">&quot;type is not comparable: {s}&quot;</span>,</span>
+<span class="line" id="L1276">                .{<span class="tok-builtin">@typeName</span>(Expected)},</span>
+<span class="line" id="L1277">            );</span>
+<span class="line" id="L1278">            <span class="tok-builtin">@compileError</span>(err);</span>
+<span class="line" id="L1279">        },</span>
+<span class="line" id="L1280"></span>
+<span class="line" id="L1281">        <span class="tok-comment">// Values that are always equal.</span>
 </span>
-<span class="line" id="L1259">        <span class="tok-kw">else</span> =&gt; <span class="tok-kw">unreachable</span>,</span>
-<span class="line" id="L1260">    }</span>
-<span class="line" id="L1261"></span>
-<span class="line" id="L1262">    <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
-<span class="line" id="L1263">}</span>
-<span class="line" id="L1264"></span>
-<span class="line" id="L1265"><span class="tok-kw">fn</span> <span class="tok-fn">deepEqual</span>(expected: <span class="tok-kw">anytype</span>, value: <span class="tok-kw">anytype</span>) <span class="tok-type">bool</span> {</span>
-<span class="line" id="L1266">    <span class="tok-kw">const</span> Expected = <span class="tok-builtin">@TypeOf</span>(expected);</span>
-<span class="line" id="L1267">    <span class="tok-kw">const</span> expected_info = <span class="tok-builtin">@typeInfo</span>(Expected);</span>
-<span class="line" id="L1268">    <span class="tok-kw">const</span> Value = <span class="tok-builtin">@TypeOf</span>(value);</span>
-<span class="line" id="L1269"></span>
-<span class="line" id="L1270">    <span class="tok-kw">if</span> (Value != Expected) {</span>
-<span class="line" id="L1271">        <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
-<span class="line" id="L1272">    }</span>
-<span class="line" id="L1273"></span>
-<span class="line" id="L1274">    <span class="tok-kw">switch</span> (expected_info) {</span>
-<span class="line" id="L1275">        <span class="tok-comment">// Invalid values.</span>
+<span class="line" id="L1282">        .Null,</span>
+<span class="line" id="L1283">        .Undefined,</span>
+<span class="line" id="L1284">        .Void,</span>
+<span class="line" id="L1285">        =&gt; <span class="tok-kw">return</span> <span class="tok-null">true</span>,</span>
+<span class="line" id="L1286"></span>
+<span class="line" id="L1287">        <span class="tok-comment">// Values comparable with == and !=.</span>
 </span>
-<span class="line" id="L1276">        .AnyFrame,</span>
-<span class="line" id="L1277">        .Frame,</span>
-<span class="line" id="L1278">        .NoReturn,</span>
-<span class="line" id="L1279">        .Opaque,</span>
-<span class="line" id="L1280">        =&gt; {</span>
-<span class="line" id="L1281">            <span class="tok-kw">const</span> err = fmt.comptimePrint(</span>
-<span class="line" id="L1282">                <span class="tok-str">&quot;type is not comparable: {s}&quot;</span>,</span>
-<span class="line" id="L1283">                .{<span class="tok-builtin">@typeName</span>(Expected)},</span>
-<span class="line" id="L1284">            );</span>
-<span class="line" id="L1285">            <span class="tok-builtin">@compileError</span>(err);</span>
-<span class="line" id="L1286">        },</span>
-<span class="line" id="L1287"></span>
-<span class="line" id="L1288">        <span class="tok-comment">// Values that are always equal.</span>
-</span>
-<span class="line" id="L1289">        .Null,</span>
-<span class="line" id="L1290">        .Undefined,</span>
-<span class="line" id="L1291">        .Void,</span>
-<span class="line" id="L1292">        =&gt; <span class="tok-kw">return</span> <span class="tok-null">true</span>,</span>
-<span class="line" id="L1293"></span>
-<span class="line" id="L1294">        <span class="tok-comment">// Values comparable with == and !=.</span>
-</span>
-<span class="line" id="L1295">        .Bool,</span>
-<span class="line" id="L1296">        .ComptimeFloat,</span>
-<span class="line" id="L1297">        .ComptimeInt,</span>
-<span class="line" id="L1298">        .Enum,</span>
-<span class="line" id="L1299">        .EnumLiteral,</span>
-<span class="line" id="L1300">        .ErrorSet,</span>
-<span class="line" id="L1301">        .Float,</span>
-<span class="line" id="L1302">        .Fn,</span>
-<span class="line" id="L1303">        .Int,</span>
-<span class="line" id="L1304">        .Type,</span>
-<span class="line" id="L1305">        =&gt; <span class="tok-kw">if</span> (value != expected) <span class="tok-kw">return</span> <span class="tok-null">false</span>,</span>
-<span class="line" id="L1306"></span>
-<span class="line" id="L1307">        .Array,</span>
-<span class="line" id="L1308">        .Vector,</span>
-<span class="line" id="L1309">        =&gt; <span class="tok-kw">for</span> (expected, value) |e, v| {</span>
-<span class="line" id="L1310">            <span class="tok-kw">if</span> (!deepEqual(e, v)) <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
-<span class="line" id="L1311">        },</span>
-<span class="line" id="L1312"></span>
-<span class="line" id="L1313">        .ErrorUnion =&gt; {</span>
-<span class="line" id="L1314">            <span class="tok-kw">if</span> (expected) |e_payload| {</span>
-<span class="line" id="L1315">                <span class="tok-kw">if</span> (value) |v_payload| {</span>
-<span class="line" id="L1316">                    <span class="tok-kw">return</span> deepEqual(e_payload, v_payload);</span>
-<span class="line" id="L1317">                }</span>
-<span class="line" id="L1318"></span>
-<span class="line" id="L1319">                <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
-<span class="line" id="L1320">            } <span class="tok-kw">else</span> |e_err| {</span>
-<span class="line" id="L1321">                <span class="tok-kw">if</span> (value) |_| {</span>
-<span class="line" id="L1322">                    <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
-<span class="line" id="L1323">                } <span class="tok-kw">else</span> |v_err| {</span>
-<span class="line" id="L1324">                    <span class="tok-kw">return</span> deepEqual(e_err, v_err);</span>
+<span class="line" id="L1288">        .Bool,</span>
+<span class="line" id="L1289">        .ComptimeFloat,</span>
+<span class="line" id="L1290">        .ComptimeInt,</span>
+<span class="line" id="L1291">        .Enum,</span>
+<span class="line" id="L1292">        .EnumLiteral,</span>
+<span class="line" id="L1293">        .ErrorSet,</span>
+<span class="line" id="L1294">        .Float,</span>
+<span class="line" id="L1295">        .Fn,</span>
+<span class="line" id="L1296">        .Int,</span>
+<span class="line" id="L1297">        .Type,</span>
+<span class="line" id="L1298">        =&gt; <span class="tok-kw">if</span> (value != expected) <span class="tok-kw">return</span> <span class="tok-null">false</span>,</span>
+<span class="line" id="L1299"></span>
+<span class="line" id="L1300">        .Array,</span>
+<span class="line" id="L1301">        .Vector,</span>
+<span class="line" id="L1302">        =&gt; <span class="tok-kw">for</span> (expected, value) |e, v| {</span>
+<span class="line" id="L1303">            <span class="tok-kw">if</span> (!deepEqual(e, v)) <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L1304">        },</span>
+<span class="line" id="L1305"></span>
+<span class="line" id="L1306">        .ErrorUnion =&gt; {</span>
+<span class="line" id="L1307">            <span class="tok-kw">if</span> (expected) |e_payload| {</span>
+<span class="line" id="L1308">                <span class="tok-kw">if</span> (value) |v_payload| {</span>
+<span class="line" id="L1309">                    <span class="tok-kw">return</span> deepEqual(e_payload, v_payload);</span>
+<span class="line" id="L1310">                }</span>
+<span class="line" id="L1311"></span>
+<span class="line" id="L1312">                <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L1313">            } <span class="tok-kw">else</span> |e_err| {</span>
+<span class="line" id="L1314">                <span class="tok-kw">if</span> (value) |_| {</span>
+<span class="line" id="L1315">                    <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L1316">                } <span class="tok-kw">else</span> |v_err| {</span>
+<span class="line" id="L1317">                    <span class="tok-kw">return</span> deepEqual(e_err, v_err);</span>
+<span class="line" id="L1318">                }</span>
+<span class="line" id="L1319">            }</span>
+<span class="line" id="L1320">        },</span>
+<span class="line" id="L1321">        .Optional =&gt; {</span>
+<span class="line" id="L1322">            <span class="tok-kw">if</span> (expected) |e_payload| {</span>
+<span class="line" id="L1323">                <span class="tok-kw">if</span> (value) |v_payload| {</span>
+<span class="line" id="L1324">                    <span class="tok-kw">return</span> deepEqual(e_payload, v_payload);</span>
 <span class="line" id="L1325">                }</span>
-<span class="line" id="L1326">            }</span>
-<span class="line" id="L1327">        },</span>
-<span class="line" id="L1328">        .Optional =&gt; {</span>
-<span class="line" id="L1329">            <span class="tok-kw">if</span> (expected) |e_payload| {</span>
-<span class="line" id="L1330">                <span class="tok-kw">if</span> (value) |v_payload| {</span>
-<span class="line" id="L1331">                    <span class="tok-kw">return</span> deepEqual(e_payload, v_payload);</span>
-<span class="line" id="L1332">                }</span>
-<span class="line" id="L1333"></span>
-<span class="line" id="L1334">                <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
-<span class="line" id="L1335">            }</span>
-<span class="line" id="L1336"></span>
-<span class="line" id="L1337">            <span class="tok-kw">if</span> (value) |_| <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
-<span class="line" id="L1338">        },</span>
-<span class="line" id="L1339">        .Pointer =&gt; |info| <span class="tok-kw">switch</span> (info.size) {</span>
-<span class="line" id="L1340">            .Slice =&gt; {</span>
-<span class="line" id="L1341">                <span class="tok-kw">if</span> (expected.len != value.len) <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
-<span class="line" id="L1342">                <span class="tok-kw">for</span> (expected, value) |e, v| {</span>
-<span class="line" id="L1343">                    <span class="tok-kw">if</span> (!deepEqual(e, v)) <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
-<span class="line" id="L1344">                }</span>
-<span class="line" id="L1345">            },</span>
-<span class="line" id="L1346">            .One =&gt; <span class="tok-kw">switch</span> (<span class="tok-builtin">@typeInfo</span>(info.child)) {</span>
-<span class="line" id="L1347">                .Fn, .Opaque =&gt; <span class="tok-kw">if</span> (value != expected) <span class="tok-kw">return</span> <span class="tok-null">false</span>,</span>
-<span class="line" id="L1348">                <span class="tok-kw">else</span> =&gt; <span class="tok-kw">return</span> deepEqual(expected.*, value.*),</span>
-<span class="line" id="L1349">            },</span>
-<span class="line" id="L1350">            .C, .Many =&gt; <span class="tok-kw">if</span> (value != expected) <span class="tok-kw">return</span> <span class="tok-null">false</span>,</span>
-<span class="line" id="L1351">        },</span>
-<span class="line" id="L1352">        .Struct =&gt; |info| <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (info.fields) |field| {</span>
-<span class="line" id="L1353">            <span class="tok-kw">const</span> e = <span class="tok-builtin">@field</span>(expected, field.name);</span>
-<span class="line" id="L1354">            <span class="tok-kw">const</span> v = <span class="tok-builtin">@field</span>(value, field.name);</span>
-<span class="line" id="L1355">            <span class="tok-kw">return</span> deepEqual(e, v);</span>
-<span class="line" id="L1356">        },</span>
-<span class="line" id="L1357">        .Union =&gt; |info| {</span>
-<span class="line" id="L1358">            <span class="tok-kw">if</span> (info.tag_type == <span class="tok-null">null</span>) {</span>
-<span class="line" id="L1359">                <span class="tok-kw">const</span> err = fmt.comptimePrint(</span>
-<span class="line" id="L1360">                    <span class="tok-str">&quot;type is not comparable: {s}&quot;</span>,</span>
-<span class="line" id="L1361">                    .{<span class="tok-builtin">@typeName</span>(Expected)},</span>
-<span class="line" id="L1362">                );</span>
-<span class="line" id="L1363">                <span class="tok-builtin">@compileError</span>(err);</span>
+<span class="line" id="L1326"></span>
+<span class="line" id="L1327">                <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L1328">            }</span>
+<span class="line" id="L1329"></span>
+<span class="line" id="L1330">            <span class="tok-kw">if</span> (value) |_| <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L1331">        },</span>
+<span class="line" id="L1332">        .Pointer =&gt; |info| <span class="tok-kw">switch</span> (info.size) {</span>
+<span class="line" id="L1333">            .Slice =&gt; {</span>
+<span class="line" id="L1334">                <span class="tok-kw">if</span> (expected.len != value.len) <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L1335">                <span class="tok-kw">for</span> (expected, value) |e, v| {</span>
+<span class="line" id="L1336">                    <span class="tok-kw">if</span> (!deepEqual(e, v)) <span class="tok-kw">return</span> <span class="tok-null">false</span>;</span>
+<span class="line" id="L1337">                }</span>
+<span class="line" id="L1338">            },</span>
+<span class="line" id="L1339">            .One =&gt; <span class="tok-kw">switch</span> (<span class="tok-builtin">@typeInfo</span>(info.child)) {</span>
+<span class="line" id="L1340">                .Fn, .Opaque =&gt; <span class="tok-kw">if</span> (value != expected) <span class="tok-kw">return</span> <span class="tok-null">false</span>,</span>
+<span class="line" id="L1341">                <span class="tok-kw">else</span> =&gt; <span class="tok-kw">return</span> deepEqual(expected.*, value.*),</span>
+<span class="line" id="L1342">            },</span>
+<span class="line" id="L1343">            .C, .Many =&gt; <span class="tok-kw">if</span> (value != expected) <span class="tok-kw">return</span> <span class="tok-null">false</span>,</span>
+<span class="line" id="L1344">        },</span>
+<span class="line" id="L1345">        .Struct =&gt; |info| <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (info.fields) |field| {</span>
+<span class="line" id="L1346">            <span class="tok-kw">const</span> e = <span class="tok-builtin">@field</span>(expected, field.name);</span>
+<span class="line" id="L1347">            <span class="tok-kw">const</span> v = <span class="tok-builtin">@field</span>(value, field.name);</span>
+<span class="line" id="L1348">            <span class="tok-kw">return</span> deepEqual(e, v);</span>
+<span class="line" id="L1349">        },</span>
+<span class="line" id="L1350">        .Union =&gt; |info| {</span>
+<span class="line" id="L1351">            <span class="tok-kw">if</span> (info.tag_type == <span class="tok-null">null</span>) {</span>
+<span class="line" id="L1352">                <span class="tok-kw">const</span> err = fmt.comptimePrint(</span>
+<span class="line" id="L1353">                    <span class="tok-str">&quot;type is not comparable: {s}&quot;</span>,</span>
+<span class="line" id="L1354">                    .{<span class="tok-builtin">@typeName</span>(Expected)},</span>
+<span class="line" id="L1355">                );</span>
+<span class="line" id="L1356">                <span class="tok-builtin">@compileError</span>(err);</span>
+<span class="line" id="L1357">            }</span>
+<span class="line" id="L1358"></span>
+<span class="line" id="L1359">            <span class="tok-kw">switch</span> (expected) {</span>
+<span class="line" id="L1360">                <span class="tok-kw">inline</span> <span class="tok-kw">else</span> =&gt; |e, tag| {</span>
+<span class="line" id="L1361">                    <span class="tok-kw">const</span> v = <span class="tok-builtin">@field</span>(value, <span class="tok-builtin">@tagName</span>(tag));</span>
+<span class="line" id="L1362">                    <span class="tok-kw">return</span> deepEqual(e, v);</span>
+<span class="line" id="L1363">                },</span>
 <span class="line" id="L1364">            }</span>
-<span class="line" id="L1365"></span>
-<span class="line" id="L1366">            <span class="tok-kw">switch</span> (expected) {</span>
-<span class="line" id="L1367">                <span class="tok-kw">inline</span> <span class="tok-kw">else</span> =&gt; |e, tag| {</span>
-<span class="line" id="L1368">                    <span class="tok-kw">const</span> v = <span class="tok-builtin">@field</span>(value, <span class="tok-builtin">@tagName</span>(tag));</span>
-<span class="line" id="L1369">                    <span class="tok-kw">return</span> deepEqual(e, v);</span>
-<span class="line" id="L1370">                },</span>
-<span class="line" id="L1371">            }</span>
-<span class="line" id="L1372">        },</span>
-<span class="line" id="L1373">    }</span>
-<span class="line" id="L1374"></span>
-<span class="line" id="L1375">    <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
-<span class="line" id="L1376">}</span>
-<span class="line" id="L1377"></span>
-<span class="line" id="L1378"><span class="tok-kw">fn</span> <span class="tok-fn">diffLists</span>(listA: <span class="tok-kw">anytype</span>, listB: <span class="tok-kw">anytype</span>) ![<span class="tok-number">2</span>][]<span class="tok-type">usize</span> {</span>
-<span class="line" id="L1379">    assert(isList(listA) <span class="tok-kw">and</span> isList(listB));</span>
-<span class="line" id="L1380"></span>
-<span class="line" id="L1381">    <span class="tok-kw">const</span> a_is_tuple = <span class="tok-builtin">@typeInfo</span>(<span class="tok-builtin">@TypeOf</span>(listA)) == .Struct;</span>
-<span class="line" id="L1382">    <span class="tok-kw">const</span> b_is_tuple = <span class="tok-builtin">@typeInfo</span>(<span class="tok-builtin">@TypeOf</span>(listB)) == .Struct;</span>
+<span class="line" id="L1365">        },</span>
+<span class="line" id="L1366">    }</span>
+<span class="line" id="L1367"></span>
+<span class="line" id="L1368">    <span class="tok-kw">return</span> <span class="tok-null">true</span>;</span>
+<span class="line" id="L1369">}</span>
+<span class="line" id="L1370"></span>
+<span class="line" id="L1371"><span class="tok-kw">fn</span> <span class="tok-fn">diffLists</span>(listA: <span class="tok-kw">anytype</span>, listB: <span class="tok-kw">anytype</span>) ![<span class="tok-number">2</span>][]<span class="tok-type">usize</span> {</span>
+<span class="line" id="L1372">    assert(isList(listA) <span class="tok-kw">and</span> isList(listB));</span>
+<span class="line" id="L1373"></span>
+<span class="line" id="L1374">    <span class="tok-kw">const</span> a_is_tuple = <span class="tok-builtin">@typeInfo</span>(<span class="tok-builtin">@TypeOf</span>(listA)) == .Struct;</span>
+<span class="line" id="L1375">    <span class="tok-kw">const</span> b_is_tuple = <span class="tok-builtin">@typeInfo</span>(<span class="tok-builtin">@TypeOf</span>(listB)) == .Struct;</span>
+<span class="line" id="L1376"></span>
+<span class="line" id="L1377">    <span class="tok-kw">var</span> visited = [_]<span class="tok-type">bool</span>{<span class="tok-null">false</span>} ** listB.len;</span>
+<span class="line" id="L1378"></span>
+<span class="line" id="L1379">    <span class="tok-kw">var</span> extraA = ArrayList(<span class="tok-type">usize</span>).init(test_ally);</span>
+<span class="line" id="L1380">    <span class="tok-kw">var</span> extraB = ArrayList(<span class="tok-type">usize</span>).init(test_ally);</span>
+<span class="line" id="L1381">    <span class="tok-kw">defer</span> extraA.deinit();</span>
+<span class="line" id="L1382">    <span class="tok-kw">defer</span> extraB.deinit();</span>
 <span class="line" id="L1383"></span>
-<span class="line" id="L1384">    <span class="tok-kw">var</span> visited = [_]<span class="tok-type">bool</span>{<span class="tok-null">false</span>} ** listB.len;</span>
-<span class="line" id="L1385"></span>
-<span class="line" id="L1386">    <span class="tok-kw">var</span> extraA = ArrayList(<span class="tok-type">usize</span>).init(test_ally);</span>
-<span class="line" id="L1387">    <span class="tok-kw">var</span> extraB = ArrayList(<span class="tok-type">usize</span>).init(test_ally);</span>
-<span class="line" id="L1388">    <span class="tok-kw">defer</span> extraA.deinit();</span>
-<span class="line" id="L1389">    <span class="tok-kw">defer</span> extraB.deinit();</span>
-<span class="line" id="L1390"></span>
-<span class="line" id="L1391">    <span class="tok-kw">if</span> (a_is_tuple) {</span>
-<span class="line" id="L1392">        <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (listA, <span class="tok-number">0</span>..) |elemA, i| {</span>
-<span class="line" id="L1393">            <span class="tok-kw">var</span> found = <span class="tok-null">false</span>;</span>
-<span class="line" id="L1394"></span>
-<span class="line" id="L1395">            <span class="tok-kw">if</span> (b_is_tuple) {</span>
-<span class="line" id="L1396">                <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (listB, <span class="tok-number">0</span>..) |elemB, j| {</span>
-<span class="line" id="L1397">                    <span class="tok-kw">if</span> (!visited[j] <span class="tok-kw">and</span> deepEqual(elemB, elemA)) {</span>
-<span class="line" id="L1398">                        visited[j] = <span class="tok-null">true</span>;</span>
-<span class="line" id="L1399">                        found = <span class="tok-null">true</span>;</span>
-<span class="line" id="L1400">                    }</span>
-<span class="line" id="L1401">                }</span>
-<span class="line" id="L1402">            } <span class="tok-kw">else</span> {</span>
-<span class="line" id="L1403">                <span class="tok-kw">for</span> (listB, <span class="tok-number">0</span>..) |elemB, j| {</span>
-<span class="line" id="L1404">                    <span class="tok-kw">if</span> (visited[j]) {</span>
-<span class="line" id="L1405">                        <span class="tok-kw">continue</span>;</span>
-<span class="line" id="L1406">                    }</span>
-<span class="line" id="L1407">                    <span class="tok-kw">if</span> (deepEqual(elemB, elemA)) {</span>
-<span class="line" id="L1408">                        visited[j] = <span class="tok-null">true</span>;</span>
-<span class="line" id="L1409">                        found = <span class="tok-null">true</span>;</span>
-<span class="line" id="L1410">                        <span class="tok-kw">break</span>;</span>
-<span class="line" id="L1411">                    }</span>
-<span class="line" id="L1412">                }</span>
-<span class="line" id="L1413">            }</span>
-<span class="line" id="L1414"></span>
-<span class="line" id="L1415">            <span class="tok-kw">if</span> (!found) {</span>
-<span class="line" id="L1416">                <span class="tok-kw">try</span> extraA.append(i);</span>
-<span class="line" id="L1417">            }</span>
-<span class="line" id="L1418">        }</span>
-<span class="line" id="L1419">    } <span class="tok-kw">else</span> {</span>
-<span class="line" id="L1420">        <span class="tok-kw">for</span> (listA, <span class="tok-number">0</span>..) |elemA, i| {</span>
-<span class="line" id="L1421">            <span class="tok-kw">var</span> found = <span class="tok-null">false</span>;</span>
-<span class="line" id="L1422"></span>
-<span class="line" id="L1423">            <span class="tok-kw">if</span> (b_is_tuple) {</span>
-<span class="line" id="L1424">                <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (listB, <span class="tok-number">0</span>..) |elemB, j| {</span>
-<span class="line" id="L1425">                    <span class="tok-kw">if</span> (!visited[j] <span class="tok-kw">and</span> deepEqual(elemB, elemA)) {</span>
-<span class="line" id="L1426">                        visited[j] = <span class="tok-null">true</span>;</span>
-<span class="line" id="L1427">                        found = <span class="tok-null">true</span>;</span>
-<span class="line" id="L1428">                    }</span>
-<span class="line" id="L1429">                }</span>
-<span class="line" id="L1430">            } <span class="tok-kw">else</span> {</span>
-<span class="line" id="L1431">                <span class="tok-kw">for</span> (listB, <span class="tok-number">0</span>..) |elemB, j| {</span>
-<span class="line" id="L1432">                    <span class="tok-kw">if</span> (visited[j]) {</span>
-<span class="line" id="L1433">                        <span class="tok-kw">continue</span>;</span>
-<span class="line" id="L1434">                    }</span>
-<span class="line" id="L1435">                    <span class="tok-kw">if</span> (deepEqual(elemB, elemA)) {</span>
-<span class="line" id="L1436">                        visited[j] = <span class="tok-null">true</span>;</span>
-<span class="line" id="L1437">                        found = <span class="tok-null">true</span>;</span>
-<span class="line" id="L1438">                        <span class="tok-kw">break</span>;</span>
-<span class="line" id="L1439">                    }</span>
-<span class="line" id="L1440">                }</span>
-<span class="line" id="L1441">            }</span>
-<span class="line" id="L1442"></span>
-<span class="line" id="L1443">            <span class="tok-kw">if</span> (!found) {</span>
-<span class="line" id="L1444">                <span class="tok-kw">try</span> extraA.append(i);</span>
-<span class="line" id="L1445">            }</span>
-<span class="line" id="L1446">        }</span>
-<span class="line" id="L1447">    }</span>
-<span class="line" id="L1448"></span>
-<span class="line" id="L1449">    <span class="tok-kw">if</span> (b_is_tuple) {</span>
-<span class="line" id="L1450">        <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (visited, <span class="tok-number">0</span>..) |seen, i| {</span>
-<span class="line" id="L1451">            <span class="tok-kw">if</span> (!seen) {</span>
-<span class="line" id="L1452">                <span class="tok-kw">try</span> extraB.append(i);</span>
-<span class="line" id="L1453">            }</span>
-<span class="line" id="L1454">        }</span>
-<span class="line" id="L1455">    } <span class="tok-kw">else</span> {</span>
-<span class="line" id="L1456">        <span class="tok-kw">for</span> (visited, <span class="tok-number">0</span>..) |seen, i| {</span>
-<span class="line" id="L1457">            <span class="tok-kw">if</span> (seen) {</span>
-<span class="line" id="L1458">                <span class="tok-kw">continue</span>;</span>
-<span class="line" id="L1459">            }</span>
-<span class="line" id="L1460"></span>
-<span class="line" id="L1461">            <span class="tok-kw">try</span> extraB.append(i);</span>
-<span class="line" id="L1462">        }</span>
-<span class="line" id="L1463">    }</span>
-<span class="line" id="L1464"></span>
-<span class="line" id="L1465">    <span class="tok-kw">return</span> [_][]<span class="tok-type">usize</span>{</span>
-<span class="line" id="L1466">        <span class="tok-kw">try</span> extraA.toOwnedSlice(),</span>
-<span class="line" id="L1467">        <span class="tok-kw">try</span> extraB.toOwnedSlice(),</span>
-<span class="line" id="L1468">    };</span>
-<span class="line" id="L1469">}</span>
-<span class="line" id="L1470"></span>
+<span class="line" id="L1384">    <span class="tok-kw">if</span> (a_is_tuple) {</span>
+<span class="line" id="L1385">        <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (listA, <span class="tok-number">0</span>..) |elemA, i| {</span>
+<span class="line" id="L1386">            <span class="tok-kw">var</span> found = <span class="tok-null">false</span>;</span>
+<span class="line" id="L1387"></span>
+<span class="line" id="L1388">            <span class="tok-kw">if</span> (b_is_tuple) {</span>
+<span class="line" id="L1389">                <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (listB, <span class="tok-number">0</span>..) |elemB, j| {</span>
+<span class="line" id="L1390">                    <span class="tok-kw">if</span> (!visited[j] <span class="tok-kw">and</span> deepEqual(elemB, elemA)) {</span>
+<span class="line" id="L1391">                        visited[j] = <span class="tok-null">true</span>;</span>
+<span class="line" id="L1392">                        found = <span class="tok-null">true</span>;</span>
+<span class="line" id="L1393">                    }</span>
+<span class="line" id="L1394">                }</span>
+<span class="line" id="L1395">            } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L1396">                <span class="tok-kw">for</span> (listB, <span class="tok-number">0</span>..) |elemB, j| {</span>
+<span class="line" id="L1397">                    <span class="tok-kw">if</span> (visited[j]) {</span>
+<span class="line" id="L1398">                        <span class="tok-kw">continue</span>;</span>
+<span class="line" id="L1399">                    }</span>
+<span class="line" id="L1400">                    <span class="tok-kw">if</span> (deepEqual(elemB, elemA)) {</span>
+<span class="line" id="L1401">                        visited[j] = <span class="tok-null">true</span>;</span>
+<span class="line" id="L1402">                        found = <span class="tok-null">true</span>;</span>
+<span class="line" id="L1403">                        <span class="tok-kw">break</span>;</span>
+<span class="line" id="L1404">                    }</span>
+<span class="line" id="L1405">                }</span>
+<span class="line" id="L1406">            }</span>
+<span class="line" id="L1407"></span>
+<span class="line" id="L1408">            <span class="tok-kw">if</span> (!found) {</span>
+<span class="line" id="L1409">                <span class="tok-kw">try</span> extraA.append(i);</span>
+<span class="line" id="L1410">            }</span>
+<span class="line" id="L1411">        }</span>
+<span class="line" id="L1412">    } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L1413">        <span class="tok-kw">for</span> (listA, <span class="tok-number">0</span>..) |elemA, i| {</span>
+<span class="line" id="L1414">            <span class="tok-kw">var</span> found = <span class="tok-null">false</span>;</span>
+<span class="line" id="L1415"></span>
+<span class="line" id="L1416">            <span class="tok-kw">if</span> (b_is_tuple) {</span>
+<span class="line" id="L1417">                <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (listB, <span class="tok-number">0</span>..) |elemB, j| {</span>
+<span class="line" id="L1418">                    <span class="tok-kw">if</span> (!visited[j] <span class="tok-kw">and</span> deepEqual(elemB, elemA)) {</span>
+<span class="line" id="L1419">                        visited[j] = <span class="tok-null">true</span>;</span>
+<span class="line" id="L1420">                        found = <span class="tok-null">true</span>;</span>
+<span class="line" id="L1421">                    }</span>
+<span class="line" id="L1422">                }</span>
+<span class="line" id="L1423">            } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L1424">                <span class="tok-kw">for</span> (listB, <span class="tok-number">0</span>..) |elemB, j| {</span>
+<span class="line" id="L1425">                    <span class="tok-kw">if</span> (visited[j]) {</span>
+<span class="line" id="L1426">                        <span class="tok-kw">continue</span>;</span>
+<span class="line" id="L1427">                    }</span>
+<span class="line" id="L1428">                    <span class="tok-kw">if</span> (deepEqual(elemB, elemA)) {</span>
+<span class="line" id="L1429">                        visited[j] = <span class="tok-null">true</span>;</span>
+<span class="line" id="L1430">                        found = <span class="tok-null">true</span>;</span>
+<span class="line" id="L1431">                        <span class="tok-kw">break</span>;</span>
+<span class="line" id="L1432">                    }</span>
+<span class="line" id="L1433">                }</span>
+<span class="line" id="L1434">            }</span>
+<span class="line" id="L1435"></span>
+<span class="line" id="L1436">            <span class="tok-kw">if</span> (!found) {</span>
+<span class="line" id="L1437">                <span class="tok-kw">try</span> extraA.append(i);</span>
+<span class="line" id="L1438">            }</span>
+<span class="line" id="L1439">        }</span>
+<span class="line" id="L1440">    }</span>
+<span class="line" id="L1441"></span>
+<span class="line" id="L1442">    <span class="tok-kw">if</span> (b_is_tuple) {</span>
+<span class="line" id="L1443">        <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (visited, <span class="tok-number">0</span>..) |seen, i| {</span>
+<span class="line" id="L1444">            <span class="tok-kw">if</span> (!seen) {</span>
+<span class="line" id="L1445">                <span class="tok-kw">try</span> extraB.append(i);</span>
+<span class="line" id="L1446">            }</span>
+<span class="line" id="L1447">        }</span>
+<span class="line" id="L1448">    } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L1449">        <span class="tok-kw">for</span> (visited, <span class="tok-number">0</span>..) |seen, i| {</span>
+<span class="line" id="L1450">            <span class="tok-kw">if</span> (seen) {</span>
+<span class="line" id="L1451">                <span class="tok-kw">continue</span>;</span>
+<span class="line" id="L1452">            }</span>
+<span class="line" id="L1453"></span>
+<span class="line" id="L1454">            <span class="tok-kw">try</span> extraB.append(i);</span>
+<span class="line" id="L1455">        }</span>
+<span class="line" id="L1456">    }</span>
+<span class="line" id="L1457"></span>
+<span class="line" id="L1458">    <span class="tok-kw">return</span> [_][]<span class="tok-type">usize</span>{</span>
+<span class="line" id="L1459">        <span class="tok-kw">try</span> extraA.toOwnedSlice(),</span>
+<span class="line" id="L1460">        <span class="tok-kw">try</span> extraB.toOwnedSlice(),</span>
+<span class="line" id="L1461">    };</span>
+<span class="line" id="L1462">}</span>
+<span class="line" id="L1463"></span>
 </code></pre></body>
 </html>
