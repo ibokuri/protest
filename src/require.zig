@@ -139,175 +139,6 @@ fn isList(list: anytype) bool {
     };
 }
 
-fn isEmpty(list: anytype) bool {
-    std.debug.assert(isList(list));
-    return list.len == 0;
-}
-
-fn diffLists(listA: anytype, listB: anytype) ![2][]usize {
-    std.debug.assert(isList(listA) and isList(listB));
-
-    const a_is_tuple = @typeInfo(@TypeOf(listA)) == .Struct;
-    const b_is_tuple = @typeInfo(@TypeOf(listB)) == .Struct;
-
-    var visited = [_]bool{false} ** listB.len;
-
-    var extraA = std.ArrayList(usize).init(test_ally);
-    var extraB = std.ArrayList(usize).init(test_ally);
-    defer extraA.deinit();
-    defer extraB.deinit();
-
-    if (a_is_tuple) {
-        inline for (listA, 0..) |elemA, i| {
-            var found = false;
-
-            if (b_is_tuple) {
-                inline for (listB, 0..) |elemB, j| {
-                    if (!visited[j] and deepEqual(elemB, elemA)) {
-                        visited[j] = true;
-                        found = true;
-                    }
-                }
-            } else {
-                for (listB, 0..) |elemB, j| {
-                    if (visited[j]) {
-                        continue;
-                    }
-                    if (deepEqual(elemB, elemA)) {
-                        visited[j] = true;
-                        found = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!found) {
-                try extraA.append(i);
-            }
-        }
-    } else {
-        for (listA, 0..) |elemA, i| {
-            var found = false;
-
-            if (b_is_tuple) {
-                inline for (listB, 0..) |elemB, j| {
-                    if (!visited[j] and deepEqual(elemB, elemA)) {
-                        visited[j] = true;
-                        found = true;
-                    }
-                }
-            } else {
-                for (listB, 0..) |elemB, j| {
-                    if (visited[j]) {
-                        continue;
-                    }
-                    if (deepEqual(elemB, elemA)) {
-                        visited[j] = true;
-                        found = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!found) {
-                try extraA.append(i);
-            }
-        }
-    }
-
-    if (b_is_tuple) {
-        inline for (visited, 0..) |seen, i| {
-            if (!seen) {
-                try extraB.append(i);
-            }
-        }
-    } else {
-        for (visited, 0..) |seen, i| {
-            if (seen) {
-                continue;
-            }
-
-            try extraB.append(i);
-        }
-    }
-
-    return [_][]usize{
-        try extraA.toOwnedSlice(),
-        try extraB.toOwnedSlice(),
-    };
-}
-
-fn formatDiffList(listA: anytype, listB: anytype, extraA: []usize, extraB: []usize) ![]const u8 {
-    const ListA = @TypeOf(listA);
-    const ListB = @TypeOf(listB);
-
-    var fail_msg = std.ArrayList(u8).init(test_ally);
-    const fail_msg_writer = fail_msg.writer();
-    errdefer fail_msg.deinit();
-
-    try std.fmt.format(fail_msg_writer, "elements differ", .{});
-    if (extraA.len > 0) {
-        try std.fmt.format(fail_msg_writer, "\n\nextra elements in list A:\n", .{});
-        try std.fmt.format(fail_msg_writer, "{{ ", .{});
-        for (extraA, 0..) |idx, i| {
-            if (!(@typeInfo(ListA) == .Struct)) {
-                if (i != extraA.len - 1) {
-                    try std.fmt.format(fail_msg_writer, "{any}, ", .{listA[idx]});
-                } else {
-                    try std.fmt.format(fail_msg_writer, "{any}", .{listA[idx]});
-                }
-            } else {
-                if (i != extraA.len - 1) {
-                    inline for (listA, 0..) |elemA, j| {
-                        if (j == idx) {
-                            try std.fmt.format(fail_msg_writer, "{any}, ", .{elemA});
-                        }
-                    }
-                } else {
-                    inline for (listA, 0..) |elemA, j| {
-                        if (j == idx) {
-                            try std.fmt.format(fail_msg_writer, "{any}", .{elemA});
-                        }
-                    }
-                }
-            }
-        }
-        try std.fmt.format(fail_msg_writer, " }}", .{});
-    }
-    if (extraB.len > 0) {
-        try std.fmt.format(fail_msg_writer, "\n\nextra elements in list B:\n", .{});
-        try std.fmt.format(fail_msg_writer, "{{ ", .{});
-        for (extraB, 0..) |idx, i| {
-            if (!(@typeInfo(ListB) == .Struct)) {
-                if (i != extraB.len - 1) {
-                    try std.fmt.format(fail_msg_writer, "{any}, ", .{listB[idx]});
-                } else {
-                    try std.fmt.format(fail_msg_writer, "{any}", .{listB[idx]});
-                }
-            } else {
-                if (i != extraB.len - 1) {
-                    inline for (listB, 0..) |elemB, j| {
-                        if (j == idx) {
-                            try std.fmt.format(fail_msg_writer, "{any}, ", .{elemB});
-                        }
-                    }
-                } else {
-                    inline for (listB, 0..) |elemB, j| {
-                        if (j == idx) {
-                            try std.fmt.format(fail_msg_writer, "{any}", .{elemB});
-                        }
-                    }
-                }
-            }
-        }
-        try std.fmt.format(fail_msg_writer, " }}", .{});
-    }
-    try std.fmt.format(fail_msg_writer, "\n\nlistA:\n{any}", .{listA});
-    try std.fmt.format(fail_msg_writer, "\n\nlistB:\n{any}\n", .{listB});
-
-    return try fail_msg.toOwnedSlice();
-}
-
 /// Asserts that two values are equal.
 ///
 /// ## Examples
@@ -1297,6 +1128,11 @@ fn deepEqual(expected: anytype, value: anytype) bool {
     return true;
 }
 
+fn isEmpty(list: anytype) bool {
+    std.debug.assert(isList(list));
+    return list.len == 0;
+}
+
 fn isString(comptime T: type) bool {
     comptime {
         // Only pointer types can be strings, no optionals
@@ -1435,4 +1271,189 @@ fn containsElement(haystack: anytype, needle: anytype) bool {
     }
 
     return false;
+}
+
+fn diffLists(listA: anytype, listB: anytype) ![2][]usize {
+    std.debug.assert(isList(listA) and isList(listB));
+
+    const a_is_tuple = @typeInfo(@TypeOf(listA)) == .Struct;
+    const b_is_tuple = @typeInfo(@TypeOf(listB)) == .Struct;
+
+    var visited = [_]bool{false} ** listB.len;
+
+    var extraA = std.ArrayList(usize).init(test_ally);
+    var extraB = std.ArrayList(usize).init(test_ally);
+    defer extraA.deinit();
+    defer extraB.deinit();
+
+    if (a_is_tuple) {
+        inline for (listA, 0..) |elemA, i| {
+            var found = false;
+
+            if (b_is_tuple) {
+                inline for (listB, 0..) |elemB, j| {
+                    if (!visited[j] and deepEqual(elemB, elemA)) {
+                        visited[j] = true;
+                        found = true;
+                    }
+                }
+            } else {
+                for (listB, 0..) |elemB, j| {
+                    if (visited[j]) {
+                        continue;
+                    }
+                    if (deepEqual(elemB, elemA)) {
+                        visited[j] = true;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!found) {
+                try extraA.append(i);
+            }
+        }
+    } else {
+        for (listA, 0..) |elemA, i| {
+            var found = false;
+
+            if (b_is_tuple) {
+                inline for (listB, 0..) |elemB, j| {
+                    if (!visited[j] and deepEqual(elemB, elemA)) {
+                        visited[j] = true;
+                        found = true;
+                    }
+                }
+            } else {
+                for (listB, 0..) |elemB, j| {
+                    if (visited[j]) {
+                        continue;
+                    }
+                    if (deepEqual(elemB, elemA)) {
+                        visited[j] = true;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!found) {
+                try extraA.append(i);
+            }
+        }
+    }
+
+    if (b_is_tuple) {
+        inline for (visited, 0..) |seen, i| {
+            if (!seen) {
+                try extraB.append(i);
+            }
+        }
+    } else {
+        for (visited, 0..) |seen, i| {
+            if (seen) {
+                continue;
+            }
+
+            try extraB.append(i);
+        }
+    }
+
+    return [_][]usize{
+        try extraA.toOwnedSlice(),
+        try extraB.toOwnedSlice(),
+    };
+}
+
+fn formatDiffList(
+    listA: anytype,
+    listB: anytype,
+    extraA: []usize,
+    extraB: []usize,
+) ![]const u8 {
+    var fail_msg = std.ArrayList(u8).init(test_ally);
+    const fail_msg_writer = fail_msg.writer();
+    errdefer fail_msg.deinit();
+
+    try std.fmt.format(fail_msg_writer, "elements differ", .{});
+
+    try formatExtra(fail_msg_writer, extraA, 'A', listA);
+    try formatExtra(fail_msg_writer, extraB, 'B', listB);
+
+    try std.fmt.format(fail_msg_writer, "\n\nlistA:\n", .{});
+    try formatList(fail_msg_writer, listA);
+    try std.fmt.format(fail_msg_writer, "\n\nlistB:\n", .{});
+    try formatList(fail_msg_writer, listB);
+    try std.fmt.format(fail_msg_writer, "\n", .{});
+
+    return try fail_msg.toOwnedSlice();
+}
+
+fn formatList(writer: anytype, list: anytype) !void {
+    std.debug.assert(isList(list));
+
+    try std.fmt.format(writer, "{{ ", .{});
+
+    switch (@typeInfo(@TypeOf(list))) {
+        .Struct => inline for (list, 0..) |elem, i| {
+            if (i != list.len - 1) {
+                try std.fmt.format(writer, "{any}, ", .{elem});
+            } else {
+                try std.fmt.format(writer, "{any}", .{elem});
+            }
+        },
+        else => for (list, 0..) |elem, i| {
+            if (i != list.len - 1) {
+                try std.fmt.format(writer, "{any}, ", .{elem});
+            } else {
+                try std.fmt.format(writer, "{any}", .{elem});
+            }
+        },
+    }
+
+    try std.fmt.format(writer, " }}", .{});
+}
+
+fn formatExtra(
+    writer: anytype,
+    extra: []usize,
+    comptime letter: comptime_int,
+    list: anytype,
+) !void {
+    std.debug.assert(isList(list));
+
+    if (extra.len == 0) {
+        return;
+    }
+
+    try std.fmt.format(writer, "\n\nextra elements in list {u}:\n", .{letter});
+    try std.fmt.format(writer, "{{ ", .{});
+
+    switch (@typeInfo(@TypeOf(list))) {
+        .Struct => for (extra, 0..) |idx, i| {
+            if (i != extra.len - 1) {
+                inline for (list, 0..) |elemA, j| {
+                    if (j == idx) {
+                        try std.fmt.format(writer, "{any}, ", .{elemA});
+                    }
+                }
+            } else {
+                inline for (list, 0..) |elemA, j| {
+                    if (j == idx) {
+                        try std.fmt.format(writer, "{any}", .{elemA});
+                    }
+                }
+            }
+        },
+        else => for (extra, 0..) |idx, i| {
+            if (i != extra.len - 1) {
+                try std.fmt.format(writer, "{any}, ", .{list[idx]});
+            } else {
+                try std.fmt.format(writer, "{any}", .{list[idx]});
+            }
+        },
+    }
+
+    try std.fmt.format(writer, " }}", .{});
 }
