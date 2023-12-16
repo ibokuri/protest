@@ -124,21 +124,6 @@ pub inline fn elementsMatchf(
     try failf(fail_msg, msg, args);
 }
 
-fn isList(list: anytype) bool {
-    const List = @TypeOf(list);
-
-    return switch (@typeInfo(List)) {
-        .Array => true,
-        .Pointer => |info| ret: {
-            const is_slice = info.size == .Slice;
-            const is_ptr_to_array = info.size == .One and @typeInfo(std.meta.Child(List)) == .Array;
-            break :ret is_slice or is_ptr_to_array;
-        },
-        .Struct => |info| info.is_tuple,
-        else => false,
-    };
-}
-
 /// Asserts that two values are equal.
 ///
 /// ## Examples
@@ -1131,6 +1116,21 @@ fn deepEqual(expected: anytype, value: anytype) bool {
 fn isEmpty(list: anytype) bool {
     std.debug.assert(isList(list));
     return list.len == 0;
+}
+
+fn isList(list: anytype) bool {
+    const List = @TypeOf(list);
+
+    return switch (@typeInfo(List)) {
+        .Array => true,
+        .Pointer => |info| ret: {
+            const is_slice = info.size == .Slice;
+            const is_ptr_to_array = info.size == .One and @typeInfo(std.meta.Child(List)) == .Array;
+            break :ret is_slice or is_ptr_to_array;
+        },
+        .Struct => |info| info.is_tuple,
+        else => false,
+    };
 }
 
 fn isString(comptime T: type) bool {
