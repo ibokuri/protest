@@ -163,29 +163,45 @@ pub inline fn equalf(
             if (expected_str and value_str) {
                 break :f 
                 \\Not equal:
-                \\expected: "{s}"
-                \\actual:   "{s}"
+                \\
+                \\expected:
+                \\"{s}"
+                \\
+                \\actual:
+                \\"{s}"
                 ;
             }
             if (!expected_str and !value_str) {
                 break :f 
                 \\Not equal:
-                \\expected: {any}
-                \\actual:   {any}
+                \\
+                \\expected:
+                \\{any}
+                \\
+                \\actual:
+                \\{any}
                 ;
             }
             if (expected_str) {
                 break :f 
                 \\Not equal:
-                \\expected: "{s}"
-                \\actual:   {any}
+                \\
+                \\expected:
+                \\"{s}"
+                \\
+                \\actual:
+                \\{any}
                 ;
             }
             if (value_str) {
                 break :f 
                 \\Not equal:
-                \\expected: {any}
-                \\actual:   "{s}"
+                \\
+                \\expected:
+                \\{any}
+                \\
+                \\actual:
+                \\"{s}"
                 ;
             }
         };
