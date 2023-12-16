@@ -97,7 +97,7 @@ pub inline fn elementsMatchf(
     args: anytype,
 ) !void {
     comptime {
-        if (!isList(listA)) {
+        if (!isList(@TypeOf(listA))) {
             const err = fmt.comptimePrint(
                 "expected 'listA' to be a list, found '{s}'",
                 .{@typeName(@TypeOf(listA))},
@@ -105,7 +105,7 @@ pub inline fn elementsMatchf(
             @compileError(err);
         }
 
-        if (!isList(listB)) {
+        if (!isList(@TypeOf(listB))) {
             const err = fmt.comptimePrint(
                 "expected 'listB' to be a list, found '{s}'",
                 .{@typeName(@TypeOf(listB))},
@@ -767,7 +767,7 @@ pub inline fn lenf(
     const List = @TypeOf(list);
 
     comptime {
-        if (!isList(list)) {
+        if (!isList(List)) {
             const err = fmt.comptimePrint(
                 "expected 'list' to be a list, found '{s}'",
                 .{@typeName(List)},
@@ -1002,23 +1002,27 @@ fn checkComparable(comptime T: type) void {
 }
 
 fn isEmpty(list: anytype) bool {
-    assert(isList(list));
-    return list.len == 0;
+    assert(isList(@TypeOf(list)));
+
+    return switch (@typeInfo(@TypeOf(list))) {
+        .Pointer => |info| if (info.size == .One) list.*.len == 0,
+        else => list.len == 0,
+    };
 }
 
-fn isList(list: anytype) bool {
-    const List = @TypeOf(list);
-
-    return switch (@typeInfo(List)) {
-        .Array => true,
-        .Pointer => |info| ret: {
-            const is_slice = info.size == .Slice;
-            const is_ptr_to_array = info.size == .One and @typeInfo(meta.Child(List)) == .Array;
-            break :ret is_slice or is_ptr_to_array;
-        },
-        .Struct => |info| info.is_tuple,
-        else => false,
-    };
+fn isList(comptime List: type) bool {
+    comptime {
+        return switch (@typeInfo(List)) {
+            .Array => true,
+            .Pointer => |info| ret: {
+                const is_slice = info.size == .Slice;
+                const is_ptr_to_array = info.size == .One and @typeInfo(meta.Child(List)) == .Array;
+                break :ret is_slice or is_ptr_to_array;
+            },
+            .Struct => |info| info.is_tuple,
+            else => false,
+        };
+    }
 }
 
 fn isString(comptime T: type) bool {
@@ -1092,7 +1096,7 @@ fn formatExtra(
     comptime letter: comptime_int,
     list: anytype,
 ) !void {
-    assert(isList(list));
+    assert(isList(@TypeOf(list)));
 
     if (extra.len == 0) {
         return;
@@ -1130,7 +1134,7 @@ fn formatExtra(
 }
 
 fn formatList(writer: anytype, list: anytype) !void {
-    assert(isList(list));
+    assert(isList(@TypeOf(list)));
 
     try fmt.format(writer, "{{ ", .{});
 
@@ -1360,7 +1364,13 @@ fn deepEqual(expected: anytype, value: anytype) bool {
     const expected_info = @typeInfo(Expected);
     const Value = @TypeOf(value);
 
-    if (Value != Expected) {
+    const e_is_str = comptime isString(Expected);
+    const v_is_str = comptime isString(Value);
+    if (e_is_str) {
+        if (!v_is_str) {
+            return false;
+        }
+    } else if (Value != Expected) {
         return false;
     }
 
@@ -1438,7 +1448,16 @@ fn deepEqual(expected: anytype, value: anytype) bool {
             },
             .One => switch (@typeInfo(info.child)) {
                 .Fn, .Opaque => if (value != expected) return false,
-                else => return deepEqual(expected.*, value.*),
+                else => if (e_is_str) {
+                    comptime assert(v_is_str);
+
+                    if (expected.len != value.len) return false;
+                    for (expected, value) |e, v| {
+                        if (!deepEqual(e, v)) return false;
+                    }
+                } else {
+                    return deepEqual(expected.*, value.*);
+                },
             },
             .C, .Many => if (value != expected) return false,
         },
@@ -1469,7 +1488,7 @@ fn deepEqual(expected: anytype, value: anytype) bool {
 }
 
 fn diffLists(listA: anytype, listB: anytype) ![2][]usize {
-    assert(isList(listA) and isList(listB));
+    assert(isList(@TypeOf(listA)) and isList(@TypeOf(listB)));
 
     const a_is_tuple = @typeInfo(@TypeOf(listA)) == .Struct;
     const b_is_tuple = @typeInfo(@TypeOf(listB)) == .Struct;
