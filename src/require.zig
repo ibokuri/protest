@@ -96,15 +96,22 @@ pub inline fn elementsMatchf(
     comptime msg: []const u8,
     args: anytype,
 ) !void {
-    const a_is_list = comptime isList(listA);
-    const b_is_list = comptime isList(listA);
-    if (!a_is_list or !b_is_list) {
-        const fail_msg = try sprintf(
-            "'{}' has an unsupported type: {}, expecting array, slice, or tuple",
-            if (!a_is_list) .{ listA, @typeName(@TypeOf(listA)) } else .{ listB, @typeName(@TypeOf(listB)) },
-        );
-        defer test_ally.free(fail_msg);
-        try failf(fail_msg, msg, args);
+    comptime {
+        if (!isList(listA)) {
+            const err = fmt.comptimePrint(
+                "expected 'listA' to be a list, found '{s}'",
+                .{@typeName(@TypeOf(listA))},
+            );
+            @compileError(err);
+        }
+
+        if (!isList(listB)) {
+            const err = fmt.comptimePrint(
+                "expected 'listB' to be a list, found '{s}'",
+                .{@typeName(@TypeOf(listB))},
+            );
+            @compileError(err);
+        }
     }
 
     if (isEmpty(listA) and isEmpty(listB)) {
@@ -1170,7 +1177,17 @@ fn containsElement(haystack: anytype, needle: anytype) bool {
     //
     // `haystack` must be an array, tuple, slice, or string.
     const haystack_is_valid = comptime switch (haystack_info) {
-        .Pointer => |info| info.size == .Slice or haystack_is_str,
+        .Pointer => |info| is_valid: {
+            if (info.size == .Slice) {
+                break :is_valid true;
+            }
+
+            if (info.size == .One and @typeInfo(info.child) == .Array) {
+                break :is_valid true;
+            }
+
+            break :is_valid haystack_is_str;
+        },
         .Array => true,
         .Struct => |info| info.is_tuple,
         else => false,
@@ -1194,16 +1211,25 @@ fn containsElement(haystack: anytype, needle: anytype) bool {
     // If `haystack` is a tuple, `needle` must be one of the child types of
     // `haystack`.
     const needle_is_valid = comptime switch (haystack_info) {
-        .Pointer => is_valid: {
+        .Pointer => |info| is_valid: {
             if (haystack_is_str) {
-                if (needle_is_str or Needle == comptime_int or Needle == u8) {
-                    break :is_valid true;
+                switch (Needle) {
+                    comptime_int, u8 => break :is_valid true,
+                    else => {
+                        if (needle_is_str) {
+                            break :is_valid true;
+                        }
+                    },
                 }
-            } else if (Needle == meta.Child(Haystack)) {
-                break :is_valid true;
+
+                break :is_valid false;
             }
 
-            break :is_valid false;
+            break :is_valid switch (info.size) {
+                .Slice => Needle == meta.Child(Haystack),
+                .One => Needle == meta.Child(meta.Child(Haystack)),
+                else => false,
+            };
         },
         .Array => Needle == meta.Child(Haystack),
         .Struct => is_valid: {
@@ -1242,7 +1268,7 @@ fn containsElement(haystack: anytype, needle: anytype) bool {
 
                 return false;
             } else {
-                comptime assert(h_info.size == .Slice);
+                comptime assert(h_info.size == .Slice or h_info.size == .One);
 
                 for (haystack) |elem| {
                     if (deepEqual(needle, elem)) {
