@@ -740,6 +740,64 @@ pub inline fn isTruef(
     }
 }
 
+/// Asserts that the specified list has a specific length.
+///
+/// ## Examples
+///
+/// ```
+/// try require.len(.{ 1, 2, 3 }, 3);
+/// ```
+pub inline fn len(list: anytype, length: usize) !void {
+    try lenf(list, length, "", .{});
+}
+
+/// Asserts that the specified list has a specific length.
+///
+/// ## Examples
+///
+/// ```
+/// try require.lenf(.{ 1, 2, 3 }, 3, "error message {s}", .{"formatted"});
+/// ```
+pub inline fn lenf(
+    list: anytype,
+    length: usize,
+    comptime msg: []const u8,
+    args: anytype,
+) !void {
+    const List = @TypeOf(list);
+
+    comptime {
+        if (!isList(list)) {
+            const err = fmt.comptimePrint(
+                "expected 'list' to be a list, found '{s}'",
+                .{@typeName(List)},
+            );
+            @compileError(err);
+        }
+
+        checkArgs(args);
+    }
+
+    const list_len: usize = switch (@typeInfo(List)) {
+        inline .Array, .Struct => list.len,
+        .Pointer => |info| if (info.size == .Slice) list.len else list.*.len,
+        else => unreachable,
+    };
+
+    if (list_len != length) {
+        const f = comptime f: {
+            if (isString(List)) {
+                break :f "\"{s}\" should have {} item(s), but has {}";
+            }
+            break :f "{any} should have {} item(s), but has {}";
+        };
+        const fail_msg = try sprintf(f, .{ list, length, list_len });
+        defer test_ally.free(fail_msg);
+
+        try failf(fail_msg, msg, args);
+    }
+}
+
 /// Asserts that the specified string, array, slice, or tuple does not contain
 /// the specified substring or element.
 ///
@@ -1103,13 +1161,13 @@ const LabelContent = struct {
 
 fn labelOutput(contents: []const LabelContent) ![]const u8 {
     const longest_label_len: usize = longest_label_len: {
-        var len: usize = 0;
+        var longest: usize = 0;
         for (contents) |v| {
-            if (v.label.len > len) {
-                len = v.label.len;
+            if (v.label.len > longest) {
+                longest = v.label.len;
             }
         }
-        break :longest_label_len len;
+        break :longest_label_len longest;
     };
 
     var output = ArrayList(u8).init(test_ally);
