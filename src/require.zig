@@ -57,7 +57,7 @@ pub inline fn containsf(
             \\{any} does not contain "{s}"
             ;
         };
-        const fail_msg = try failMsg(fmt, .{ haystack, needle });
+        const fail_msg = try sprintf(fmt, .{ haystack, needle });
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg, msg, args);
@@ -95,7 +95,7 @@ pub inline fn elementsMatchf(
     const a_is_list = comptime isList(listA);
     const b_is_list = comptime isList(listA);
     if (!a_is_list or !b_is_list) {
-        const fail_msg = try failMsg(
+        const fail_msg = try sprintf(
             "'{}' has an unsupported type: {}, expecting array, slice, or tuple",
             if (!a_is_list) .{ listA, @typeName(@TypeOf(listA)) } else .{ listB, @typeName(@TypeOf(listB)) },
         );
@@ -188,7 +188,7 @@ pub inline fn equalf(
                 ;
             }
         };
-        const fail_msg = try failMsg(fmt, .{ expected, value });
+        const fail_msg = try sprintf(fmt, .{ expected, value });
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg, msg, args);
@@ -229,14 +229,14 @@ pub inline fn equalErrorf(
     const info = @typeInfo(@TypeOf(value));
 
     if (info != .ErrorSet) {
-        const fail_msg = try failMsg("Expected error, found '{}'", .{value});
+        const fail_msg = try sprintf("Expected error, found '{}'", .{value});
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg, msg, args);
     }
 
     if (value != expected) {
-        const fail_msg = try failMsg(
+        const fail_msg = try sprintf(
             \\Error not equal:
             \\expected: {}
             \\value:   {}
@@ -278,7 +278,7 @@ pub inline fn equalTypef(
     const Value = @TypeOf(value);
 
     if (Expected != Value) {
-        const fail_msg = try failMsg(
+        const fail_msg = try sprintf(
             "Expected type '{s}', found '{s}'",
             .{ @typeName(Expected), @typeName(Value) },
         );
@@ -374,7 +374,7 @@ pub inline fn isErrorf(
     comptime checkArgs(args);
 
     if (@typeInfo(@TypeOf(value)) != .ErrorSet) {
-        const fail_msg = try failMsg("Expected error, found '{any}'", .{value});
+        const fail_msg = try sprintf("Expected error, found '{any}'", .{value});
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg, msg, args);
@@ -441,7 +441,7 @@ pub inline fn isGreaterf(
     comptime checkComparable(@TypeOf(v1));
 
     if (v1 <= v2) {
-        const fail_msg = try failMsg(
+        const fail_msg = try sprintf(
             "'{}' is not greater than '{}'",
             .{ v1, v2 },
         );
@@ -481,7 +481,7 @@ pub inline fn isGreaterOrEqualf(
     comptime checkComparable(@TypeOf(v1));
 
     if (v1 < v2) {
-        const fail_msg = try failMsg(
+        const fail_msg = try sprintf(
             "'{}' is not greater than or equal to '{}'",
             .{ v1, v2 },
         );
@@ -521,7 +521,7 @@ pub inline fn isLessf(
     comptime checkComparable(@TypeOf(v1));
 
     if (v1 >= v2) {
-        const fail_msg = try failMsg(
+        const fail_msg = try sprintf(
             "'{}' is not less than '{}'",
             .{ v1, v2 },
         );
@@ -561,7 +561,7 @@ pub inline fn isLessOrEqualf(
     comptime checkComparable(@TypeOf(v1));
 
     if (v1 > v2) {
-        const fail_msg = try failMsg(
+        const fail_msg = try sprintf(
             "'{}' is not less than or equal to '{}'",
             .{ v1, v2 },
         );
@@ -600,7 +600,7 @@ pub inline fn isNegativef(
     comptime checkComparable(@TypeOf(value));
 
     if (value < 0) {
-        const fail_msg = try failMsg("'{}' is not negative", .{value});
+        const fail_msg = try sprintf("'{}' is not negative", .{value});
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg.items, msg, args);
@@ -642,8 +642,8 @@ pub inline fn isNullf(
 
     const fmt = "Expected null value, found '{any}'";
     const fail_msg = try switch (info) {
-        .Optional => failMsg(fmt, .{value.?}),
-        else => failMsg(fmt, .{value}),
+        .Optional => sprintf(fmt, .{value.?}),
+        else => sprintf(fmt, .{value}),
     };
     defer test_ally.free(fail_msg);
 
@@ -679,7 +679,7 @@ pub inline fn isPositivef(
     comptime checkComparable(@TypeOf(value));
 
     if (value >= 0) {
-        const fail_msg = try failMsg("'{}' is not positive", .{value});
+        const fail_msg = try sprintf("'{}' is not positive", .{value});
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg.items, msg, args);
@@ -770,7 +770,7 @@ pub inline fn notContainsf(
             \\{any} should not contain "{s}"
             ;
         };
-        const fail_msg = try failMsg(fmt, .{ haystack, needle });
+        const fail_msg = try sprintf(fmt, .{ haystack, needle });
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg, msg, args);
@@ -803,7 +803,7 @@ pub inline fn notErrorf(
     comptime checkArgs(args);
 
     if (@typeInfo(@TypeOf(value)) == .ErrorSet) {
-        const fail_msg = try failMsg(
+        const fail_msg = try sprintf(
             "Expected non-error, found '{}'",
             .{value},
         );
@@ -849,7 +849,7 @@ pub inline fn notEqualf(
 
             break :fmt "Should not be: {any}";
         };
-        const fail_msg = try failMsg(fmt, .{value});
+        const fail_msg = try sprintf(fmt, .{value});
         defer test_ally.free(fail_msg);
 
         try failf(fail_msg, msg, args);
@@ -888,14 +888,9 @@ pub inline fn notNullf(
     }
 }
 
-fn failMsg(comptime fmt: []const u8, args: anytype) ![]const u8 {
-    var msg = std.ArrayList(u8).init(test_ally);
-    errdefer msg.deinit();
-
-    try std.fmt.format(msg.writer(), fmt, args);
-
-    return msg.toOwnedSlice();
-}
+////////////////////////////////////////////////////////////////////////////////
+// Validation
+////////////////////////////////////////////////////////////////////////////////
 
 fn checkArgs(args: anytype) void {
     comptime {
@@ -925,6 +920,159 @@ fn checkComparable(comptime T: type) void {
             @compileError(err);
         }
     }
+}
+
+fn isEmpty(list: anytype) bool {
+    std.debug.assert(isList(list));
+    return list.len == 0;
+}
+
+fn isList(list: anytype) bool {
+    const List = @TypeOf(list);
+
+    return switch (@typeInfo(List)) {
+        .Array => true,
+        .Pointer => |info| ret: {
+            const is_slice = info.size == .Slice;
+            const is_ptr_to_array = info.size == .One and @typeInfo(std.meta.Child(List)) == .Array;
+            break :ret is_slice or is_ptr_to_array;
+        },
+        .Struct => |info| info.is_tuple,
+        else => false,
+    };
+}
+
+fn isString(comptime T: type) bool {
+    comptime {
+        // Only pointer types can be strings, no optionals
+        const info = @typeInfo(T);
+        if (info != .Pointer) return false;
+        const ptr = &info.Pointer;
+
+        // Check for CV qualifiers that would prevent coerction to []const u8
+        if (ptr.is_volatile or ptr.is_allowzero) return false;
+
+        // If it's already a slice, simple check.
+        if (ptr.size == .Slice) {
+            return ptr.child == u8;
+        }
+
+        // Otherwise check if it's an array type that coerces to slice.
+        if (ptr.size == .One) {
+            const child = @typeInfo(ptr.child);
+            if (child == .Array) {
+                const arr = &child.Array;
+                return arr.child == u8;
+            }
+        }
+
+        return false;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Formatting
+////////////////////////////////////////////////////////////////////////////////
+
+fn sprintf(comptime fmt: []const u8, args: anytype) ![]const u8 {
+    var msg = std.ArrayList(u8).init(test_ally);
+    errdefer msg.deinit();
+
+    try std.fmt.format(msg.writer(), fmt, args);
+
+    return msg.toOwnedSlice();
+}
+
+fn formatDiffList(
+    listA: anytype,
+    listB: anytype,
+    extraA: []usize,
+    extraB: []usize,
+) ![]const u8 {
+    var fail_msg = std.ArrayList(u8).init(test_ally);
+    const fail_msg_writer = fail_msg.writer();
+    errdefer fail_msg.deinit();
+
+    try std.fmt.format(fail_msg_writer, "elements differ", .{});
+
+    try formatExtra(fail_msg_writer, extraA, 'A', listA);
+    try formatExtra(fail_msg_writer, extraB, 'B', listB);
+
+    try std.fmt.format(fail_msg_writer, "\n\nlistA:\n", .{});
+    try formatList(fail_msg_writer, listA);
+    try std.fmt.format(fail_msg_writer, "\n\nlistB:\n", .{});
+    try formatList(fail_msg_writer, listB);
+    try std.fmt.format(fail_msg_writer, "\n", .{});
+
+    return try fail_msg.toOwnedSlice();
+}
+
+fn formatExtra(
+    writer: anytype,
+    extra: []usize,
+    comptime letter: comptime_int,
+    list: anytype,
+) !void {
+    std.debug.assert(isList(list));
+
+    if (extra.len == 0) {
+        return;
+    }
+
+    try std.fmt.format(writer, "\n\nextra elements in list {u}:\n", .{letter});
+    try std.fmt.format(writer, "{{ ", .{});
+
+    switch (@typeInfo(@TypeOf(list))) {
+        .Struct => for (extra, 0..) |idx, i| {
+            if (i != extra.len - 1) {
+                inline for (list, 0..) |elemA, j| {
+                    if (j == idx) {
+                        try std.fmt.format(writer, "{any}, ", .{elemA});
+                    }
+                }
+            } else {
+                inline for (list, 0..) |elemA, j| {
+                    if (j == idx) {
+                        try std.fmt.format(writer, "{any}", .{elemA});
+                    }
+                }
+            }
+        },
+        else => for (extra, 0..) |idx, i| {
+            if (i != extra.len - 1) {
+                try std.fmt.format(writer, "{any}, ", .{list[idx]});
+            } else {
+                try std.fmt.format(writer, "{any}", .{list[idx]});
+            }
+        },
+    }
+
+    try std.fmt.format(writer, " }}", .{});
+}
+
+fn formatList(writer: anytype, list: anytype) !void {
+    std.debug.assert(isList(list));
+
+    try std.fmt.format(writer, "{{ ", .{});
+
+    switch (@typeInfo(@TypeOf(list))) {
+        .Struct => inline for (list, 0..) |elem, i| {
+            if (i != list.len - 1) {
+                try std.fmt.format(writer, "{any}, ", .{elem});
+            } else {
+                try std.fmt.format(writer, "{any}", .{elem});
+            }
+        },
+        else => for (list, 0..) |elem, i| {
+            if (i != list.len - 1) {
+                try std.fmt.format(writer, "{any}, ", .{elem});
+            } else {
+                try std.fmt.format(writer, "{any}", .{elem});
+            }
+        },
+    }
+
+    try std.fmt.format(writer, " }}", .{});
 }
 
 const LabelContent = struct {
@@ -998,6 +1146,122 @@ fn indentMessageLines(msg: []const u8, longest_label_len: usize) ![]const u8 {
     }
 
     return output.toOwnedSlice();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Comparison
+////////////////////////////////////////////////////////////////////////////////
+
+fn containsElement(haystack: anytype, needle: anytype) bool {
+    const Haystack = @TypeOf(haystack);
+    const Needle = @TypeOf(needle);
+    const haystack_info = @typeInfo(Haystack);
+    const haystack_is_str = comptime isString(Haystack);
+    const needle_is_str = comptime isString(Needle);
+
+    // Check the type of `haystack`.
+    //
+    // `haystack` must be an array, tuple, slice, or string.
+    const haystack_is_valid = comptime switch (haystack_info) {
+        .Pointer => |info| info.size == .Slice or haystack_is_str,
+        .Array => true,
+        .Struct => |info| info.is_tuple,
+        else => false,
+    };
+
+    if (!haystack_is_valid) {
+        const err = std.fmt.comptimePrint(
+            "type is not searchable: {s}",
+            .{@typeName(Haystack)},
+        );
+        @compileError(err);
+    }
+
+    // Check the type of `needle`.
+    //
+    // If `haystack` is a string, `needle` can be a string, comptime_int, or u8.
+    //
+    // If `haystack` is an array or a non-string slice, `needle` must be the
+    // child type of `haystack`.
+    //
+    // If `haystack` is a tuple, `needle` must be one of the child types of
+    // `haystack`.
+    const needle_is_valid = comptime switch (haystack_info) {
+        .Pointer => is_valid: {
+            if (haystack_is_str) {
+                if (needle_is_str or Needle == comptime_int or Needle == u8) {
+                    break :is_valid true;
+                }
+            } else if (Needle == std.meta.Child(Haystack)) {
+                break :is_valid true;
+            }
+
+            break :is_valid false;
+        },
+        .Array => Needle == std.meta.Child(Haystack),
+        .Struct => is_valid: {
+            for (std.meta.fields(Haystack)) |f| {
+                if (Needle == f.type) {
+                    break :is_valid true;
+                }
+            }
+
+            break :is_valid false;
+        },
+        // UNREACHABLE: We've already checked that `haystack` is either an
+        // array, pointer, or tuple.
+        else => unreachable,
+    };
+
+    if (!needle_is_valid) {
+        const err = std.fmt.comptimePrint(
+            "invalid 'needle' type: {s}",
+            .{@typeName(Needle)},
+        );
+        @compileError(err);
+    }
+
+    // Search for `needle` in `haystack`.
+    switch (haystack_info) {
+        .Pointer => |h_info| {
+            if (haystack_is_str) {
+                if (needle_is_str) {
+                    if (std.mem.indexOfPos(u8, haystack, 0, needle)) |_| {
+                        return true;
+                    }
+                } else if (std.mem.indexOfPos(u8, haystack, 0, &.{needle})) |_| {
+                    return true;
+                }
+
+                return false;
+            } else {
+                comptime std.debug.assert(h_info.size == .Slice);
+
+                for (haystack) |elem| {
+                    if (deepEqual(needle, elem)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        },
+        .Array => inline for (haystack) |elem| {
+            if (deepEqual(needle, elem)) {
+                return true;
+            }
+        },
+        .Struct => inline for (haystack) |elem| {
+            if (deepEqual(needle, elem)) {
+                return true;
+            }
+        },
+        // UNREACHABLE: We've already checked that `haystack` is either an
+        // array, pointer, or tuple.
+        else => unreachable,
+    }
+
+    return false;
 }
 
 fn deepEqual(expected: anytype, value: anytype) bool {
@@ -1113,166 +1377,6 @@ fn deepEqual(expected: anytype, value: anytype) bool {
     return true;
 }
 
-fn isEmpty(list: anytype) bool {
-    std.debug.assert(isList(list));
-    return list.len == 0;
-}
-
-fn isList(list: anytype) bool {
-    const List = @TypeOf(list);
-
-    return switch (@typeInfo(List)) {
-        .Array => true,
-        .Pointer => |info| ret: {
-            const is_slice = info.size == .Slice;
-            const is_ptr_to_array = info.size == .One and @typeInfo(std.meta.Child(List)) == .Array;
-            break :ret is_slice or is_ptr_to_array;
-        },
-        .Struct => |info| info.is_tuple,
-        else => false,
-    };
-}
-
-fn isString(comptime T: type) bool {
-    comptime {
-        // Only pointer types can be strings, no optionals
-        const info = @typeInfo(T);
-        if (info != .Pointer) return false;
-        const ptr = &info.Pointer;
-
-        // Check for CV qualifiers that would prevent coerction to []const u8
-        if (ptr.is_volatile or ptr.is_allowzero) return false;
-
-        // If it's already a slice, simple check.
-        if (ptr.size == .Slice) {
-            return ptr.child == u8;
-        }
-
-        // Otherwise check if it's an array type that coerces to slice.
-        if (ptr.size == .One) {
-            const child = @typeInfo(ptr.child);
-            if (child == .Array) {
-                const arr = &child.Array;
-                return arr.child == u8;
-            }
-        }
-
-        return false;
-    }
-}
-
-fn containsElement(haystack: anytype, needle: anytype) bool {
-    const Haystack = @TypeOf(haystack);
-    const Needle = @TypeOf(needle);
-    const haystack_info = @typeInfo(Haystack);
-    const haystack_is_str = comptime isString(Haystack);
-    const needle_is_str = comptime isString(Needle);
-
-    // Check the type of `haystack`.
-    //
-    // `haystack` must be an array, tuple, slice, or string.
-    const haystack_is_valid = comptime switch (haystack_info) {
-        .Pointer => |info| info.size == .Slice or haystack_is_str,
-        .Array => true,
-        .Struct => |info| info.is_tuple,
-        else => false,
-    };
-
-    if (!haystack_is_valid) {
-        const err = std.fmt.comptimePrint(
-            "type is not searchable: {s}",
-            .{@typeName(Haystack)},
-        );
-        @compileError(err);
-    }
-
-    // Check the type of `needle`.
-    //
-    // If `haystack` is a string, `needle` can be a string, comptime_int, or u8.
-    //
-    // If `haystack` is an array or a non-string slice, `needle` must be the
-    // child type of `haystack`.
-    //
-    // If `haystack` is a tuple, `needle` must be one of the child types of
-    // `haystack`.
-    const needle_is_valid = comptime switch (haystack_info) {
-        .Pointer => is_valid: {
-            if (haystack_is_str) {
-                if (needle_is_str or Needle == comptime_int or Needle == u8) {
-                    break :is_valid true;
-                }
-            } else if (Needle == std.meta.Child(Haystack)) {
-                break :is_valid true;
-            }
-
-            break :is_valid false;
-        },
-        .Array => Needle == std.meta.Child(Haystack),
-        .Struct => is_valid: {
-            for (std.meta.fields(Haystack)) |f| {
-                if (Needle == f.type) {
-                    break :is_valid true;
-                }
-            }
-
-            break :is_valid false;
-        },
-        // UNREACHABLE: We've already checked that `haystack` is either an
-        // array, pointer, or tuple.
-        else => unreachable,
-    };
-
-    if (!needle_is_valid) {
-        const err = std.fmt.comptimePrint(
-            "invalid 'needle' type: {s}",
-            .{@typeName(Needle)},
-        );
-        @compileError(err);
-    }
-
-    // Search for `needle` in `haystack`.
-    switch (haystack_info) {
-        .Pointer => |h_info| {
-            if (haystack_is_str) {
-                if (needle_is_str) {
-                    if (std.mem.indexOfPos(u8, haystack, 0, needle)) |_| {
-                        return true;
-                    }
-                } else if (std.mem.indexOfPos(u8, haystack, 0, &.{needle})) |_| {
-                    return true;
-                }
-
-                return false;
-            } else {
-                comptime std.debug.assert(h_info.size == .Slice);
-
-                for (haystack) |elem| {
-                    if (deepEqual(needle, elem)) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        },
-        .Array => inline for (haystack) |elem| {
-            if (deepEqual(needle, elem)) {
-                return true;
-            }
-        },
-        .Struct => inline for (haystack) |elem| {
-            if (deepEqual(needle, elem)) {
-                return true;
-            }
-        },
-        // UNREACHABLE: We've already checked that `haystack` is either an
-        // array, pointer, or tuple.
-        else => unreachable,
-    }
-
-    return false;
-}
-
 fn diffLists(listA: anytype, listB: anytype) ![2][]usize {
     std.debug.assert(isList(listA) and isList(listB));
 
@@ -1364,96 +1468,4 @@ fn diffLists(listA: anytype, listB: anytype) ![2][]usize {
         try extraA.toOwnedSlice(),
         try extraB.toOwnedSlice(),
     };
-}
-
-fn formatDiffList(
-    listA: anytype,
-    listB: anytype,
-    extraA: []usize,
-    extraB: []usize,
-) ![]const u8 {
-    var fail_msg = std.ArrayList(u8).init(test_ally);
-    const fail_msg_writer = fail_msg.writer();
-    errdefer fail_msg.deinit();
-
-    try std.fmt.format(fail_msg_writer, "elements differ", .{});
-
-    try formatExtra(fail_msg_writer, extraA, 'A', listA);
-    try formatExtra(fail_msg_writer, extraB, 'B', listB);
-
-    try std.fmt.format(fail_msg_writer, "\n\nlistA:\n", .{});
-    try formatList(fail_msg_writer, listA);
-    try std.fmt.format(fail_msg_writer, "\n\nlistB:\n", .{});
-    try formatList(fail_msg_writer, listB);
-    try std.fmt.format(fail_msg_writer, "\n", .{});
-
-    return try fail_msg.toOwnedSlice();
-}
-
-fn formatList(writer: anytype, list: anytype) !void {
-    std.debug.assert(isList(list));
-
-    try std.fmt.format(writer, "{{ ", .{});
-
-    switch (@typeInfo(@TypeOf(list))) {
-        .Struct => inline for (list, 0..) |elem, i| {
-            if (i != list.len - 1) {
-                try std.fmt.format(writer, "{any}, ", .{elem});
-            } else {
-                try std.fmt.format(writer, "{any}", .{elem});
-            }
-        },
-        else => for (list, 0..) |elem, i| {
-            if (i != list.len - 1) {
-                try std.fmt.format(writer, "{any}, ", .{elem});
-            } else {
-                try std.fmt.format(writer, "{any}", .{elem});
-            }
-        },
-    }
-
-    try std.fmt.format(writer, " }}", .{});
-}
-
-fn formatExtra(
-    writer: anytype,
-    extra: []usize,
-    comptime letter: comptime_int,
-    list: anytype,
-) !void {
-    std.debug.assert(isList(list));
-
-    if (extra.len == 0) {
-        return;
-    }
-
-    try std.fmt.format(writer, "\n\nextra elements in list {u}:\n", .{letter});
-    try std.fmt.format(writer, "{{ ", .{});
-
-    switch (@typeInfo(@TypeOf(list))) {
-        .Struct => for (extra, 0..) |idx, i| {
-            if (i != extra.len - 1) {
-                inline for (list, 0..) |elemA, j| {
-                    if (j == idx) {
-                        try std.fmt.format(writer, "{any}, ", .{elemA});
-                    }
-                }
-            } else {
-                inline for (list, 0..) |elemA, j| {
-                    if (j == idx) {
-                        try std.fmt.format(writer, "{any}", .{elemA});
-                    }
-                }
-            }
-        },
-        else => for (extra, 0..) |idx, i| {
-            if (i != extra.len - 1) {
-                try std.fmt.format(writer, "{any}, ", .{list[idx]});
-            } else {
-                try std.fmt.format(writer, "{any}", .{list[idx]});
-            }
-        },
-    }
-
-    try std.fmt.format(writer, " }}", .{});
 }
