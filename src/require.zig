@@ -225,11 +225,11 @@ pub inline fn equalf(
 /// ## Examples
 ///
 /// ```
-/// try require.equalError(error.Foo, error.Foo);
+/// try require.equalError(error.Foo, foo());
 /// ```
 pub inline fn equalError(
     expected: anyerror,
-    value: anyerror,
+    value: anytype,
 ) !void {
     try equalErrorf(expected, value, "", .{});
 }
@@ -240,33 +240,65 @@ pub inline fn equalError(
 /// ## Examples
 ///
 /// ```
-/// try require.equalErrorf(error.Foo, error.Foo, "error message {s}", .{"formatted"});
+/// try require.equalErrorf(error.Foo, foo(), "error message {s}", .{"formatted"});
 /// ```
 pub inline fn equalErrorf(
     expected: anyerror,
-    value: anyerror,
+    value: anytype,
     comptime msg: []const u8,
     args: anytype,
 ) !void {
     comptime checkArgs(args);
 
     const info = @typeInfo(@TypeOf(value));
+    _ = info;
 
-    if (info != .ErrorSet) {
-        const fail_msg = try sprintf("Expected error, found '{}'", .{value});
-        defer test_ally.free(fail_msg);
+    switch (@typeInfo(@TypeOf(value))) {
+        .ErrorSet => {
+            if (value != expected) {
+                const fail_msg = try sprintf(
+                    \\Error not equal:
+                    \\
+                    \\expected:
+                    \\{}
+                    \\
+                    \\value:
+                    \\{}
+                , .{ expected, value });
+                defer test_ally.free(fail_msg);
 
-        try failf(fail_msg, msg, args);
-    }
+                try failf(fail_msg, msg, args);
+            }
+        },
+        .ErrorUnion => {
+            if (value) |_| {
+                const fail_msg = try sprintf("Expected error, found '{any}'", .{value});
+                defer test_ally.free(fail_msg);
 
-    if (value != expected) {
-        const fail_msg = try sprintf(
-            \\Error not equal:
-            \\expected: {}
-            \\value:   {}
-        , .{ expected, value });
-        defer test_ally.free(fail_msg);
-        try failf(fail_msg, msg, args);
+                try failf(fail_msg, msg, args);
+            } else |err| {
+                if (err != expected) {
+                    const fail_msg = try sprintf(
+                        \\Error not equal:
+                        \\
+                        \\expected:
+                        \\{}
+                        \\
+                        \\value:
+                        \\{}
+                    , .{ expected, err });
+                    defer test_ally.free(fail_msg);
+
+                    try failf(fail_msg, msg, args);
+                }
+            }
+        },
+        else => {
+            const fail_msg = try sprintf("Expected error, found '{}'", .{value});
+            defer test_ally.free(fail_msg);
+
+            try failf(fail_msg, msg, args);
+        },
     }
 }
 
