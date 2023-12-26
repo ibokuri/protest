@@ -250,9 +250,6 @@ pub inline fn equalErrorf(
 ) !void {
     comptime checkArgs(args);
 
-    const info = @typeInfo(@TypeOf(value));
-    _ = info;
-
     switch (@typeInfo(@TypeOf(value))) {
         .ErrorSet => {
             if (value != expected) {
@@ -948,8 +945,6 @@ pub inline fn notEqualf(
     comptime msg: []const u8,
     args: anytype,
 ) !void {
-    const Expected = @TypeOf(expected);
-    _ = Expected;
     const Value = @TypeOf(value);
 
     if (deepEqual(expected, value)) {
