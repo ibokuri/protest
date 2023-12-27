@@ -1491,7 +1491,10 @@ fn deepEqual(expected: anytype, value: anytype) bool {
         .Struct => |info| inline for (info.fields) |field| {
             const e = @field(expected, field.name);
             const v = @field(value, field.name);
-            return deepEqual(e, v);
+
+            if (!deepEqual(e, v)) {
+                return false;
+            }
         },
         .Union => |info| {
             if (info.tag_type == null) {
