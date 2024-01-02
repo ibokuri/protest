@@ -1401,463 +1401,465 @@
 <span class="line" id="L1266">}</span>
 <span class="line" id="L1267"></span>
 <span class="line" id="L1268"><span class="tok-kw">test</span> <span class="tok-str">&quot;lerp&quot;</span> {</span>
-<span class="line" id="L1269">    <span class="tok-kw">if</span> (builtin.zig_backend == .stage2_x86_64 <span class="tok-kw">and</span></span>
-<span class="line" id="L1270">        !<span class="tok-kw">comptime</span> std.Target.x86.featureSetHas(builtin.cpu.features, .fma)) <span class="tok-kw">return</span> <span class="tok-kw">error</span>.SkipZigTest;</span>
-<span class="line" id="L1271"></span>
-<span class="line" id="L1272">    <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">f64</span>, <span class="tok-number">75</span>), lerp(<span class="tok-number">50</span>, <span class="tok-number">100</span>, <span class="tok-number">0.5</span>));</span>
-<span class="line" id="L1273">    <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">f32</span>, <span class="tok-number">43.75</span>), lerp(<span class="tok-number">50</span>, <span class="tok-number">25</span>, <span class="tok-number">0.25</span>));</span>
-<span class="line" id="L1274">    <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">f64</span>, -<span class="tok-number">31.25</span>), lerp(-<span class="tok-number">50</span>, <span class="tok-number">25</span>, <span class="tok-number">0.25</span>));</span>
-<span class="line" id="L1275"></span>
-<span class="line" id="L1276">    <span class="tok-kw">try</span> testing.expectApproxEqRel(<span class="tok-builtin">@as</span>(<span class="tok-type">f32</span>, -<span class="tok-number">7.16067345e+03</span>), lerp(-<span class="tok-number">10000.12345</span>, -<span class="tok-number">5000.12345</span>, <span class="tok-number">0.56789</span>), <span class="tok-number">1e-19</span>);</span>
-<span class="line" id="L1277">    <span class="tok-kw">try</span> testing.expectApproxEqRel(<span class="tok-builtin">@as</span>(<span class="tok-type">f64</span>, <span class="tok-number">7.010987590521e+62</span>), lerp(<span class="tok-number">0.123456789e-64</span>, <span class="tok-number">0.123456789e64</span>, <span class="tok-number">0.56789</span>), <span class="tok-number">1e-33</span>);</span>
-<span class="line" id="L1278"></span>
-<span class="line" id="L1279">    <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">f32</span>, <span class="tok-number">0.0</span>), lerp(<span class="tok-builtin">@as</span>(<span class="tok-type">f32</span>, <span class="tok-number">1.0e8</span>), <span class="tok-number">1.0</span>, <span class="tok-number">1.0</span>));</span>
-<span class="line" id="L1280">    <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">f64</span>, <span class="tok-number">0.0</span>), lerp(<span class="tok-builtin">@as</span>(<span class="tok-type">f64</span>, <span class="tok-number">1.0e16</span>), <span class="tok-number">1.0</span>, <span class="tok-number">1.0</span>));</span>
-<span class="line" id="L1281">    <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">f32</span>, <span class="tok-number">1.0</span>), lerp(<span class="tok-builtin">@as</span>(<span class="tok-type">f32</span>, <span class="tok-number">1.0e7</span>), <span class="tok-number">1.0</span>, <span class="tok-number">1.0</span>));</span>
-<span class="line" id="L1282">    <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">f64</span>, <span class="tok-number">1.0</span>), lerp(<span class="tok-builtin">@as</span>(<span class="tok-type">f64</span>, <span class="tok-number">1.0e15</span>), <span class="tok-number">1.0</span>, <span class="tok-number">1.0</span>));</span>
-<span class="line" id="L1283"></span>
-<span class="line" id="L1284">    {</span>
-<span class="line" id="L1285">        <span class="tok-kw">const</span> a: <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f32</span>) = <span class="tok-builtin">@splat</span>(<span class="tok-number">0</span>);</span>
-<span class="line" id="L1286">        <span class="tok-kw">const</span> b: <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f32</span>) = <span class="tok-builtin">@splat</span>(<span class="tok-number">50</span>);</span>
-<span class="line" id="L1287">        <span class="tok-kw">const</span> t: <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f32</span>) = <span class="tok-builtin">@splat</span>(<span class="tok-number">0.5</span>);</span>
-<span class="line" id="L1288">        <span class="tok-kw">try</span> testing.expectEqual(</span>
-<span class="line" id="L1289">            lerp(a, b, t),</span>
-<span class="line" id="L1290">            <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f32</span>){ <span class="tok-number">25</span>, <span class="tok-number">25</span>, <span class="tok-number">25</span> },</span>
-<span class="line" id="L1291">        );</span>
-<span class="line" id="L1292">    }</span>
-<span class="line" id="L1293">    {</span>
-<span class="line" id="L1294">        <span class="tok-kw">const</span> a: <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f64</span>) = <span class="tok-builtin">@splat</span>(<span class="tok-number">50</span>);</span>
-<span class="line" id="L1295">        <span class="tok-kw">const</span> b: <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f64</span>) = <span class="tok-builtin">@splat</span>(<span class="tok-number">100</span>);</span>
-<span class="line" id="L1296">        <span class="tok-kw">const</span> t: <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f64</span>) = <span class="tok-builtin">@splat</span>(<span class="tok-number">0.5</span>);</span>
-<span class="line" id="L1297">        <span class="tok-kw">try</span> testing.expectEqual(</span>
-<span class="line" id="L1298">            lerp(a, b, t),</span>
-<span class="line" id="L1299">            <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f64</span>){ <span class="tok-number">75</span>, <span class="tok-number">75</span>, <span class="tok-number">75</span> },</span>
-<span class="line" id="L1300">        );</span>
-<span class="line" id="L1301">    }</span>
-<span class="line" id="L1302">}</span>
-<span class="line" id="L1303"></span>
-<span class="line" id="L1304"><span class="tok-comment">/// Returns the maximum value of integer type T.</span></span>
-<span class="line" id="L1305"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">maxInt</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>) <span class="tok-type">comptime_int</span> {</span>
-<span class="line" id="L1306">    <span class="tok-kw">const</span> info = <span class="tok-builtin">@typeInfo</span>(T);</span>
-<span class="line" id="L1307">    <span class="tok-kw">const</span> bit_count = info.Int.bits;</span>
-<span class="line" id="L1308">    <span class="tok-kw">if</span> (bit_count == <span class="tok-number">0</span>) <span class="tok-kw">return</span> <span class="tok-number">0</span>;</span>
-<span class="line" id="L1309">    <span class="tok-kw">return</span> (<span class="tok-number">1</span> &lt;&lt; (bit_count - <span class="tok-builtin">@intFromBool</span>(info.Int.signedness == .signed))) - <span class="tok-number">1</span>;</span>
-<span class="line" id="L1310">}</span>
-<span class="line" id="L1311"></span>
-<span class="line" id="L1312"><span class="tok-comment">/// Returns the minimum value of integer type T.</span></span>
-<span class="line" id="L1313"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">minInt</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>) <span class="tok-type">comptime_int</span> {</span>
-<span class="line" id="L1314">    <span class="tok-kw">const</span> info = <span class="tok-builtin">@typeInfo</span>(T);</span>
-<span class="line" id="L1315">    <span class="tok-kw">const</span> bit_count = info.Int.bits;</span>
-<span class="line" id="L1316">    <span class="tok-kw">if</span> (info.Int.signedness == .unsigned) <span class="tok-kw">return</span> <span class="tok-number">0</span>;</span>
-<span class="line" id="L1317">    <span class="tok-kw">if</span> (bit_count == <span class="tok-number">0</span>) <span class="tok-kw">return</span> <span class="tok-number">0</span>;</span>
-<span class="line" id="L1318">    <span class="tok-kw">return</span> -(<span class="tok-number">1</span> &lt;&lt; (bit_count - <span class="tok-number">1</span>));</span>
-<span class="line" id="L1319">}</span>
-<span class="line" id="L1320"></span>
-<span class="line" id="L1321"><span class="tok-kw">test</span> <span class="tok-str">&quot;minInt and maxInt&quot;</span> {</span>
-<span class="line" id="L1322">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">u0</span>) == <span class="tok-number">0</span>);</span>
-<span class="line" id="L1323">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">u1</span>) == <span class="tok-number">1</span>);</span>
-<span class="line" id="L1324">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">u8</span>) == <span class="tok-number">255</span>);</span>
-<span class="line" id="L1325">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">u16</span>) == <span class="tok-number">65535</span>);</span>
-<span class="line" id="L1326">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">u32</span>) == <span class="tok-number">4294967295</span>);</span>
-<span class="line" id="L1327">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">u64</span>) == <span class="tok-number">18446744073709551615</span>);</span>
-<span class="line" id="L1328">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">u128</span>) == <span class="tok-number">340282366920938463463374607431768211455</span>);</span>
-<span class="line" id="L1329"></span>
-<span class="line" id="L1330">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i0</span>) == <span class="tok-number">0</span>);</span>
-<span class="line" id="L1331">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i1</span>) == <span class="tok-number">0</span>);</span>
-<span class="line" id="L1332">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i8</span>) == <span class="tok-number">127</span>);</span>
-<span class="line" id="L1333">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i16</span>) == <span class="tok-number">32767</span>);</span>
-<span class="line" id="L1334">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i32</span>) == <span class="tok-number">2147483647</span>);</span>
-<span class="line" id="L1335">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i63</span>) == <span class="tok-number">4611686018427387903</span>);</span>
-<span class="line" id="L1336">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i64</span>) == <span class="tok-number">9223372036854775807</span>);</span>
-<span class="line" id="L1337">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i128</span>) == <span class="tok-number">170141183460469231731687303715884105727</span>);</span>
-<span class="line" id="L1338"></span>
-<span class="line" id="L1339">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u0</span>) == <span class="tok-number">0</span>);</span>
-<span class="line" id="L1340">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u1</span>) == <span class="tok-number">0</span>);</span>
-<span class="line" id="L1341">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u8</span>) == <span class="tok-number">0</span>);</span>
-<span class="line" id="L1342">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u16</span>) == <span class="tok-number">0</span>);</span>
-<span class="line" id="L1343">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u32</span>) == <span class="tok-number">0</span>);</span>
-<span class="line" id="L1344">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u63</span>) == <span class="tok-number">0</span>);</span>
-<span class="line" id="L1345">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u64</span>) == <span class="tok-number">0</span>);</span>
-<span class="line" id="L1346">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u128</span>) == <span class="tok-number">0</span>);</span>
-<span class="line" id="L1347"></span>
-<span class="line" id="L1348">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i0</span>) == <span class="tok-number">0</span>);</span>
-<span class="line" id="L1349">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i1</span>) == -<span class="tok-number">1</span>);</span>
-<span class="line" id="L1350">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i8</span>) == -<span class="tok-number">128</span>);</span>
-<span class="line" id="L1351">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i16</span>) == -<span class="tok-number">32768</span>);</span>
-<span class="line" id="L1352">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i32</span>) == -<span class="tok-number">2147483648</span>);</span>
-<span class="line" id="L1353">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i63</span>) == -<span class="tok-number">4611686018427387904</span>);</span>
-<span class="line" id="L1354">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i64</span>) == -<span class="tok-number">9223372036854775808</span>);</span>
-<span class="line" id="L1355">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i128</span>) == -<span class="tok-number">170141183460469231731687303715884105728</span>);</span>
-<span class="line" id="L1356">}</span>
-<span class="line" id="L1357"></span>
-<span class="line" id="L1358"><span class="tok-kw">test</span> <span class="tok-str">&quot;max value type&quot;</span> {</span>
-<span class="line" id="L1359">    <span class="tok-kw">const</span> x: <span class="tok-type">u32</span> = maxInt(<span class="tok-type">i32</span>);</span>
-<span class="line" id="L1360">    <span class="tok-kw">try</span> testing.expect(x == <span class="tok-number">2147483647</span>);</span>
-<span class="line" id="L1361">}</span>
-<span class="line" id="L1362"></span>
-<span class="line" id="L1363"><span class="tok-comment">/// Multiply a and b. Return type is wide enough to guarantee no</span></span>
-<span class="line" id="L1364"><span class="tok-comment">/// overflow.</span></span>
-<span class="line" id="L1365"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">mulWide</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, a: T, b: T) std.meta.Int(</span>
-<span class="line" id="L1366">    <span class="tok-builtin">@typeInfo</span>(T).Int.signedness,</span>
-<span class="line" id="L1367">    <span class="tok-builtin">@typeInfo</span>(T).Int.bits * <span class="tok-number">2</span>,</span>
-<span class="line" id="L1368">) {</span>
-<span class="line" id="L1369">    <span class="tok-kw">const</span> ResultInt = std.meta.Int(</span>
-<span class="line" id="L1370">        <span class="tok-builtin">@typeInfo</span>(T).Int.signedness,</span>
-<span class="line" id="L1371">        <span class="tok-builtin">@typeInfo</span>(T).Int.bits * <span class="tok-number">2</span>,</span>
-<span class="line" id="L1372">    );</span>
-<span class="line" id="L1373">    <span class="tok-kw">return</span> <span class="tok-builtin">@as</span>(ResultInt, a) * <span class="tok-builtin">@as</span>(ResultInt, b);</span>
-<span class="line" id="L1374">}</span>
-<span class="line" id="L1375"></span>
-<span class="line" id="L1376"><span class="tok-kw">test</span> <span class="tok-str">&quot;mulWide&quot;</span> {</span>
-<span class="line" id="L1377">    <span class="tok-kw">try</span> testing.expect(mulWide(<span class="tok-type">u8</span>, <span class="tok-number">5</span>, <span class="tok-number">5</span>) == <span class="tok-number">25</span>);</span>
-<span class="line" id="L1378">    <span class="tok-kw">try</span> testing.expect(mulWide(<span class="tok-type">i8</span>, <span class="tok-number">5</span>, -<span class="tok-number">5</span>) == -<span class="tok-number">25</span>);</span>
-<span class="line" id="L1379">    <span class="tok-kw">try</span> testing.expect(mulWide(<span class="tok-type">u8</span>, <span class="tok-number">100</span>, <span class="tok-number">100</span>) == <span class="tok-number">10000</span>);</span>
-<span class="line" id="L1380">}</span>
-<span class="line" id="L1381"></span>
-<span class="line" id="L1382"><span class="tok-comment">/// See also `CompareOperator`.</span></span>
-<span class="line" id="L1383"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Order = <span class="tok-kw">enum</span> {</span>
-<span class="line" id="L1384">    <span class="tok-comment">/// Greater than (`&gt;`)</span></span>
-<span class="line" id="L1385">    gt,</span>
-<span class="line" id="L1386"></span>
-<span class="line" id="L1387">    <span class="tok-comment">/// Less than (`&lt;`)</span></span>
-<span class="line" id="L1388">    lt,</span>
-<span class="line" id="L1389"></span>
-<span class="line" id="L1390">    <span class="tok-comment">/// Equal (`==`)</span></span>
-<span class="line" id="L1391">    eq,</span>
-<span class="line" id="L1392"></span>
-<span class="line" id="L1393">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">invert</span>(self: Order) Order {</span>
-<span class="line" id="L1394">        <span class="tok-kw">return</span> <span class="tok-kw">switch</span> (self) {</span>
-<span class="line" id="L1395">            .lt =&gt; .gt,</span>
-<span class="line" id="L1396">            .eq =&gt; .eq,</span>
-<span class="line" id="L1397">            .gt =&gt; .lt,</span>
-<span class="line" id="L1398">        };</span>
-<span class="line" id="L1399">    }</span>
-<span class="line" id="L1400"></span>
-<span class="line" id="L1401">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">compare</span>(self: Order, op: CompareOperator) <span class="tok-type">bool</span> {</span>
-<span class="line" id="L1402">        <span class="tok-kw">return</span> <span class="tok-kw">switch</span> (self) {</span>
-<span class="line" id="L1403">            .lt =&gt; <span class="tok-kw">switch</span> (op) {</span>
-<span class="line" id="L1404">                .lt =&gt; <span class="tok-null">true</span>,</span>
-<span class="line" id="L1405">                .lte =&gt; <span class="tok-null">true</span>,</span>
-<span class="line" id="L1406">                .eq =&gt; <span class="tok-null">false</span>,</span>
-<span class="line" id="L1407">                .gte =&gt; <span class="tok-null">false</span>,</span>
-<span class="line" id="L1408">                .gt =&gt; <span class="tok-null">false</span>,</span>
-<span class="line" id="L1409">                .neq =&gt; <span class="tok-null">true</span>,</span>
-<span class="line" id="L1410">            },</span>
-<span class="line" id="L1411">            .eq =&gt; <span class="tok-kw">switch</span> (op) {</span>
-<span class="line" id="L1412">                .lt =&gt; <span class="tok-null">false</span>,</span>
-<span class="line" id="L1413">                .lte =&gt; <span class="tok-null">true</span>,</span>
-<span class="line" id="L1414">                .eq =&gt; <span class="tok-null">true</span>,</span>
-<span class="line" id="L1415">                .gte =&gt; <span class="tok-null">true</span>,</span>
-<span class="line" id="L1416">                .gt =&gt; <span class="tok-null">false</span>,</span>
-<span class="line" id="L1417">                .neq =&gt; <span class="tok-null">false</span>,</span>
-<span class="line" id="L1418">            },</span>
-<span class="line" id="L1419">            .gt =&gt; <span class="tok-kw">switch</span> (op) {</span>
-<span class="line" id="L1420">                .lt =&gt; <span class="tok-null">false</span>,</span>
-<span class="line" id="L1421">                .lte =&gt; <span class="tok-null">false</span>,</span>
-<span class="line" id="L1422">                .eq =&gt; <span class="tok-null">false</span>,</span>
-<span class="line" id="L1423">                .gte =&gt; <span class="tok-null">true</span>,</span>
-<span class="line" id="L1424">                .gt =&gt; <span class="tok-null">true</span>,</span>
-<span class="line" id="L1425">                .neq =&gt; <span class="tok-null">true</span>,</span>
-<span class="line" id="L1426">            },</span>
-<span class="line" id="L1427">        };</span>
-<span class="line" id="L1428">    }</span>
-<span class="line" id="L1429">};</span>
-<span class="line" id="L1430"></span>
-<span class="line" id="L1431"><span class="tok-comment">/// Given two numbers, this function returns the order they are with respect to each other.</span></span>
-<span class="line" id="L1432"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">order</span>(a: <span class="tok-kw">anytype</span>, b: <span class="tok-kw">anytype</span>) Order {</span>
-<span class="line" id="L1433">    <span class="tok-kw">if</span> (a == b) {</span>
-<span class="line" id="L1434">        <span class="tok-kw">return</span> .eq;</span>
-<span class="line" id="L1435">    } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (a &lt; b) {</span>
-<span class="line" id="L1436">        <span class="tok-kw">return</span> .lt;</span>
-<span class="line" id="L1437">    } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (a &gt; b) {</span>
-<span class="line" id="L1438">        <span class="tok-kw">return</span> .gt;</span>
-<span class="line" id="L1439">    } <span class="tok-kw">else</span> {</span>
-<span class="line" id="L1440">        <span class="tok-kw">unreachable</span>;</span>
-<span class="line" id="L1441">    }</span>
-<span class="line" id="L1442">}</span>
-<span class="line" id="L1443"></span>
-<span class="line" id="L1444"><span class="tok-comment">/// See also `Order`.</span></span>
-<span class="line" id="L1445"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> CompareOperator = <span class="tok-kw">enum</span> {</span>
-<span class="line" id="L1446">    <span class="tok-comment">/// Less than (`&lt;`)</span></span>
-<span class="line" id="L1447">    lt,</span>
-<span class="line" id="L1448">    <span class="tok-comment">/// Less than or equal (`&lt;=`)</span></span>
-<span class="line" id="L1449">    lte,</span>
-<span class="line" id="L1450">    <span class="tok-comment">/// Equal (`==`)</span></span>
-<span class="line" id="L1451">    eq,</span>
-<span class="line" id="L1452">    <span class="tok-comment">/// Greater than or equal (`&gt;=`)</span></span>
-<span class="line" id="L1453">    gte,</span>
-<span class="line" id="L1454">    <span class="tok-comment">/// Greater than (`&gt;`)</span></span>
-<span class="line" id="L1455">    gt,</span>
-<span class="line" id="L1456">    <span class="tok-comment">/// Not equal (`!=`)</span></span>
-<span class="line" id="L1457">    neq,</span>
-<span class="line" id="L1458"></span>
-<span class="line" id="L1459">    <span class="tok-comment">/// Reverse the direction of the comparison.</span></span>
-<span class="line" id="L1460">    <span class="tok-comment">/// Use when swapping the left and right hand operands.</span></span>
-<span class="line" id="L1461">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">reverse</span>(op: CompareOperator) CompareOperator {</span>
-<span class="line" id="L1462">        <span class="tok-kw">return</span> <span class="tok-kw">switch</span> (op) {</span>
-<span class="line" id="L1463">            .lt =&gt; .gt,</span>
-<span class="line" id="L1464">            .lte =&gt; .gte,</span>
-<span class="line" id="L1465">            .gt =&gt; .lt,</span>
-<span class="line" id="L1466">            .gte =&gt; .lte,</span>
-<span class="line" id="L1467">            .eq =&gt; .eq,</span>
-<span class="line" id="L1468">            .neq =&gt; .neq,</span>
-<span class="line" id="L1469">        };</span>
-<span class="line" id="L1470">    }</span>
-<span class="line" id="L1471">};</span>
-<span class="line" id="L1472"></span>
-<span class="line" id="L1473"><span class="tok-comment">/// This function does the same thing as comparison operators, however the</span></span>
-<span class="line" id="L1474"><span class="tok-comment">/// operator is a runtime-known enum value. Works on any operands that</span></span>
-<span class="line" id="L1475"><span class="tok-comment">/// support comparison operators.</span></span>
-<span class="line" id="L1476"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">compare</span>(a: <span class="tok-kw">anytype</span>, op: CompareOperator, b: <span class="tok-kw">anytype</span>) <span class="tok-type">bool</span> {</span>
-<span class="line" id="L1477">    <span class="tok-kw">return</span> <span class="tok-kw">switch</span> (op) {</span>
-<span class="line" id="L1478">        .lt =&gt; a &lt; b,</span>
-<span class="line" id="L1479">        .lte =&gt; a &lt;= b,</span>
-<span class="line" id="L1480">        .eq =&gt; a == b,</span>
-<span class="line" id="L1481">        .neq =&gt; a != b,</span>
-<span class="line" id="L1482">        .gt =&gt; a &gt; b,</span>
-<span class="line" id="L1483">        .gte =&gt; a &gt;= b,</span>
-<span class="line" id="L1484">    };</span>
-<span class="line" id="L1485">}</span>
-<span class="line" id="L1486"></span>
-<span class="line" id="L1487"><span class="tok-kw">test</span> <span class="tok-str">&quot;compare between signed and unsigned&quot;</span> {</span>
-<span class="line" id="L1488">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>), .lt, <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>)));</span>
-<span class="line" id="L1489">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, <span class="tok-number">2</span>), .gt, <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">1</span>)));</span>
-<span class="line" id="L1490">    <span class="tok-kw">try</span> testing.expect(!compare(<span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>), .gte, <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>)));</span>
-<span class="line" id="L1491">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>), .gt, <span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>)));</span>
-<span class="line" id="L1492">    <span class="tok-kw">try</span> testing.expect(!compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>), .lte, <span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>)));</span>
-<span class="line" id="L1493">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>), .lt, <span class="tok-builtin">@as</span>(<span class="tok-type">u9</span>, <span class="tok-number">255</span>)));</span>
-<span class="line" id="L1494">    <span class="tok-kw">try</span> testing.expect(!compare(<span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>), .gte, <span class="tok-builtin">@as</span>(<span class="tok-type">u9</span>, <span class="tok-number">255</span>)));</span>
-<span class="line" id="L1495">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u9</span>, <span class="tok-number">255</span>), .gt, <span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>)));</span>
-<span class="line" id="L1496">    <span class="tok-kw">try</span> testing.expect(!compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u9</span>, <span class="tok-number">255</span>), .lte, <span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>)));</span>
-<span class="line" id="L1497">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">i9</span>, -<span class="tok-number">1</span>), .lt, <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>)));</span>
-<span class="line" id="L1498">    <span class="tok-kw">try</span> testing.expect(!compare(<span class="tok-builtin">@as</span>(<span class="tok-type">i9</span>, -<span class="tok-number">1</span>), .gte, <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>)));</span>
-<span class="line" id="L1499">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>), .gt, <span class="tok-builtin">@as</span>(<span class="tok-type">i9</span>, -<span class="tok-number">1</span>)));</span>
-<span class="line" id="L1500">    <span class="tok-kw">try</span> testing.expect(!compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>), .lte, <span class="tok-builtin">@as</span>(<span class="tok-type">i9</span>, -<span class="tok-number">1</span>)));</span>
-<span class="line" id="L1501">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">1</span>), .lt, <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">2</span>)));</span>
-<span class="line" id="L1502">    <span class="tok-kw">try</span> testing.expect(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-builtin">@bitCast</span>(<span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>))) == <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>));</span>
-<span class="line" id="L1503">    <span class="tok-kw">try</span> testing.expect(!compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>), .eq, <span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>)));</span>
-<span class="line" id="L1504">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">1</span>), .eq, <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">1</span>)));</span>
-<span class="line" id="L1505">}</span>
-<span class="line" id="L1506"></span>
-<span class="line" id="L1507"><span class="tok-kw">test</span> <span class="tok-str">&quot;order&quot;</span> {</span>
-<span class="line" id="L1508">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">0</span>, <span class="tok-number">0</span>) == .eq);</span>
-<span class="line" id="L1509">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">1</span>, <span class="tok-number">0</span>) == .gt);</span>
-<span class="line" id="L1510">    <span class="tok-kw">try</span> testing.expect(order(-<span class="tok-number">1</span>, <span class="tok-number">0</span>) == .lt);</span>
-<span class="line" id="L1511">}</span>
-<span class="line" id="L1512"></span>
-<span class="line" id="L1513"><span class="tok-kw">test</span> <span class="tok-str">&quot;order.invert&quot;</span> {</span>
-<span class="line" id="L1514">    <span class="tok-kw">try</span> testing.expect(Order.invert(order(<span class="tok-number">0</span>, <span class="tok-number">0</span>)) == .eq);</span>
-<span class="line" id="L1515">    <span class="tok-kw">try</span> testing.expect(Order.invert(order(<span class="tok-number">1</span>, <span class="tok-number">0</span>)) == .lt);</span>
-<span class="line" id="L1516">    <span class="tok-kw">try</span> testing.expect(Order.invert(order(-<span class="tok-number">1</span>, <span class="tok-number">0</span>)) == .gt);</span>
-<span class="line" id="L1517">}</span>
-<span class="line" id="L1518"></span>
-<span class="line" id="L1519"><span class="tok-kw">test</span> <span class="tok-str">&quot;order.compare&quot;</span> {</span>
-<span class="line" id="L1520">    <span class="tok-kw">try</span> testing.expect(order(-<span class="tok-number">1</span>, <span class="tok-number">0</span>).compare(.lt));</span>
-<span class="line" id="L1521">    <span class="tok-kw">try</span> testing.expect(order(-<span class="tok-number">1</span>, <span class="tok-number">0</span>).compare(.lte));</span>
-<span class="line" id="L1522">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">0</span>, <span class="tok-number">0</span>).compare(.lte));</span>
-<span class="line" id="L1523">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">0</span>, <span class="tok-number">0</span>).compare(.eq));</span>
-<span class="line" id="L1524">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">0</span>, <span class="tok-number">0</span>).compare(.gte));</span>
-<span class="line" id="L1525">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">1</span>, <span class="tok-number">0</span>).compare(.gte));</span>
-<span class="line" id="L1526">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">1</span>, <span class="tok-number">0</span>).compare(.gt));</span>
-<span class="line" id="L1527">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">1</span>, <span class="tok-number">0</span>).compare(.neq));</span>
-<span class="line" id="L1528">}</span>
-<span class="line" id="L1529"></span>
-<span class="line" id="L1530"><span class="tok-kw">test</span> <span class="tok-str">&quot;compare.reverse&quot;</span> {</span>
-<span class="line" id="L1531">    <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (<span class="tok-builtin">@typeInfo</span>(CompareOperator).Enum.fields) |op_field| {</span>
-<span class="line" id="L1532">        <span class="tok-kw">const</span> op = <span class="tok-builtin">@as</span>(CompareOperator, <span class="tok-builtin">@enumFromInt</span>(op_field.value));</span>
-<span class="line" id="L1533">        <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-number">2</span>, op, <span class="tok-number">3</span>) == compare(<span class="tok-number">3</span>, op.reverse(), <span class="tok-number">2</span>));</span>
-<span class="line" id="L1534">        <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-number">3</span>, op, <span class="tok-number">3</span>) == compare(<span class="tok-number">3</span>, op.reverse(), <span class="tok-number">3</span>));</span>
-<span class="line" id="L1535">        <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-number">4</span>, op, <span class="tok-number">3</span>) == compare(<span class="tok-number">3</span>, op.reverse(), <span class="tok-number">4</span>));</span>
-<span class="line" id="L1536">    }</span>
-<span class="line" id="L1537">}</span>
-<span class="line" id="L1538"></span>
-<span class="line" id="L1539"><span class="tok-comment">/// Returns a mask of all ones if value is true,</span></span>
-<span class="line" id="L1540"><span class="tok-comment">/// and a mask of all zeroes if value is false.</span></span>
-<span class="line" id="L1541"><span class="tok-comment">/// Compiles to one instruction for register sized integers.</span></span>
-<span class="line" id="L1542"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">boolMask</span>(<span class="tok-kw">comptime</span> MaskInt: <span class="tok-type">type</span>, value: <span class="tok-type">bool</span>) MaskInt {</span>
-<span class="line" id="L1543">    <span class="tok-kw">if</span> (<span class="tok-builtin">@typeInfo</span>(MaskInt) != .Int)</span>
-<span class="line" id="L1544">        <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;boolMask requires an integer mask type.&quot;</span>);</span>
-<span class="line" id="L1545"></span>
-<span class="line" id="L1546">    <span class="tok-kw">if</span> (MaskInt == <span class="tok-type">u0</span> <span class="tok-kw">or</span> MaskInt == <span class="tok-type">i0</span>)</span>
-<span class="line" id="L1547">        <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;boolMask cannot convert to u0 or i0, they are too small.&quot;</span>);</span>
-<span class="line" id="L1548"></span>
-<span class="line" id="L1549">    <span class="tok-comment">// The u1 and i1 cases tend to overflow,</span>
+<span class="line" id="L1269">    <span class="tok-kw">if</span> (builtin.zig_backend == .stage2_c) <span class="tok-kw">return</span> <span class="tok-kw">error</span>.SkipZigTest; <span class="tok-comment">// https://github.com/ziglang/zig/issues/17884</span>
 </span>
-<span class="line" id="L1550">    <span class="tok-comment">// so we special case them here.</span>
+<span class="line" id="L1270">    <span class="tok-kw">if</span> (builtin.zig_backend == .stage2_x86_64 <span class="tok-kw">and</span></span>
+<span class="line" id="L1271">        !<span class="tok-kw">comptime</span> std.Target.x86.featureSetHas(builtin.cpu.features, .fma)) <span class="tok-kw">return</span> <span class="tok-kw">error</span>.SkipZigTest;</span>
+<span class="line" id="L1272"></span>
+<span class="line" id="L1273">    <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">f64</span>, <span class="tok-number">75</span>), lerp(<span class="tok-number">50</span>, <span class="tok-number">100</span>, <span class="tok-number">0.5</span>));</span>
+<span class="line" id="L1274">    <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">f32</span>, <span class="tok-number">43.75</span>), lerp(<span class="tok-number">50</span>, <span class="tok-number">25</span>, <span class="tok-number">0.25</span>));</span>
+<span class="line" id="L1275">    <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">f64</span>, -<span class="tok-number">31.25</span>), lerp(-<span class="tok-number">50</span>, <span class="tok-number">25</span>, <span class="tok-number">0.25</span>));</span>
+<span class="line" id="L1276"></span>
+<span class="line" id="L1277">    <span class="tok-kw">try</span> testing.expectApproxEqRel(<span class="tok-builtin">@as</span>(<span class="tok-type">f32</span>, -<span class="tok-number">7.16067345e+03</span>), lerp(-<span class="tok-number">10000.12345</span>, -<span class="tok-number">5000.12345</span>, <span class="tok-number">0.56789</span>), <span class="tok-number">1e-19</span>);</span>
+<span class="line" id="L1278">    <span class="tok-kw">try</span> testing.expectApproxEqRel(<span class="tok-builtin">@as</span>(<span class="tok-type">f64</span>, <span class="tok-number">7.010987590521e+62</span>), lerp(<span class="tok-number">0.123456789e-64</span>, <span class="tok-number">0.123456789e64</span>, <span class="tok-number">0.56789</span>), <span class="tok-number">1e-33</span>);</span>
+<span class="line" id="L1279"></span>
+<span class="line" id="L1280">    <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">f32</span>, <span class="tok-number">0.0</span>), lerp(<span class="tok-builtin">@as</span>(<span class="tok-type">f32</span>, <span class="tok-number">1.0e8</span>), <span class="tok-number">1.0</span>, <span class="tok-number">1.0</span>));</span>
+<span class="line" id="L1281">    <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">f64</span>, <span class="tok-number">0.0</span>), lerp(<span class="tok-builtin">@as</span>(<span class="tok-type">f64</span>, <span class="tok-number">1.0e16</span>), <span class="tok-number">1.0</span>, <span class="tok-number">1.0</span>));</span>
+<span class="line" id="L1282">    <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">f32</span>, <span class="tok-number">1.0</span>), lerp(<span class="tok-builtin">@as</span>(<span class="tok-type">f32</span>, <span class="tok-number">1.0e7</span>), <span class="tok-number">1.0</span>, <span class="tok-number">1.0</span>));</span>
+<span class="line" id="L1283">    <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">f64</span>, <span class="tok-number">1.0</span>), lerp(<span class="tok-builtin">@as</span>(<span class="tok-type">f64</span>, <span class="tok-number">1.0e15</span>), <span class="tok-number">1.0</span>, <span class="tok-number">1.0</span>));</span>
+<span class="line" id="L1284"></span>
+<span class="line" id="L1285">    {</span>
+<span class="line" id="L1286">        <span class="tok-kw">const</span> a: <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f32</span>) = <span class="tok-builtin">@splat</span>(<span class="tok-number">0</span>);</span>
+<span class="line" id="L1287">        <span class="tok-kw">const</span> b: <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f32</span>) = <span class="tok-builtin">@splat</span>(<span class="tok-number">50</span>);</span>
+<span class="line" id="L1288">        <span class="tok-kw">const</span> t: <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f32</span>) = <span class="tok-builtin">@splat</span>(<span class="tok-number">0.5</span>);</span>
+<span class="line" id="L1289">        <span class="tok-kw">try</span> testing.expectEqual(</span>
+<span class="line" id="L1290">            lerp(a, b, t),</span>
+<span class="line" id="L1291">            <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f32</span>){ <span class="tok-number">25</span>, <span class="tok-number">25</span>, <span class="tok-number">25</span> },</span>
+<span class="line" id="L1292">        );</span>
+<span class="line" id="L1293">    }</span>
+<span class="line" id="L1294">    {</span>
+<span class="line" id="L1295">        <span class="tok-kw">const</span> a: <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f64</span>) = <span class="tok-builtin">@splat</span>(<span class="tok-number">50</span>);</span>
+<span class="line" id="L1296">        <span class="tok-kw">const</span> b: <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f64</span>) = <span class="tok-builtin">@splat</span>(<span class="tok-number">100</span>);</span>
+<span class="line" id="L1297">        <span class="tok-kw">const</span> t: <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f64</span>) = <span class="tok-builtin">@splat</span>(<span class="tok-number">0.5</span>);</span>
+<span class="line" id="L1298">        <span class="tok-kw">try</span> testing.expectEqual(</span>
+<span class="line" id="L1299">            lerp(a, b, t),</span>
+<span class="line" id="L1300">            <span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, <span class="tok-type">f64</span>){ <span class="tok-number">75</span>, <span class="tok-number">75</span>, <span class="tok-number">75</span> },</span>
+<span class="line" id="L1301">        );</span>
+<span class="line" id="L1302">    }</span>
+<span class="line" id="L1303">}</span>
+<span class="line" id="L1304"></span>
+<span class="line" id="L1305"><span class="tok-comment">/// Returns the maximum value of integer type T.</span></span>
+<span class="line" id="L1306"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">maxInt</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>) <span class="tok-type">comptime_int</span> {</span>
+<span class="line" id="L1307">    <span class="tok-kw">const</span> info = <span class="tok-builtin">@typeInfo</span>(T);</span>
+<span class="line" id="L1308">    <span class="tok-kw">const</span> bit_count = info.Int.bits;</span>
+<span class="line" id="L1309">    <span class="tok-kw">if</span> (bit_count == <span class="tok-number">0</span>) <span class="tok-kw">return</span> <span class="tok-number">0</span>;</span>
+<span class="line" id="L1310">    <span class="tok-kw">return</span> (<span class="tok-number">1</span> &lt;&lt; (bit_count - <span class="tok-builtin">@intFromBool</span>(info.Int.signedness == .signed))) - <span class="tok-number">1</span>;</span>
+<span class="line" id="L1311">}</span>
+<span class="line" id="L1312"></span>
+<span class="line" id="L1313"><span class="tok-comment">/// Returns the minimum value of integer type T.</span></span>
+<span class="line" id="L1314"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">minInt</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>) <span class="tok-type">comptime_int</span> {</span>
+<span class="line" id="L1315">    <span class="tok-kw">const</span> info = <span class="tok-builtin">@typeInfo</span>(T);</span>
+<span class="line" id="L1316">    <span class="tok-kw">const</span> bit_count = info.Int.bits;</span>
+<span class="line" id="L1317">    <span class="tok-kw">if</span> (info.Int.signedness == .unsigned) <span class="tok-kw">return</span> <span class="tok-number">0</span>;</span>
+<span class="line" id="L1318">    <span class="tok-kw">if</span> (bit_count == <span class="tok-number">0</span>) <span class="tok-kw">return</span> <span class="tok-number">0</span>;</span>
+<span class="line" id="L1319">    <span class="tok-kw">return</span> -(<span class="tok-number">1</span> &lt;&lt; (bit_count - <span class="tok-number">1</span>));</span>
+<span class="line" id="L1320">}</span>
+<span class="line" id="L1321"></span>
+<span class="line" id="L1322"><span class="tok-kw">test</span> <span class="tok-str">&quot;minInt and maxInt&quot;</span> {</span>
+<span class="line" id="L1323">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">u0</span>) == <span class="tok-number">0</span>);</span>
+<span class="line" id="L1324">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">u1</span>) == <span class="tok-number">1</span>);</span>
+<span class="line" id="L1325">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">u8</span>) == <span class="tok-number">255</span>);</span>
+<span class="line" id="L1326">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">u16</span>) == <span class="tok-number">65535</span>);</span>
+<span class="line" id="L1327">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">u32</span>) == <span class="tok-number">4294967295</span>);</span>
+<span class="line" id="L1328">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">u64</span>) == <span class="tok-number">18446744073709551615</span>);</span>
+<span class="line" id="L1329">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">u128</span>) == <span class="tok-number">340282366920938463463374607431768211455</span>);</span>
+<span class="line" id="L1330"></span>
+<span class="line" id="L1331">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i0</span>) == <span class="tok-number">0</span>);</span>
+<span class="line" id="L1332">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i1</span>) == <span class="tok-number">0</span>);</span>
+<span class="line" id="L1333">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i8</span>) == <span class="tok-number">127</span>);</span>
+<span class="line" id="L1334">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i16</span>) == <span class="tok-number">32767</span>);</span>
+<span class="line" id="L1335">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i32</span>) == <span class="tok-number">2147483647</span>);</span>
+<span class="line" id="L1336">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i63</span>) == <span class="tok-number">4611686018427387903</span>);</span>
+<span class="line" id="L1337">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i64</span>) == <span class="tok-number">9223372036854775807</span>);</span>
+<span class="line" id="L1338">    <span class="tok-kw">try</span> testing.expect(maxInt(<span class="tok-type">i128</span>) == <span class="tok-number">170141183460469231731687303715884105727</span>);</span>
+<span class="line" id="L1339"></span>
+<span class="line" id="L1340">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u0</span>) == <span class="tok-number">0</span>);</span>
+<span class="line" id="L1341">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u1</span>) == <span class="tok-number">0</span>);</span>
+<span class="line" id="L1342">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u8</span>) == <span class="tok-number">0</span>);</span>
+<span class="line" id="L1343">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u16</span>) == <span class="tok-number">0</span>);</span>
+<span class="line" id="L1344">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u32</span>) == <span class="tok-number">0</span>);</span>
+<span class="line" id="L1345">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u63</span>) == <span class="tok-number">0</span>);</span>
+<span class="line" id="L1346">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u64</span>) == <span class="tok-number">0</span>);</span>
+<span class="line" id="L1347">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">u128</span>) == <span class="tok-number">0</span>);</span>
+<span class="line" id="L1348"></span>
+<span class="line" id="L1349">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i0</span>) == <span class="tok-number">0</span>);</span>
+<span class="line" id="L1350">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i1</span>) == -<span class="tok-number">1</span>);</span>
+<span class="line" id="L1351">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i8</span>) == -<span class="tok-number">128</span>);</span>
+<span class="line" id="L1352">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i16</span>) == -<span class="tok-number">32768</span>);</span>
+<span class="line" id="L1353">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i32</span>) == -<span class="tok-number">2147483648</span>);</span>
+<span class="line" id="L1354">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i63</span>) == -<span class="tok-number">4611686018427387904</span>);</span>
+<span class="line" id="L1355">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i64</span>) == -<span class="tok-number">9223372036854775808</span>);</span>
+<span class="line" id="L1356">    <span class="tok-kw">try</span> testing.expect(minInt(<span class="tok-type">i128</span>) == -<span class="tok-number">170141183460469231731687303715884105728</span>);</span>
+<span class="line" id="L1357">}</span>
+<span class="line" id="L1358"></span>
+<span class="line" id="L1359"><span class="tok-kw">test</span> <span class="tok-str">&quot;max value type&quot;</span> {</span>
+<span class="line" id="L1360">    <span class="tok-kw">const</span> x: <span class="tok-type">u32</span> = maxInt(<span class="tok-type">i32</span>);</span>
+<span class="line" id="L1361">    <span class="tok-kw">try</span> testing.expect(x == <span class="tok-number">2147483647</span>);</span>
+<span class="line" id="L1362">}</span>
+<span class="line" id="L1363"></span>
+<span class="line" id="L1364"><span class="tok-comment">/// Multiply a and b. Return type is wide enough to guarantee no</span></span>
+<span class="line" id="L1365"><span class="tok-comment">/// overflow.</span></span>
+<span class="line" id="L1366"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">mulWide</span>(<span class="tok-kw">comptime</span> T: <span class="tok-type">type</span>, a: T, b: T) std.meta.Int(</span>
+<span class="line" id="L1367">    <span class="tok-builtin">@typeInfo</span>(T).Int.signedness,</span>
+<span class="line" id="L1368">    <span class="tok-builtin">@typeInfo</span>(T).Int.bits * <span class="tok-number">2</span>,</span>
+<span class="line" id="L1369">) {</span>
+<span class="line" id="L1370">    <span class="tok-kw">const</span> ResultInt = std.meta.Int(</span>
+<span class="line" id="L1371">        <span class="tok-builtin">@typeInfo</span>(T).Int.signedness,</span>
+<span class="line" id="L1372">        <span class="tok-builtin">@typeInfo</span>(T).Int.bits * <span class="tok-number">2</span>,</span>
+<span class="line" id="L1373">    );</span>
+<span class="line" id="L1374">    <span class="tok-kw">return</span> <span class="tok-builtin">@as</span>(ResultInt, a) * <span class="tok-builtin">@as</span>(ResultInt, b);</span>
+<span class="line" id="L1375">}</span>
+<span class="line" id="L1376"></span>
+<span class="line" id="L1377"><span class="tok-kw">test</span> <span class="tok-str">&quot;mulWide&quot;</span> {</span>
+<span class="line" id="L1378">    <span class="tok-kw">try</span> testing.expect(mulWide(<span class="tok-type">u8</span>, <span class="tok-number">5</span>, <span class="tok-number">5</span>) == <span class="tok-number">25</span>);</span>
+<span class="line" id="L1379">    <span class="tok-kw">try</span> testing.expect(mulWide(<span class="tok-type">i8</span>, <span class="tok-number">5</span>, -<span class="tok-number">5</span>) == -<span class="tok-number">25</span>);</span>
+<span class="line" id="L1380">    <span class="tok-kw">try</span> testing.expect(mulWide(<span class="tok-type">u8</span>, <span class="tok-number">100</span>, <span class="tok-number">100</span>) == <span class="tok-number">10000</span>);</span>
+<span class="line" id="L1381">}</span>
+<span class="line" id="L1382"></span>
+<span class="line" id="L1383"><span class="tok-comment">/// See also `CompareOperator`.</span></span>
+<span class="line" id="L1384"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Order = <span class="tok-kw">enum</span> {</span>
+<span class="line" id="L1385">    <span class="tok-comment">/// Greater than (`&gt;`)</span></span>
+<span class="line" id="L1386">    gt,</span>
+<span class="line" id="L1387"></span>
+<span class="line" id="L1388">    <span class="tok-comment">/// Less than (`&lt;`)</span></span>
+<span class="line" id="L1389">    lt,</span>
+<span class="line" id="L1390"></span>
+<span class="line" id="L1391">    <span class="tok-comment">/// Equal (`==`)</span></span>
+<span class="line" id="L1392">    eq,</span>
+<span class="line" id="L1393"></span>
+<span class="line" id="L1394">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">invert</span>(self: Order) Order {</span>
+<span class="line" id="L1395">        <span class="tok-kw">return</span> <span class="tok-kw">switch</span> (self) {</span>
+<span class="line" id="L1396">            .lt =&gt; .gt,</span>
+<span class="line" id="L1397">            .eq =&gt; .eq,</span>
+<span class="line" id="L1398">            .gt =&gt; .lt,</span>
+<span class="line" id="L1399">        };</span>
+<span class="line" id="L1400">    }</span>
+<span class="line" id="L1401"></span>
+<span class="line" id="L1402">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">compare</span>(self: Order, op: CompareOperator) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L1403">        <span class="tok-kw">return</span> <span class="tok-kw">switch</span> (self) {</span>
+<span class="line" id="L1404">            .lt =&gt; <span class="tok-kw">switch</span> (op) {</span>
+<span class="line" id="L1405">                .lt =&gt; <span class="tok-null">true</span>,</span>
+<span class="line" id="L1406">                .lte =&gt; <span class="tok-null">true</span>,</span>
+<span class="line" id="L1407">                .eq =&gt; <span class="tok-null">false</span>,</span>
+<span class="line" id="L1408">                .gte =&gt; <span class="tok-null">false</span>,</span>
+<span class="line" id="L1409">                .gt =&gt; <span class="tok-null">false</span>,</span>
+<span class="line" id="L1410">                .neq =&gt; <span class="tok-null">true</span>,</span>
+<span class="line" id="L1411">            },</span>
+<span class="line" id="L1412">            .eq =&gt; <span class="tok-kw">switch</span> (op) {</span>
+<span class="line" id="L1413">                .lt =&gt; <span class="tok-null">false</span>,</span>
+<span class="line" id="L1414">                .lte =&gt; <span class="tok-null">true</span>,</span>
+<span class="line" id="L1415">                .eq =&gt; <span class="tok-null">true</span>,</span>
+<span class="line" id="L1416">                .gte =&gt; <span class="tok-null">true</span>,</span>
+<span class="line" id="L1417">                .gt =&gt; <span class="tok-null">false</span>,</span>
+<span class="line" id="L1418">                .neq =&gt; <span class="tok-null">false</span>,</span>
+<span class="line" id="L1419">            },</span>
+<span class="line" id="L1420">            .gt =&gt; <span class="tok-kw">switch</span> (op) {</span>
+<span class="line" id="L1421">                .lt =&gt; <span class="tok-null">false</span>,</span>
+<span class="line" id="L1422">                .lte =&gt; <span class="tok-null">false</span>,</span>
+<span class="line" id="L1423">                .eq =&gt; <span class="tok-null">false</span>,</span>
+<span class="line" id="L1424">                .gte =&gt; <span class="tok-null">true</span>,</span>
+<span class="line" id="L1425">                .gt =&gt; <span class="tok-null">true</span>,</span>
+<span class="line" id="L1426">                .neq =&gt; <span class="tok-null">true</span>,</span>
+<span class="line" id="L1427">            },</span>
+<span class="line" id="L1428">        };</span>
+<span class="line" id="L1429">    }</span>
+<span class="line" id="L1430">};</span>
+<span class="line" id="L1431"></span>
+<span class="line" id="L1432"><span class="tok-comment">/// Given two numbers, this function returns the order they are with respect to each other.</span></span>
+<span class="line" id="L1433"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">order</span>(a: <span class="tok-kw">anytype</span>, b: <span class="tok-kw">anytype</span>) Order {</span>
+<span class="line" id="L1434">    <span class="tok-kw">if</span> (a == b) {</span>
+<span class="line" id="L1435">        <span class="tok-kw">return</span> .eq;</span>
+<span class="line" id="L1436">    } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (a &lt; b) {</span>
+<span class="line" id="L1437">        <span class="tok-kw">return</span> .lt;</span>
+<span class="line" id="L1438">    } <span class="tok-kw">else</span> <span class="tok-kw">if</span> (a &gt; b) {</span>
+<span class="line" id="L1439">        <span class="tok-kw">return</span> .gt;</span>
+<span class="line" id="L1440">    } <span class="tok-kw">else</span> {</span>
+<span class="line" id="L1441">        <span class="tok-kw">unreachable</span>;</span>
+<span class="line" id="L1442">    }</span>
+<span class="line" id="L1443">}</span>
+<span class="line" id="L1444"></span>
+<span class="line" id="L1445"><span class="tok-comment">/// See also `Order`.</span></span>
+<span class="line" id="L1446"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> CompareOperator = <span class="tok-kw">enum</span> {</span>
+<span class="line" id="L1447">    <span class="tok-comment">/// Less than (`&lt;`)</span></span>
+<span class="line" id="L1448">    lt,</span>
+<span class="line" id="L1449">    <span class="tok-comment">/// Less than or equal (`&lt;=`)</span></span>
+<span class="line" id="L1450">    lte,</span>
+<span class="line" id="L1451">    <span class="tok-comment">/// Equal (`==`)</span></span>
+<span class="line" id="L1452">    eq,</span>
+<span class="line" id="L1453">    <span class="tok-comment">/// Greater than or equal (`&gt;=`)</span></span>
+<span class="line" id="L1454">    gte,</span>
+<span class="line" id="L1455">    <span class="tok-comment">/// Greater than (`&gt;`)</span></span>
+<span class="line" id="L1456">    gt,</span>
+<span class="line" id="L1457">    <span class="tok-comment">/// Not equal (`!=`)</span></span>
+<span class="line" id="L1458">    neq,</span>
+<span class="line" id="L1459"></span>
+<span class="line" id="L1460">    <span class="tok-comment">/// Reverse the direction of the comparison.</span></span>
+<span class="line" id="L1461">    <span class="tok-comment">/// Use when swapping the left and right hand operands.</span></span>
+<span class="line" id="L1462">    <span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">reverse</span>(op: CompareOperator) CompareOperator {</span>
+<span class="line" id="L1463">        <span class="tok-kw">return</span> <span class="tok-kw">switch</span> (op) {</span>
+<span class="line" id="L1464">            .lt =&gt; .gt,</span>
+<span class="line" id="L1465">            .lte =&gt; .gte,</span>
+<span class="line" id="L1466">            .gt =&gt; .lt,</span>
+<span class="line" id="L1467">            .gte =&gt; .lte,</span>
+<span class="line" id="L1468">            .eq =&gt; .eq,</span>
+<span class="line" id="L1469">            .neq =&gt; .neq,</span>
+<span class="line" id="L1470">        };</span>
+<span class="line" id="L1471">    }</span>
+<span class="line" id="L1472">};</span>
+<span class="line" id="L1473"></span>
+<span class="line" id="L1474"><span class="tok-comment">/// This function does the same thing as comparison operators, however the</span></span>
+<span class="line" id="L1475"><span class="tok-comment">/// operator is a runtime-known enum value. Works on any operands that</span></span>
+<span class="line" id="L1476"><span class="tok-comment">/// support comparison operators.</span></span>
+<span class="line" id="L1477"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">compare</span>(a: <span class="tok-kw">anytype</span>, op: CompareOperator, b: <span class="tok-kw">anytype</span>) <span class="tok-type">bool</span> {</span>
+<span class="line" id="L1478">    <span class="tok-kw">return</span> <span class="tok-kw">switch</span> (op) {</span>
+<span class="line" id="L1479">        .lt =&gt; a &lt; b,</span>
+<span class="line" id="L1480">        .lte =&gt; a &lt;= b,</span>
+<span class="line" id="L1481">        .eq =&gt; a == b,</span>
+<span class="line" id="L1482">        .neq =&gt; a != b,</span>
+<span class="line" id="L1483">        .gt =&gt; a &gt; b,</span>
+<span class="line" id="L1484">        .gte =&gt; a &gt;= b,</span>
+<span class="line" id="L1485">    };</span>
+<span class="line" id="L1486">}</span>
+<span class="line" id="L1487"></span>
+<span class="line" id="L1488"><span class="tok-kw">test</span> <span class="tok-str">&quot;compare between signed and unsigned&quot;</span> {</span>
+<span class="line" id="L1489">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>), .lt, <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>)));</span>
+<span class="line" id="L1490">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, <span class="tok-number">2</span>), .gt, <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">1</span>)));</span>
+<span class="line" id="L1491">    <span class="tok-kw">try</span> testing.expect(!compare(<span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>), .gte, <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>)));</span>
+<span class="line" id="L1492">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>), .gt, <span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>)));</span>
+<span class="line" id="L1493">    <span class="tok-kw">try</span> testing.expect(!compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>), .lte, <span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>)));</span>
+<span class="line" id="L1494">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>), .lt, <span class="tok-builtin">@as</span>(<span class="tok-type">u9</span>, <span class="tok-number">255</span>)));</span>
+<span class="line" id="L1495">    <span class="tok-kw">try</span> testing.expect(!compare(<span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>), .gte, <span class="tok-builtin">@as</span>(<span class="tok-type">u9</span>, <span class="tok-number">255</span>)));</span>
+<span class="line" id="L1496">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u9</span>, <span class="tok-number">255</span>), .gt, <span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>)));</span>
+<span class="line" id="L1497">    <span class="tok-kw">try</span> testing.expect(!compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u9</span>, <span class="tok-number">255</span>), .lte, <span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>)));</span>
+<span class="line" id="L1498">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">i9</span>, -<span class="tok-number">1</span>), .lt, <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>)));</span>
+<span class="line" id="L1499">    <span class="tok-kw">try</span> testing.expect(!compare(<span class="tok-builtin">@as</span>(<span class="tok-type">i9</span>, -<span class="tok-number">1</span>), .gte, <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>)));</span>
+<span class="line" id="L1500">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>), .gt, <span class="tok-builtin">@as</span>(<span class="tok-type">i9</span>, -<span class="tok-number">1</span>)));</span>
+<span class="line" id="L1501">    <span class="tok-kw">try</span> testing.expect(!compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>), .lte, <span class="tok-builtin">@as</span>(<span class="tok-type">i9</span>, -<span class="tok-number">1</span>)));</span>
+<span class="line" id="L1502">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">1</span>), .lt, <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">2</span>)));</span>
+<span class="line" id="L1503">    <span class="tok-kw">try</span> testing.expect(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-builtin">@bitCast</span>(<span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>))) == <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>));</span>
+<span class="line" id="L1504">    <span class="tok-kw">try</span> testing.expect(!compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">255</span>), .eq, <span class="tok-builtin">@as</span>(<span class="tok-type">i8</span>, -<span class="tok-number">1</span>)));</span>
+<span class="line" id="L1505">    <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">1</span>), .eq, <span class="tok-builtin">@as</span>(<span class="tok-type">u8</span>, <span class="tok-number">1</span>)));</span>
+<span class="line" id="L1506">}</span>
+<span class="line" id="L1507"></span>
+<span class="line" id="L1508"><span class="tok-kw">test</span> <span class="tok-str">&quot;order&quot;</span> {</span>
+<span class="line" id="L1509">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">0</span>, <span class="tok-number">0</span>) == .eq);</span>
+<span class="line" id="L1510">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">1</span>, <span class="tok-number">0</span>) == .gt);</span>
+<span class="line" id="L1511">    <span class="tok-kw">try</span> testing.expect(order(-<span class="tok-number">1</span>, <span class="tok-number">0</span>) == .lt);</span>
+<span class="line" id="L1512">}</span>
+<span class="line" id="L1513"></span>
+<span class="line" id="L1514"><span class="tok-kw">test</span> <span class="tok-str">&quot;order.invert&quot;</span> {</span>
+<span class="line" id="L1515">    <span class="tok-kw">try</span> testing.expect(Order.invert(order(<span class="tok-number">0</span>, <span class="tok-number">0</span>)) == .eq);</span>
+<span class="line" id="L1516">    <span class="tok-kw">try</span> testing.expect(Order.invert(order(<span class="tok-number">1</span>, <span class="tok-number">0</span>)) == .lt);</span>
+<span class="line" id="L1517">    <span class="tok-kw">try</span> testing.expect(Order.invert(order(-<span class="tok-number">1</span>, <span class="tok-number">0</span>)) == .gt);</span>
+<span class="line" id="L1518">}</span>
+<span class="line" id="L1519"></span>
+<span class="line" id="L1520"><span class="tok-kw">test</span> <span class="tok-str">&quot;order.compare&quot;</span> {</span>
+<span class="line" id="L1521">    <span class="tok-kw">try</span> testing.expect(order(-<span class="tok-number">1</span>, <span class="tok-number">0</span>).compare(.lt));</span>
+<span class="line" id="L1522">    <span class="tok-kw">try</span> testing.expect(order(-<span class="tok-number">1</span>, <span class="tok-number">0</span>).compare(.lte));</span>
+<span class="line" id="L1523">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">0</span>, <span class="tok-number">0</span>).compare(.lte));</span>
+<span class="line" id="L1524">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">0</span>, <span class="tok-number">0</span>).compare(.eq));</span>
+<span class="line" id="L1525">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">0</span>, <span class="tok-number">0</span>).compare(.gte));</span>
+<span class="line" id="L1526">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">1</span>, <span class="tok-number">0</span>).compare(.gte));</span>
+<span class="line" id="L1527">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">1</span>, <span class="tok-number">0</span>).compare(.gt));</span>
+<span class="line" id="L1528">    <span class="tok-kw">try</span> testing.expect(order(<span class="tok-number">1</span>, <span class="tok-number">0</span>).compare(.neq));</span>
+<span class="line" id="L1529">}</span>
+<span class="line" id="L1530"></span>
+<span class="line" id="L1531"><span class="tok-kw">test</span> <span class="tok-str">&quot;compare.reverse&quot;</span> {</span>
+<span class="line" id="L1532">    <span class="tok-kw">inline</span> <span class="tok-kw">for</span> (<span class="tok-builtin">@typeInfo</span>(CompareOperator).Enum.fields) |op_field| {</span>
+<span class="line" id="L1533">        <span class="tok-kw">const</span> op = <span class="tok-builtin">@as</span>(CompareOperator, <span class="tok-builtin">@enumFromInt</span>(op_field.value));</span>
+<span class="line" id="L1534">        <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-number">2</span>, op, <span class="tok-number">3</span>) == compare(<span class="tok-number">3</span>, op.reverse(), <span class="tok-number">2</span>));</span>
+<span class="line" id="L1535">        <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-number">3</span>, op, <span class="tok-number">3</span>) == compare(<span class="tok-number">3</span>, op.reverse(), <span class="tok-number">3</span>));</span>
+<span class="line" id="L1536">        <span class="tok-kw">try</span> testing.expect(compare(<span class="tok-number">4</span>, op, <span class="tok-number">3</span>) == compare(<span class="tok-number">3</span>, op.reverse(), <span class="tok-number">4</span>));</span>
+<span class="line" id="L1537">    }</span>
+<span class="line" id="L1538">}</span>
+<span class="line" id="L1539"></span>
+<span class="line" id="L1540"><span class="tok-comment">/// Returns a mask of all ones if value is true,</span></span>
+<span class="line" id="L1541"><span class="tok-comment">/// and a mask of all zeroes if value is false.</span></span>
+<span class="line" id="L1542"><span class="tok-comment">/// Compiles to one instruction for register sized integers.</span></span>
+<span class="line" id="L1543"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">boolMask</span>(<span class="tok-kw">comptime</span> MaskInt: <span class="tok-type">type</span>, value: <span class="tok-type">bool</span>) MaskInt {</span>
+<span class="line" id="L1544">    <span class="tok-kw">if</span> (<span class="tok-builtin">@typeInfo</span>(MaskInt) != .Int)</span>
+<span class="line" id="L1545">        <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;boolMask requires an integer mask type.&quot;</span>);</span>
+<span class="line" id="L1546"></span>
+<span class="line" id="L1547">    <span class="tok-kw">if</span> (MaskInt == <span class="tok-type">u0</span> <span class="tok-kw">or</span> MaskInt == <span class="tok-type">i0</span>)</span>
+<span class="line" id="L1548">        <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;boolMask cannot convert to u0 or i0, they are too small.&quot;</span>);</span>
+<span class="line" id="L1549"></span>
+<span class="line" id="L1550">    <span class="tok-comment">// The u1 and i1 cases tend to overflow,</span>
 </span>
-<span class="line" id="L1551">    <span class="tok-kw">if</span> (MaskInt == <span class="tok-type">u1</span>) <span class="tok-kw">return</span> <span class="tok-builtin">@intFromBool</span>(value);</span>
-<span class="line" id="L1552">    <span class="tok-kw">if</span> (MaskInt == <span class="tok-type">i1</span>) {</span>
-<span class="line" id="L1553">        <span class="tok-comment">// The @as here is a workaround for #7950</span>
+<span class="line" id="L1551">    <span class="tok-comment">// so we special case them here.</span>
 </span>
-<span class="line" id="L1554">        <span class="tok-kw">return</span> <span class="tok-builtin">@as</span>(<span class="tok-type">i1</span>, <span class="tok-builtin">@bitCast</span>(<span class="tok-builtin">@as</span>(<span class="tok-type">u1</span>, <span class="tok-builtin">@intFromBool</span>(value))));</span>
-<span class="line" id="L1555">    }</span>
-<span class="line" id="L1556"></span>
-<span class="line" id="L1557">    <span class="tok-kw">return</span> -%<span class="tok-builtin">@as</span>(MaskInt, <span class="tok-builtin">@intCast</span>(<span class="tok-builtin">@intFromBool</span>(value)));</span>
-<span class="line" id="L1558">}</span>
-<span class="line" id="L1559"></span>
-<span class="line" id="L1560"><span class="tok-kw">test</span> <span class="tok-str">&quot;boolMask&quot;</span> {</span>
-<span class="line" id="L1561">    <span class="tok-kw">const</span> runTest = <span class="tok-kw">struct</span> {</span>
-<span class="line" id="L1562">        <span class="tok-kw">fn</span> <span class="tok-fn">runTest</span>() !<span class="tok-type">void</span> {</span>
-<span class="line" id="L1563">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">u1</span>, <span class="tok-number">0</span>), boolMask(<span class="tok-type">u1</span>, <span class="tok-null">false</span>));</span>
-<span class="line" id="L1564">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">u1</span>, <span class="tok-number">1</span>), boolMask(<span class="tok-type">u1</span>, <span class="tok-null">true</span>));</span>
-<span class="line" id="L1565"></span>
-<span class="line" id="L1566">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">i1</span>, <span class="tok-number">0</span>), boolMask(<span class="tok-type">i1</span>, <span class="tok-null">false</span>));</span>
-<span class="line" id="L1567">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">i1</span>, -<span class="tok-number">1</span>), boolMask(<span class="tok-type">i1</span>, <span class="tok-null">true</span>));</span>
-<span class="line" id="L1568"></span>
-<span class="line" id="L1569">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">u13</span>, <span class="tok-number">0</span>), boolMask(<span class="tok-type">u13</span>, <span class="tok-null">false</span>));</span>
-<span class="line" id="L1570">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">u13</span>, <span class="tok-number">0x1FFF</span>), boolMask(<span class="tok-type">u13</span>, <span class="tok-null">true</span>));</span>
-<span class="line" id="L1571"></span>
-<span class="line" id="L1572">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">i13</span>, <span class="tok-number">0</span>), boolMask(<span class="tok-type">i13</span>, <span class="tok-null">false</span>));</span>
-<span class="line" id="L1573">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">i13</span>, -<span class="tok-number">1</span>), boolMask(<span class="tok-type">i13</span>, <span class="tok-null">true</span>));</span>
-<span class="line" id="L1574"></span>
-<span class="line" id="L1575">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">u32</span>, <span class="tok-number">0</span>), boolMask(<span class="tok-type">u32</span>, <span class="tok-null">false</span>));</span>
-<span class="line" id="L1576">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">u32</span>, <span class="tok-number">0xFFFF_FFFF</span>), boolMask(<span class="tok-type">u32</span>, <span class="tok-null">true</span>));</span>
-<span class="line" id="L1577"></span>
-<span class="line" id="L1578">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">i32</span>, <span class="tok-number">0</span>), boolMask(<span class="tok-type">i32</span>, <span class="tok-null">false</span>));</span>
-<span class="line" id="L1579">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">i32</span>, -<span class="tok-number">1</span>), boolMask(<span class="tok-type">i32</span>, <span class="tok-null">true</span>));</span>
-<span class="line" id="L1580">        }</span>
-<span class="line" id="L1581">    }.runTest;</span>
-<span class="line" id="L1582">    <span class="tok-kw">try</span> runTest();</span>
-<span class="line" id="L1583">    <span class="tok-kw">try</span> <span class="tok-kw">comptime</span> runTest();</span>
-<span class="line" id="L1584">}</span>
-<span class="line" id="L1585"></span>
-<span class="line" id="L1586"><span class="tok-comment">/// Return the mod of `num` with the smallest integer type</span></span>
-<span class="line" id="L1587"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">comptimeMod</span>(num: <span class="tok-kw">anytype</span>, <span class="tok-kw">comptime</span> denom: <span class="tok-type">comptime_int</span>) IntFittingRange(<span class="tok-number">0</span>, denom - <span class="tok-number">1</span>) {</span>
-<span class="line" id="L1588">    <span class="tok-kw">return</span> <span class="tok-builtin">@as</span>(IntFittingRange(<span class="tok-number">0</span>, denom - <span class="tok-number">1</span>), <span class="tok-builtin">@intCast</span>(<span class="tok-builtin">@mod</span>(num, denom)));</span>
-<span class="line" id="L1589">}</span>
-<span class="line" id="L1590"></span>
-<span class="line" id="L1591"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> F80 = <span class="tok-kw">struct</span> {</span>
-<span class="line" id="L1592">    fraction: <span class="tok-type">u64</span>,</span>
-<span class="line" id="L1593">    exp: <span class="tok-type">u16</span>,</span>
-<span class="line" id="L1594">};</span>
-<span class="line" id="L1595"></span>
-<span class="line" id="L1596"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">make_f80</span>(repr: F80) <span class="tok-type">f80</span> {</span>
-<span class="line" id="L1597">    <span class="tok-kw">const</span> int = (<span class="tok-builtin">@as</span>(<span class="tok-type">u80</span>, repr.exp) &lt;&lt; <span class="tok-number">64</span>) | repr.fraction;</span>
-<span class="line" id="L1598">    <span class="tok-kw">return</span> <span class="tok-builtin">@as</span>(<span class="tok-type">f80</span>, <span class="tok-builtin">@bitCast</span>(int));</span>
-<span class="line" id="L1599">}</span>
-<span class="line" id="L1600"></span>
-<span class="line" id="L1601"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">break_f80</span>(x: <span class="tok-type">f80</span>) F80 {</span>
-<span class="line" id="L1602">    <span class="tok-kw">const</span> int = <span class="tok-builtin">@as</span>(<span class="tok-type">u80</span>, <span class="tok-builtin">@bitCast</span>(x));</span>
-<span class="line" id="L1603">    <span class="tok-kw">return</span> .{</span>
-<span class="line" id="L1604">        .fraction = <span class="tok-builtin">@as</span>(<span class="tok-type">u64</span>, <span class="tok-builtin">@truncate</span>(int)),</span>
-<span class="line" id="L1605">        .exp = <span class="tok-builtin">@as</span>(<span class="tok-type">u16</span>, <span class="tok-builtin">@truncate</span>(int &gt;&gt; <span class="tok-number">64</span>)),</span>
-<span class="line" id="L1606">    };</span>
-<span class="line" id="L1607">}</span>
-<span class="line" id="L1608"></span>
-<span class="line" id="L1609"><span class="tok-comment">/// Returns -1, 0, or 1.</span></span>
-<span class="line" id="L1610"><span class="tok-comment">/// Supports integer and float types and vectors of integer and float types.</span></span>
-<span class="line" id="L1611"><span class="tok-comment">/// Unsigned integer types will always return 0 or 1.</span></span>
-<span class="line" id="L1612"><span class="tok-comment">/// Branchless.</span></span>
-<span class="line" id="L1613"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">sign</span>(i: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(i) {</span>
-<span class="line" id="L1614">    <span class="tok-kw">const</span> T = <span class="tok-builtin">@TypeOf</span>(i);</span>
-<span class="line" id="L1615">    <span class="tok-kw">return</span> <span class="tok-kw">switch</span> (<span class="tok-builtin">@typeInfo</span>(T)) {</span>
-<span class="line" id="L1616">        .Int, .ComptimeInt =&gt; <span class="tok-builtin">@as</span>(T, <span class="tok-builtin">@intFromBool</span>(i &gt; <span class="tok-number">0</span>)) - <span class="tok-builtin">@as</span>(T, <span class="tok-builtin">@intFromBool</span>(i &lt; <span class="tok-number">0</span>)),</span>
-<span class="line" id="L1617">        .Float, .ComptimeFloat =&gt; <span class="tok-builtin">@as</span>(T, <span class="tok-builtin">@floatFromInt</span>(<span class="tok-builtin">@intFromBool</span>(i &gt; <span class="tok-number">0</span>))) - <span class="tok-builtin">@as</span>(T, <span class="tok-builtin">@floatFromInt</span>(<span class="tok-builtin">@intFromBool</span>(i &lt; <span class="tok-number">0</span>))),</span>
-<span class="line" id="L1618">        .Vector =&gt; |vinfo| blk: {</span>
-<span class="line" id="L1619">            <span class="tok-kw">switch</span> (<span class="tok-builtin">@typeInfo</span>(vinfo.child)) {</span>
-<span class="line" id="L1620">                .Int, .Float =&gt; {</span>
-<span class="line" id="L1621">                    <span class="tok-kw">const</span> zero: T = <span class="tok-builtin">@splat</span>(<span class="tok-number">0</span>);</span>
-<span class="line" id="L1622">                    <span class="tok-kw">const</span> one: T = <span class="tok-builtin">@splat</span>(<span class="tok-number">1</span>);</span>
-<span class="line" id="L1623">                    <span class="tok-kw">break</span> :blk <span class="tok-builtin">@select</span>(vinfo.child, i &gt; zero, one, zero) - <span class="tok-builtin">@select</span>(vinfo.child, i &lt; zero, one, zero);</span>
-<span class="line" id="L1624">                },</span>
-<span class="line" id="L1625">                <span class="tok-kw">else</span> =&gt; <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;Expected vector of ints or floats, found &quot;</span> ++ <span class="tok-builtin">@typeName</span>(T)),</span>
-<span class="line" id="L1626">            }</span>
-<span class="line" id="L1627">        },</span>
-<span class="line" id="L1628">        <span class="tok-kw">else</span> =&gt; <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;Expected an int, float or vector of one, found &quot;</span> ++ <span class="tok-builtin">@typeName</span>(T)),</span>
-<span class="line" id="L1629">    };</span>
-<span class="line" id="L1630">}</span>
-<span class="line" id="L1631"></span>
-<span class="line" id="L1632"><span class="tok-kw">fn</span> <span class="tok-fn">testSign</span>() !<span class="tok-type">void</span> {</span>
-<span class="line" id="L1633">    <span class="tok-comment">// each of the following blocks checks the inputs</span>
+<span class="line" id="L1552">    <span class="tok-kw">if</span> (MaskInt == <span class="tok-type">u1</span>) <span class="tok-kw">return</span> <span class="tok-builtin">@intFromBool</span>(value);</span>
+<span class="line" id="L1553">    <span class="tok-kw">if</span> (MaskInt == <span class="tok-type">i1</span>) {</span>
+<span class="line" id="L1554">        <span class="tok-comment">// The @as here is a workaround for #7950</span>
 </span>
-<span class="line" id="L1634">    <span class="tok-comment">// 2, -2, 0, { 2, -2, 0 } provide expected output</span>
+<span class="line" id="L1555">        <span class="tok-kw">return</span> <span class="tok-builtin">@as</span>(<span class="tok-type">i1</span>, <span class="tok-builtin">@bitCast</span>(<span class="tok-builtin">@as</span>(<span class="tok-type">u1</span>, <span class="tok-builtin">@intFromBool</span>(value))));</span>
+<span class="line" id="L1556">    }</span>
+<span class="line" id="L1557"></span>
+<span class="line" id="L1558">    <span class="tok-kw">return</span> -%<span class="tok-builtin">@as</span>(MaskInt, <span class="tok-builtin">@intCast</span>(<span class="tok-builtin">@intFromBool</span>(value)));</span>
+<span class="line" id="L1559">}</span>
+<span class="line" id="L1560"></span>
+<span class="line" id="L1561"><span class="tok-kw">test</span> <span class="tok-str">&quot;boolMask&quot;</span> {</span>
+<span class="line" id="L1562">    <span class="tok-kw">const</span> runTest = <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L1563">        <span class="tok-kw">fn</span> <span class="tok-fn">runTest</span>() !<span class="tok-type">void</span> {</span>
+<span class="line" id="L1564">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">u1</span>, <span class="tok-number">0</span>), boolMask(<span class="tok-type">u1</span>, <span class="tok-null">false</span>));</span>
+<span class="line" id="L1565">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">u1</span>, <span class="tok-number">1</span>), boolMask(<span class="tok-type">u1</span>, <span class="tok-null">true</span>));</span>
+<span class="line" id="L1566"></span>
+<span class="line" id="L1567">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">i1</span>, <span class="tok-number">0</span>), boolMask(<span class="tok-type">i1</span>, <span class="tok-null">false</span>));</span>
+<span class="line" id="L1568">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">i1</span>, -<span class="tok-number">1</span>), boolMask(<span class="tok-type">i1</span>, <span class="tok-null">true</span>));</span>
+<span class="line" id="L1569"></span>
+<span class="line" id="L1570">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">u13</span>, <span class="tok-number">0</span>), boolMask(<span class="tok-type">u13</span>, <span class="tok-null">false</span>));</span>
+<span class="line" id="L1571">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">u13</span>, <span class="tok-number">0x1FFF</span>), boolMask(<span class="tok-type">u13</span>, <span class="tok-null">true</span>));</span>
+<span class="line" id="L1572"></span>
+<span class="line" id="L1573">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">i13</span>, <span class="tok-number">0</span>), boolMask(<span class="tok-type">i13</span>, <span class="tok-null">false</span>));</span>
+<span class="line" id="L1574">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">i13</span>, -<span class="tok-number">1</span>), boolMask(<span class="tok-type">i13</span>, <span class="tok-null">true</span>));</span>
+<span class="line" id="L1575"></span>
+<span class="line" id="L1576">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">u32</span>, <span class="tok-number">0</span>), boolMask(<span class="tok-type">u32</span>, <span class="tok-null">false</span>));</span>
+<span class="line" id="L1577">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">u32</span>, <span class="tok-number">0xFFFF_FFFF</span>), boolMask(<span class="tok-type">u32</span>, <span class="tok-null">true</span>));</span>
+<span class="line" id="L1578"></span>
+<span class="line" id="L1579">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">i32</span>, <span class="tok-number">0</span>), boolMask(<span class="tok-type">i32</span>, <span class="tok-null">false</span>));</span>
+<span class="line" id="L1580">            <span class="tok-kw">try</span> testing.expectEqual(<span class="tok-builtin">@as</span>(<span class="tok-type">i32</span>, -<span class="tok-number">1</span>), boolMask(<span class="tok-type">i32</span>, <span class="tok-null">true</span>));</span>
+<span class="line" id="L1581">        }</span>
+<span class="line" id="L1582">    }.runTest;</span>
+<span class="line" id="L1583">    <span class="tok-kw">try</span> runTest();</span>
+<span class="line" id="L1584">    <span class="tok-kw">try</span> <span class="tok-kw">comptime</span> runTest();</span>
+<span class="line" id="L1585">}</span>
+<span class="line" id="L1586"></span>
+<span class="line" id="L1587"><span class="tok-comment">/// Return the mod of `num` with the smallest integer type</span></span>
+<span class="line" id="L1588"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">comptimeMod</span>(num: <span class="tok-kw">anytype</span>, <span class="tok-kw">comptime</span> denom: <span class="tok-type">comptime_int</span>) IntFittingRange(<span class="tok-number">0</span>, denom - <span class="tok-number">1</span>) {</span>
+<span class="line" id="L1589">    <span class="tok-kw">return</span> <span class="tok-builtin">@as</span>(IntFittingRange(<span class="tok-number">0</span>, denom - <span class="tok-number">1</span>), <span class="tok-builtin">@intCast</span>(<span class="tok-builtin">@mod</span>(num, denom)));</span>
+<span class="line" id="L1590">}</span>
+<span class="line" id="L1591"></span>
+<span class="line" id="L1592"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> F80 = <span class="tok-kw">struct</span> {</span>
+<span class="line" id="L1593">    fraction: <span class="tok-type">u64</span>,</span>
+<span class="line" id="L1594">    exp: <span class="tok-type">u16</span>,</span>
+<span class="line" id="L1595">};</span>
+<span class="line" id="L1596"></span>
+<span class="line" id="L1597"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">make_f80</span>(repr: F80) <span class="tok-type">f80</span> {</span>
+<span class="line" id="L1598">    <span class="tok-kw">const</span> int = (<span class="tok-builtin">@as</span>(<span class="tok-type">u80</span>, repr.exp) &lt;&lt; <span class="tok-number">64</span>) | repr.fraction;</span>
+<span class="line" id="L1599">    <span class="tok-kw">return</span> <span class="tok-builtin">@as</span>(<span class="tok-type">f80</span>, <span class="tok-builtin">@bitCast</span>(int));</span>
+<span class="line" id="L1600">}</span>
+<span class="line" id="L1601"></span>
+<span class="line" id="L1602"><span class="tok-kw">pub</span> <span class="tok-kw">fn</span> <span class="tok-fn">break_f80</span>(x: <span class="tok-type">f80</span>) F80 {</span>
+<span class="line" id="L1603">    <span class="tok-kw">const</span> int = <span class="tok-builtin">@as</span>(<span class="tok-type">u80</span>, <span class="tok-builtin">@bitCast</span>(x));</span>
+<span class="line" id="L1604">    <span class="tok-kw">return</span> .{</span>
+<span class="line" id="L1605">        .fraction = <span class="tok-builtin">@as</span>(<span class="tok-type">u64</span>, <span class="tok-builtin">@truncate</span>(int)),</span>
+<span class="line" id="L1606">        .exp = <span class="tok-builtin">@as</span>(<span class="tok-type">u16</span>, <span class="tok-builtin">@truncate</span>(int &gt;&gt; <span class="tok-number">64</span>)),</span>
+<span class="line" id="L1607">    };</span>
+<span class="line" id="L1608">}</span>
+<span class="line" id="L1609"></span>
+<span class="line" id="L1610"><span class="tok-comment">/// Returns -1, 0, or 1.</span></span>
+<span class="line" id="L1611"><span class="tok-comment">/// Supports integer and float types and vectors of integer and float types.</span></span>
+<span class="line" id="L1612"><span class="tok-comment">/// Unsigned integer types will always return 0 or 1.</span></span>
+<span class="line" id="L1613"><span class="tok-comment">/// Branchless.</span></span>
+<span class="line" id="L1614"><span class="tok-kw">pub</span> <span class="tok-kw">inline</span> <span class="tok-kw">fn</span> <span class="tok-fn">sign</span>(i: <span class="tok-kw">anytype</span>) <span class="tok-builtin">@TypeOf</span>(i) {</span>
+<span class="line" id="L1615">    <span class="tok-kw">const</span> T = <span class="tok-builtin">@TypeOf</span>(i);</span>
+<span class="line" id="L1616">    <span class="tok-kw">return</span> <span class="tok-kw">switch</span> (<span class="tok-builtin">@typeInfo</span>(T)) {</span>
+<span class="line" id="L1617">        .Int, .ComptimeInt =&gt; <span class="tok-builtin">@as</span>(T, <span class="tok-builtin">@intFromBool</span>(i &gt; <span class="tok-number">0</span>)) - <span class="tok-builtin">@as</span>(T, <span class="tok-builtin">@intFromBool</span>(i &lt; <span class="tok-number">0</span>)),</span>
+<span class="line" id="L1618">        .Float, .ComptimeFloat =&gt; <span class="tok-builtin">@as</span>(T, <span class="tok-builtin">@floatFromInt</span>(<span class="tok-builtin">@intFromBool</span>(i &gt; <span class="tok-number">0</span>))) - <span class="tok-builtin">@as</span>(T, <span class="tok-builtin">@floatFromInt</span>(<span class="tok-builtin">@intFromBool</span>(i &lt; <span class="tok-number">0</span>))),</span>
+<span class="line" id="L1619">        .Vector =&gt; |vinfo| blk: {</span>
+<span class="line" id="L1620">            <span class="tok-kw">switch</span> (<span class="tok-builtin">@typeInfo</span>(vinfo.child)) {</span>
+<span class="line" id="L1621">                .Int, .Float =&gt; {</span>
+<span class="line" id="L1622">                    <span class="tok-kw">const</span> zero: T = <span class="tok-builtin">@splat</span>(<span class="tok-number">0</span>);</span>
+<span class="line" id="L1623">                    <span class="tok-kw">const</span> one: T = <span class="tok-builtin">@splat</span>(<span class="tok-number">1</span>);</span>
+<span class="line" id="L1624">                    <span class="tok-kw">break</span> :blk <span class="tok-builtin">@select</span>(vinfo.child, i &gt; zero, one, zero) - <span class="tok-builtin">@select</span>(vinfo.child, i &lt; zero, one, zero);</span>
+<span class="line" id="L1625">                },</span>
+<span class="line" id="L1626">                <span class="tok-kw">else</span> =&gt; <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;Expected vector of ints or floats, found &quot;</span> ++ <span class="tok-builtin">@typeName</span>(T)),</span>
+<span class="line" id="L1627">            }</span>
+<span class="line" id="L1628">        },</span>
+<span class="line" id="L1629">        <span class="tok-kw">else</span> =&gt; <span class="tok-builtin">@compileError</span>(<span class="tok-str">&quot;Expected an int, float or vector of one, found &quot;</span> ++ <span class="tok-builtin">@typeName</span>(T)),</span>
+<span class="line" id="L1630">    };</span>
+<span class="line" id="L1631">}</span>
+<span class="line" id="L1632"></span>
+<span class="line" id="L1633"><span class="tok-kw">fn</span> <span class="tok-fn">testSign</span>() !<span class="tok-type">void</span> {</span>
+<span class="line" id="L1634">    <span class="tok-comment">// each of the following blocks checks the inputs</span>
 </span>
-<span class="line" id="L1635">    <span class="tok-comment">// 1, -1, 0, { 1, -1, 0 } for the given T</span>
+<span class="line" id="L1635">    <span class="tok-comment">// 2, -2, 0, { 2, -2, 0 } provide expected output</span>
 </span>
-<span class="line" id="L1636">    <span class="tok-comment">// (negative values omitted for unsigned types)</span>
+<span class="line" id="L1636">    <span class="tok-comment">// 1, -1, 0, { 1, -1, 0 } for the given T</span>
 </span>
-<span class="line" id="L1637">    {</span>
-<span class="line" id="L1638">        <span class="tok-kw">const</span> T = <span class="tok-type">i8</span>;</span>
-<span class="line" id="L1639">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
-<span class="line" id="L1640">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">2</span>)));</span>
-<span class="line" id="L1641">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
-<span class="line" id="L1642">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
-<span class="line" id="L1643">    }</span>
-<span class="line" id="L1644">    {</span>
-<span class="line" id="L1645">        <span class="tok-kw">const</span> T = <span class="tok-type">i32</span>;</span>
-<span class="line" id="L1646">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
-<span class="line" id="L1647">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">2</span>)));</span>
-<span class="line" id="L1648">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
-<span class="line" id="L1649">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
-<span class="line" id="L1650">    }</span>
-<span class="line" id="L1651">    {</span>
-<span class="line" id="L1652">        <span class="tok-kw">const</span> T = <span class="tok-type">i64</span>;</span>
-<span class="line" id="L1653">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
-<span class="line" id="L1654">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">2</span>)));</span>
-<span class="line" id="L1655">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
-<span class="line" id="L1656">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
-<span class="line" id="L1657">    }</span>
-<span class="line" id="L1658">    {</span>
-<span class="line" id="L1659">        <span class="tok-kw">const</span> T = <span class="tok-type">u8</span>;</span>
-<span class="line" id="L1660">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
-<span class="line" id="L1661">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
-<span class="line" id="L1662">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">2</span>, T){ <span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">2</span>, T){ <span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
-<span class="line" id="L1663">    }</span>
-<span class="line" id="L1664">    {</span>
-<span class="line" id="L1665">        <span class="tok-kw">const</span> T = <span class="tok-type">u32</span>;</span>
-<span class="line" id="L1666">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
-<span class="line" id="L1667">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
-<span class="line" id="L1668">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">2</span>, T){ <span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">2</span>, T){ <span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
-<span class="line" id="L1669">    }</span>
-<span class="line" id="L1670">    {</span>
-<span class="line" id="L1671">        <span class="tok-kw">const</span> T = <span class="tok-type">u64</span>;</span>
-<span class="line" id="L1672">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
-<span class="line" id="L1673">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
-<span class="line" id="L1674">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">2</span>, T){ <span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">2</span>, T){ <span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
-<span class="line" id="L1675">    }</span>
-<span class="line" id="L1676">    {</span>
-<span class="line" id="L1677">        <span class="tok-kw">const</span> T = <span class="tok-type">f16</span>;</span>
-<span class="line" id="L1678">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
-<span class="line" id="L1679">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">2</span>)));</span>
-<span class="line" id="L1680">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
-<span class="line" id="L1681">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
-<span class="line" id="L1682">    }</span>
-<span class="line" id="L1683">    {</span>
-<span class="line" id="L1684">        <span class="tok-kw">const</span> T = <span class="tok-type">f32</span>;</span>
-<span class="line" id="L1685">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
-<span class="line" id="L1686">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">2</span>)));</span>
-<span class="line" id="L1687">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
-<span class="line" id="L1688">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
-<span class="line" id="L1689">    }</span>
-<span class="line" id="L1690">    {</span>
-<span class="line" id="L1691">        <span class="tok-kw">const</span> T = <span class="tok-type">f64</span>;</span>
-<span class="line" id="L1692">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
-<span class="line" id="L1693">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">2</span>)));</span>
-<span class="line" id="L1694">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
-<span class="line" id="L1695">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
-<span class="line" id="L1696">    }</span>
-<span class="line" id="L1697"></span>
-<span class="line" id="L1698">    <span class="tok-comment">// comptime_int</span>
+<span class="line" id="L1637">    <span class="tok-comment">// (negative values omitted for unsigned types)</span>
 </span>
-<span class="line" id="L1699">    <span class="tok-kw">try</span> std.testing.expectEqual(-<span class="tok-number">1</span>, sign(-<span class="tok-number">10</span>));</span>
-<span class="line" id="L1700">    <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-number">1</span>, sign(<span class="tok-number">10</span>));</span>
-<span class="line" id="L1701">    <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-number">0</span>, sign(<span class="tok-number">0</span>));</span>
-<span class="line" id="L1702">    <span class="tok-comment">// comptime_float</span>
+<span class="line" id="L1638">    {</span>
+<span class="line" id="L1639">        <span class="tok-kw">const</span> T = <span class="tok-type">i8</span>;</span>
+<span class="line" id="L1640">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
+<span class="line" id="L1641">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">2</span>)));</span>
+<span class="line" id="L1642">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
+<span class="line" id="L1643">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
+<span class="line" id="L1644">    }</span>
+<span class="line" id="L1645">    {</span>
+<span class="line" id="L1646">        <span class="tok-kw">const</span> T = <span class="tok-type">i32</span>;</span>
+<span class="line" id="L1647">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
+<span class="line" id="L1648">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">2</span>)));</span>
+<span class="line" id="L1649">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
+<span class="line" id="L1650">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
+<span class="line" id="L1651">    }</span>
+<span class="line" id="L1652">    {</span>
+<span class="line" id="L1653">        <span class="tok-kw">const</span> T = <span class="tok-type">i64</span>;</span>
+<span class="line" id="L1654">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
+<span class="line" id="L1655">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">2</span>)));</span>
+<span class="line" id="L1656">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
+<span class="line" id="L1657">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
+<span class="line" id="L1658">    }</span>
+<span class="line" id="L1659">    {</span>
+<span class="line" id="L1660">        <span class="tok-kw">const</span> T = <span class="tok-type">u8</span>;</span>
+<span class="line" id="L1661">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
+<span class="line" id="L1662">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
+<span class="line" id="L1663">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">2</span>, T){ <span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">2</span>, T){ <span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
+<span class="line" id="L1664">    }</span>
+<span class="line" id="L1665">    {</span>
+<span class="line" id="L1666">        <span class="tok-kw">const</span> T = <span class="tok-type">u32</span>;</span>
+<span class="line" id="L1667">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
+<span class="line" id="L1668">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
+<span class="line" id="L1669">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">2</span>, T){ <span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">2</span>, T){ <span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
+<span class="line" id="L1670">    }</span>
+<span class="line" id="L1671">    {</span>
+<span class="line" id="L1672">        <span class="tok-kw">const</span> T = <span class="tok-type">u64</span>;</span>
+<span class="line" id="L1673">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
+<span class="line" id="L1674">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
+<span class="line" id="L1675">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">2</span>, T){ <span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">2</span>, T){ <span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
+<span class="line" id="L1676">    }</span>
+<span class="line" id="L1677">    {</span>
+<span class="line" id="L1678">        <span class="tok-kw">const</span> T = <span class="tok-type">f16</span>;</span>
+<span class="line" id="L1679">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
+<span class="line" id="L1680">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">2</span>)));</span>
+<span class="line" id="L1681">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
+<span class="line" id="L1682">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
+<span class="line" id="L1683">    }</span>
+<span class="line" id="L1684">    {</span>
+<span class="line" id="L1685">        <span class="tok-kw">const</span> T = <span class="tok-type">f32</span>;</span>
+<span class="line" id="L1686">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
+<span class="line" id="L1687">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">2</span>)));</span>
+<span class="line" id="L1688">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
+<span class="line" id="L1689">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
+<span class="line" id="L1690">    }</span>
+<span class="line" id="L1691">    {</span>
+<span class="line" id="L1692">        <span class="tok-kw">const</span> T = <span class="tok-type">f64</span>;</span>
+<span class="line" id="L1693">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">2</span>)));</span>
+<span class="line" id="L1694">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">1</span>), sign(<span class="tok-builtin">@as</span>(T, -<span class="tok-number">2</span>)));</span>
+<span class="line" id="L1695">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>), sign(<span class="tok-builtin">@as</span>(T, <span class="tok-number">0</span>)));</span>
+<span class="line" id="L1696">        <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">1</span>, -<span class="tok-number">1</span>, <span class="tok-number">0</span> }, sign(<span class="tok-builtin">@Vector</span>(<span class="tok-number">3</span>, T){ <span class="tok-number">2</span>, -<span class="tok-number">2</span>, <span class="tok-number">0</span> }));</span>
+<span class="line" id="L1697">    }</span>
+<span class="line" id="L1698"></span>
+<span class="line" id="L1699">    <span class="tok-comment">// comptime_int</span>
 </span>
-<span class="line" id="L1703">    <span class="tok-kw">try</span> std.testing.expectEqual(-<span class="tok-number">1.0</span>, sign(-<span class="tok-number">10.0</span>));</span>
-<span class="line" id="L1704">    <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-number">1.0</span>, sign(<span class="tok-number">10.0</span>));</span>
-<span class="line" id="L1705">    <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-number">0.0</span>, sign(<span class="tok-number">0.0</span>));</span>
-<span class="line" id="L1706">}</span>
-<span class="line" id="L1707"></span>
-<span class="line" id="L1708"><span class="tok-kw">test</span> <span class="tok-str">&quot;sign&quot;</span> {</span>
-<span class="line" id="L1709">    <span class="tok-kw">if</span> (builtin.zig_backend == .stage2_llvm) {</span>
-<span class="line" id="L1710">        <span class="tok-comment">// https://github.com/ziglang/zig/issues/12012</span>
+<span class="line" id="L1700">    <span class="tok-kw">try</span> std.testing.expectEqual(-<span class="tok-number">1</span>, sign(-<span class="tok-number">10</span>));</span>
+<span class="line" id="L1701">    <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-number">1</span>, sign(<span class="tok-number">10</span>));</span>
+<span class="line" id="L1702">    <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-number">0</span>, sign(<span class="tok-number">0</span>));</span>
+<span class="line" id="L1703">    <span class="tok-comment">// comptime_float</span>
 </span>
-<span class="line" id="L1711">        <span class="tok-kw">return</span> <span class="tok-kw">error</span>.SkipZigTest;</span>
-<span class="line" id="L1712">    }</span>
-<span class="line" id="L1713">    <span class="tok-kw">try</span> testSign();</span>
-<span class="line" id="L1714">    <span class="tok-kw">try</span> <span class="tok-kw">comptime</span> testSign();</span>
-<span class="line" id="L1715">}</span>
-<span class="line" id="L1716"></span>
+<span class="line" id="L1704">    <span class="tok-kw">try</span> std.testing.expectEqual(-<span class="tok-number">1.0</span>, sign(-<span class="tok-number">10.0</span>));</span>
+<span class="line" id="L1705">    <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-number">1.0</span>, sign(<span class="tok-number">10.0</span>));</span>
+<span class="line" id="L1706">    <span class="tok-kw">try</span> std.testing.expectEqual(<span class="tok-number">0.0</span>, sign(<span class="tok-number">0.0</span>));</span>
+<span class="line" id="L1707">}</span>
+<span class="line" id="L1708"></span>
+<span class="line" id="L1709"><span class="tok-kw">test</span> <span class="tok-str">&quot;sign&quot;</span> {</span>
+<span class="line" id="L1710">    <span class="tok-kw">if</span> (builtin.zig_backend == .stage2_llvm) {</span>
+<span class="line" id="L1711">        <span class="tok-comment">// https://github.com/ziglang/zig/issues/12012</span>
+</span>
+<span class="line" id="L1712">        <span class="tok-kw">return</span> <span class="tok-kw">error</span>.SkipZigTest;</span>
+<span class="line" id="L1713">    }</span>
+<span class="line" id="L1714">    <span class="tok-kw">try</span> testSign();</span>
+<span class="line" id="L1715">    <span class="tok-kw">try</span> <span class="tok-kw">comptime</span> testSign();</span>
+<span class="line" id="L1716">}</span>
+<span class="line" id="L1717"></span>
 </code></pre></body>
 </html>

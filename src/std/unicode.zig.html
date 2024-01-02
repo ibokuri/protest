@@ -455,7 +455,7 @@
 <span class="line" id="L312"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L313"><span class="tok-comment">/// var utf8 = (try std.unicode.Utf8View.init(&quot;hi there&quot;)).iterator();</span></span>
 <span class="line" id="L314"><span class="tok-comment">/// while (utf8.nextCodepointSlice()) |codepoint| {</span></span>
-<span class="line" id="L315"><span class="tok-comment">///   std.debug.print(&quot;got codepoint {}\n&quot;, .{codepoint});</span></span>
+<span class="line" id="L315"><span class="tok-comment">///   std.debug.print(&quot;got codepoint {s}\n&quot;, .{codepoint});</span></span>
 <span class="line" id="L316"><span class="tok-comment">/// }</span></span>
 <span class="line" id="L317"><span class="tok-comment">/// ```</span></span>
 <span class="line" id="L318"><span class="tok-kw">pub</span> <span class="tok-kw">const</span> Utf8View = <span class="tok-kw">struct</span> {</span>
