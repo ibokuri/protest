@@ -3,13 +3,13 @@ const std = @import("std");
 const package_name = "protest";
 const package_path = "src/protest.zig";
 
-pub fn build(b: *std.build.Builder) void {
+pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const mode = b.standardOptimizeOption(.{});
 
     _ = b.addModule(
         package_name,
-        .{ .source_file = .{ .path = package_path } },
+        .{ .root_source_file = .{ .path = package_path } },
     );
 
     tests(b, target, mode);
@@ -17,8 +17,8 @@ pub fn build(b: *std.build.Builder) void {
 }
 
 fn tests(
-    b: *std.build.Builder,
-    target: std.zig.CrossTarget,
+    b: *std.Build,
+    target: std.Build.ResolvedTarget,
     mode: std.builtin.OptimizeMode,
 ) void {
     const test_step = b.step("test", "Run tests");
@@ -60,7 +60,6 @@ fn tests(
         .root_source_file = .{ .path = "src/require.zig" },
         .target = target,
         .optimize = mode,
-        .main_pkg_path = .{ .path = "src/" },
     });
 
     // Configure module-level test steps.
@@ -71,8 +70,8 @@ fn tests(
 }
 
 fn docs(
-    b: *std.build.Builder,
-    target: std.zig.CrossTarget,
+    b: *std.Build,
+    target: std.Build.ResolvedTarget,
     mode: std.builtin.OptimizeMode,
 ) void {
     const docs_step = b.step("docs", "Build the project documentation");
