@@ -1425,10 +1425,14 @@ fn deepEqual(expected: anytype, value: anytype) bool {
                 @compileError(err);
             }
 
+            // compare each union using their active tags
             switch (expected) {
-                inline else => |e, tag| {
-                    const v = @field(value, @tagName(tag));
-                    return deepEqual(e, v);
+                inline else => |e| {
+                    switch (value) {
+                        inline else => |v| {
+                            return deepEqual(e, v);
+                        },
+                    }
                 },
             }
         },
