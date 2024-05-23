@@ -10,7 +10,7 @@ pub fn build(b: *std.Build) void {
     // Package module.
     _ = b.addModule(
         package_name,
-        .{ .root_source_file = .{ .path = package_path } },
+        .{ .root_source_file = b.path(package_path) },
     );
 
     // Tests
@@ -20,7 +20,7 @@ pub fn build(b: *std.Build) void {
 
         const t_require = b.addTest(.{
             .name = "require test",
-            .root_source_file = .{ .path = "src/require.zig" },
+            .root_source_file = b.path("src/require.zig"),
             .target = target,
             .optimize = optimize,
         });
@@ -34,7 +34,7 @@ pub fn build(b: *std.Build) void {
 
         const doc_obj = b.addObject(.{
             .name = "docs",
-            .root_source_file = .{ .path = package_path },
+            .root_source_file = b.path(package_path),
             .target = target,
             .optimize = optimize,
         });
